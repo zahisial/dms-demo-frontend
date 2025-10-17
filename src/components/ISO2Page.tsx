@@ -269,7 +269,7 @@ export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults }: ISO2P
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-lg z-50"
+                    className="absolute top-full left-0 mt-2 w-60 glass-panel rounded-lg shadow-lg z-50"
                   >
                     <div className="py-2">
                       <button
@@ -290,13 +290,13 @@ export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults }: ISO2P
                       <button
                         onClick={() => {
                           setShowDropdown(false);
-                          console.log('Pending Approval clicked');
+                          
                         }}
                         className="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center text-left space-x-3">
                           <CheckCircle className="w-4 h-4" />
-                          <span>Pending Approval</span>
+                          <span>Pending for Approval</span>
                         </div>
                         <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-2 py-1 rounded-full">
                           5

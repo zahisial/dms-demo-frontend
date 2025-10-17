@@ -280,7 +280,7 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults }: EDCPag
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute left-0 top-full z-50 mt-2 w-56 rounded-lg shadow-lg glass-panel"
+                    className="absolute left-0 top-full z-50 mt-2 w-60 rounded-lg shadow-lg glass-panel"
                   >
                     <div className="py-2">
                       <button
@@ -301,13 +301,13 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults }: EDCPag
                       <button
                         onClick={() => {
                           setShowDropdown(false);
-                          console.log('Pending Approval clicked');
+                          
                         }}
                         className="flex justify-between items-center px-4 py-2 w-full text-sm text-gray-700 transition-colors dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center text-left space-x-3">
                           <CheckCircle className="w-4 h-4" />
-                          <span>Pending Approval</span>
+                          <span>Pending for Approval</span>
                         </div>
                         <span className="px-2 py-1 text-xs text-orange-600 bg-orange-100 rounded-full dark:bg-orange-900/30 dark:text-orange-400">
                           3
