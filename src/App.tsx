@@ -251,43 +251,6 @@ function App() {
     setCurrentPage('docsdb');
   };
 
-  // Get filtered documents based on selected subject
-  const getFilteredDocuments = (subjectTitle?: string): Document[] => {
-    if (!subjectTitle) {
-      return mockDocuments; // Return all documents if no subject specified
-    }
-
-    // Find documents from the specific section in current state
-    const allSections = [...iso9000Sections, ...iso2Sections, ...edcSections];
-    const targetSection = allSections.find(section => section.title === subjectTitle);
-    
-    if (targetSection) {
-      // Convert section documents to Document format for DocsDBPage
-      return targetSection.documents.map(doc => ({
-        id: doc.id,
-        title: doc.title,
-        type: doc.type,
-        url: doc.url,
-        department: subjectTitle, // Use subject title as department
-        uploadedAt: 'uploadedAt' in doc ? doc.uploadedAt : new Date().toISOString(),
-        uploadedBy: 'uploadedBy' in doc ? doc.uploadedBy : 'Unknown',
-        fileSize: 'fileSize' in doc ? doc.fileSize : 0,
-        fileType: 'fileType' in doc ? doc.fileType : 'unknown',
-        securityLevel: 'securityLevel' in doc ? doc.securityLevel : 'Public',
-        approvalStatus: 'approved' as const,
-        tags: [],
-        description: `Document from ${subjectTitle} section`,
-        lastModified: new Date(),
-        accessType: 'read' as const,
-        status: 'active' as const,
-        collaborators: [],
-        fileExtension: 'fileType' in doc ? doc.fileType : 'unknown'
-      }));
-    }
-
-    return mockDocuments; // Fallback to all documents
-  };
-
   const handleBackToMain = () => {
     setCurrentPage('iso9000');
   };
@@ -875,7 +838,6 @@ function App() {
             user={user!}
             onShowAllResults={handleShowAllResults}
             subjectTitle={selectedSubjectTitle}
-            documents={getFilteredDocuments(selectedSubjectTitle)}
           />
         </LayoutComponent>
         <ThemeToggle />

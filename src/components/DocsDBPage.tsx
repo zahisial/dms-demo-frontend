@@ -39,10 +39,9 @@ interface DocsDBPageProps {
   onShowAllResults?: (query: string) => void;
   onDocumentClick?: (document: Document) => void;
   subjectTitle?: string; // Add subject title prop
-  documents?: Document[]; // Add documents prop for filtering
 }
 
-export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentClick, subjectTitle, documents: propDocuments }: DocsDBPageProps) {
+export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentClick, subjectTitle }: DocsDBPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('All');
   const [selectedDepartment, setSelectedDepartment] = useState('All');
@@ -63,8 +62,8 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [bulkActionType, setBulkActionType] = useState<'approve' | 'reject' | 'delete' | 'security' | null>(null);
 
-  // Use prop documents or fallback to mock documents
-  const documents: Document[] = propDocuments || mockDocuments;
+  // Use centralized mock data
+  const documents: Document[] = mockDocuments;
 
 
 
