@@ -3,10 +3,10 @@ import {
   Search, 
   FileText, 
   Calendar, 
-  HardDrive, 
   ArrowLeft,
   Grid,
-  List
+  List,
+  Folder
 } from 'lucide-react';
 import { Document } from '../types';
 import SearchBar from './SearchBar';
@@ -366,16 +366,24 @@ export default function SearchResultsPage({
                         {highlightText(document.title, query)}
                       </h3>
 
+                      {/* Document Path */}
+                      <div className="flex items-center gap-1 mb-2">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary-50 dark:bg-primary-900/20 text-xs text-primary-700 dark:text-primary-300 rounded-md font-medium">
+                          <Folder className="w-3 h-3" />
+                          {document.department}
+                        </span>
+                      </div>
+
                       {/* Meta Tags */}
                       <div className="flex flex-wrap items-center gap-2 mb-3">
-                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 rounded-md">
+                        {/* <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 rounded-md">
                           <FileText className="w-3 h-3" />
                           {document.fileType.toUpperCase()}
                         </span>
                         <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 rounded-md">
                           <HardDrive className="w-3 h-3" />
                           {document.type}
-                        </span>
+                        </span> */}
                         <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 rounded-md">
                           <Calendar className="w-3 h-3" />
                           {formatDate(document.uploadedAt)}
