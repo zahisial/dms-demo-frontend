@@ -1172,7 +1172,7 @@ export default function FolderView({
                                         {document.fileType}
                                       </p>
                                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                        {new Date(document.uploadedAt).toLocaleDateString()}
+                                        {formatDate(document.uploadedAt)}
                                       </p>
                                     </div>
 

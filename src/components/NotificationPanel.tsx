@@ -94,7 +94,16 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
                         {notification.message}
                       </p>
                       <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                        {notification.timestamp.toLocaleDateString()} {notification.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        {(() => {
+                          const date = notification.timestamp;
+                          const day = date.getDate().toString().padStart(2, '0');
+                          const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                          const year = date.getFullYear();
+                          const hours = date.getHours().toString().padStart(2, '0');
+                          const minutes = date.getMinutes().toString().padStart(2, '0');
+                          const seconds = date.getSeconds().toString().padStart(2, '0');
+                          return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+                        })()}
                       </p>
                     </div>
                   </div>

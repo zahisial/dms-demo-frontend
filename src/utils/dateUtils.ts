@@ -12,22 +12,14 @@ export const formatDate = (date: Date | string): string => {
   const year = dateObj.getFullYear();
   const hours = dateObj.getHours().toString().padStart(2, '0');
   const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+  const seconds = dateObj.getSeconds().toString().padStart(2, '0');
 
-  return `${day}-${month}-${year} ${hours}:${minutes}`;
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 };
 
 export const formatDateTime = (date: Date | string): string => {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  
-  if (isNaN(dateObj.getTime())) {
-    return 'Invalid Date';
-  }
-
-  const formattedDate = formatDate(dateObj);
-  const hours = dateObj.getHours().toString().padStart(2, '0');
-  const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-
-  return `${formattedDate} ${hours}:${minutes}`;
+  // formatDateTime now returns the same as formatDate for consistency
+  return formatDate(date);
 };
 
 export const formatDateLong = (date: Date | string): string => {

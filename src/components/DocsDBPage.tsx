@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { mockDocuments } from '../data/mockData';
 import { 
   ArrowLeft, 
   Filter, 
@@ -60,219 +61,8 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [bulkActionType, setBulkActionType] = useState<'approve' | 'reject' | 'delete' | 'security' | null>(null);
 
-  // Mock data for documents
-  const documents: Document[] = [
-    {
-      id: '1',
-      title: 'Q3 Financial Report.pdf',
-      type: 'Policy',
-      fileType: 'pdf',
-      fileSize: '2.4 MB',
-      department: 'Finance',
-      uploadedBy: 'Sarah Johnson',
-      uploadedAt: new Date('2024-01-15T14:00:00Z'),
-      lastModified: new Date('2024-01-15T14:00:00Z'),
-      accessType: 'restricted',
-      approvalStatus: 'approved',
-      tags: ['Finance', 'Q3', 'Report'],
-      description: 'Quarterly financial report for Q3 2024',
-      url: '/documents/q3-financial-report.pdf',
-      securityLevel: 'Confidential',
-      approver: {
-        id: '1',
-        name: 'Sarah Johnson',
-        title: 'Senior Financial Analyst',
-        email: 'sarah.johnson@company.com',
-        avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1'
-      }
-    },
-    {
-      id: '2',
-      title: 'Budget Analysis 2024.xlsx',
-      type: 'Policy',
-      fileType: 'xlsx',
-      fileSize: '1.2 MB',
-      department: 'Finance',
-      uploadedBy: 'Mike Chen',
-      uploadedAt: new Date('2024-01-14T10:30:00Z'),
-      lastModified: new Date('2024-01-14T10:30:00Z'),
-      accessType: 'restricted',
-      approvalStatus: 'approved',
-      tags: ['Budget', 'Analysis', '2024'],
-      description: 'Budget analysis for 2024',
-      url: '/documents/budget-analysis-2024.xlsx',
-      securityLevel: 'Confidential',
-      approver: {
-        id: '2',
-        name: 'Mike Chen',
-        title: 'Financial Manager',
-        email: 'mike.chen@company.com',
-        avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1'
-      }
-    },
-    {
-      id: '3',
-      title: 'Expense Report Template.docx',
-      type: 'Form',
-      fileType: 'docx',
-      fileSize: '0.5 MB',
-      department: 'HR',
-      uploadedBy: 'Lisa Davis',
-      uploadedAt: new Date('2024-01-13T16:45:00Z'),
-      lastModified: new Date('2024-01-13T16:45:00Z'),
-      accessType: 'public',
-      approvalStatus: 'approved',
-      tags: ['Template', 'Expense', 'Report'],
-      description: 'Expense report template',
-      url: '/documents/expense-report-template.docx',
-      approver: {
-        id: '4',
-        name: 'Lisa Davis',
-        title: 'HR Manager',
-        email: 'lisa.davis@company.com',
-        avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1'
-      },
-      securityLevel: 'Public'
-    },
-    {
-      id: '4',
-      title: 'Project Proposal - Ruya 2.0.pptx',
-      type: 'Policy',
-      fileType: 'docx',
-      fileSize: '1.8 MB',
-      department: 'Engineering',
-      uploadedBy: 'David Wilson',
-      uploadedAt: new Date('2024-01-12T09:15:00Z'),
-      lastModified: new Date('2024-01-12T09:15:00Z'),
-      accessType: 'department',
-      approvalStatus: 'pending',
-      tags: ['Project', 'Proposal', 'Ruya'],
-      description: 'Project proposal for Ruya 2.0',
-      url: '/documents/project-proposal-ruya-2.0.pptx',
-      approver: {
-        id: '6',
-        name: 'David Wilson',
-        title: 'Engineering Lead',
-        email: 'david.wilson@company.com',
-        avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1'
-      }
-    },
-    {
-      id: '5',
-      title: 'API Documentation.md',
-      type: 'Manual',
-      fileType: 'doc',
-      fileSize: '0.8 MB',
-      department: 'Engineering',
-      uploadedBy: 'Alex Rodriguez',
-      uploadedAt: new Date('2024-01-11T11:20:00Z'),
-      lastModified: new Date('2024-01-11T11:20:00Z'),
-      accessType: 'public',
-      approvalStatus: 'approved',
-      tags: ['API', 'Documentation', 'Technical'],
-      description: 'API documentation',
-      url: '/documents/api-documentation.md',
-      approver: {
-        id: '8',
-        name: 'Alex Rodriguez',
-        title: 'Senior Developer',
-        email: 'alex.rodriguez@company.com',
-        avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1'
-      }
-    },
-    {
-      id: '6',
-      title: 'Database Schema.sql',
-      type: 'Manual',
-      fileType: 'doc',
-      fileSize: '0.6 MB',
-      department: 'Engineering',
-      uploadedBy: 'Sarah Johnson',
-      uploadedAt: new Date('2024-01-10T13:30:00Z'),
-      lastModified: new Date('2024-01-10T13:30:00Z'),
-      accessType: 'restricted',
-      approvalStatus: 'approved',
-      tags: ['Database', 'Schema', 'SQL'],
-      description: 'Database schema documentation',
-      url: '/documents/database-schema.sql',
-      approver: {
-        id: '1',
-        name: 'Sarah Johnson',
-        title: 'Senior Financial Analyst',
-        email: 'sarah.johnson@company.com',
-        avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1'
-      }
-    },
-    {
-      id: '7',
-      title: 'Employee Handbook 2024.docx',
-      type: 'Manual',
-      fileType: 'docx',
-      fileSize: '5.2 MB',
-      department: 'HR',
-      uploadedBy: 'Lisa Davis',
-      uploadedAt: new Date('2024-01-09T08:45:00Z'),
-      lastModified: new Date('2024-01-09T08:45:00Z'),
-      accessType: 'public',
-      approvalStatus: 'pending',
-      tags: ['Employee', 'Handbook', '2024'],
-      description: 'Employee handbook for 2024',
-      url: '/documents/employee-handbook-2024.docx',
-      approver: {
-        id: '4',
-        name: 'Lisa Davis',
-        title: 'HR Manager',
-        email: 'lisa.davis@company.com',
-        avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1'
-      }
-    },
-    {
-      id: '8',
-      title: 'Company Logo Guidelines.pdf',
-      type: 'Guide',
-      fileType: 'pdf',
-      fileSize: '0.3 MB',
-      department: 'Marketing',
-      uploadedBy: 'Emma Brown',
-      uploadedAt: new Date('2024-01-08T15:00:00Z'),
-      lastModified: new Date('2024-01-08T15:00:00Z'),
-      accessType: 'public',
-      approvalStatus: 'approved',
-      tags: ['Brand', 'Logo', 'Guidelines'],
-      description: 'Company logo guidelines',
-      url: '/documents/company-logo-guidelines.pdf',
-      approver: {
-        id: '10',
-        name: 'Emma Brown',
-        title: 'Marketing Manager',
-        email: 'emma.brown@company.com',
-        avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1'
-      }
-    },
-    {
-      id: '9',
-      title: 'Meeting Notes - All Hands.md',
-      type: 'Manual',
-      fileType: 'doc',
-      fileSize: '0.4 MB',
-      department: 'Operations',
-      uploadedBy: 'John Smith',
-      uploadedAt: new Date('2024-01-07T12:00:00Z'),
-      lastModified: new Date('2024-01-07T12:00:00Z'),
-      accessType: 'public',
-      approvalStatus: 'approved',
-      tags: ['Meeting', 'Notes', 'All Hands'],
-      description: 'Meeting notes from all hands meeting',
-      url: '/documents/meeting-notes-all-hands.md',
-      approver: {
-        id: '11',
-        name: 'John Smith',
-        title: 'Operations Manager',
-        email: 'john.smith@company.com',
-        avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1'
-      }
-    }
-  ];
+  // Use centralized mock data
+  const documents: Document[] = mockDocuments;
 
 
 
@@ -662,13 +452,14 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
       return 'Invalid Date';
     }
     
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
     
-    return `${month}-${day}-${year} ${hours}:${minutes}`;
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   };
 
   return (
