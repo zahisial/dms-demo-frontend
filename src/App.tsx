@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Plus, Upload, Shield, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -19,7 +19,7 @@ import ISO9000Page from './components/ISO9000Page';
 import PendingApprovalsPage from './components/PendingApprovalsPage';
 import DocsDBPage from './components/DocsDBPage';
 import { Document, Department, User } from './types';
-import { mockDocuments, mockDepartments, mockAuditLogs } from './data/mockData';
+import { mockDocuments, mockDepartments, mockAuditLogs, mockISO9000Sections, mockISO2Sections, mockEDCSections, type ISO9000Section, type ISO2Section, type EDCSection } from './data/mockData';
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -50,6 +50,12 @@ function App() {
   const [departmentDetailOpen, setDepartmentDetailOpen] = useState(false);
   const [selectedDepartmentDetail] = useState<Department | null>(null);
   const [currentPage, setCurrentPage] = useState<'main' | 'iso2' | 'edc' | 'ce' | 'iso9000' | 'pending-approvals' | 'docsdb' | 'document'>('main');
+  const [selectedSubjectTitle, setSelectedSubjectTitle] = useState<string>('');
+  
+  // Centralized ISO sections state
+  const [iso9000Sections, setIso9000Sections] = useState<ISO9000Section[]>(mockISO9000Sections);
+  const [iso2Sections, setIso2Sections] = useState<ISO2Section[]>(mockISO2Sections);
+  const [edcSections, setEdcSections] = useState<EDCSection[]>(mockEDCSections);
 
   // Only use currentUser, no fallback to defaultUser
   const user = currentUser;
@@ -240,8 +246,46 @@ function App() {
     }
   };
 
-  const handleNavigateToDocsDB = () => {
+  const handleNavigateToDocsDB = (subjectTitle?: string) => {
+    setSelectedSubjectTitle(subjectTitle || '');
     setCurrentPage('docsdb');
+  };
+
+  // Get filtered documents based on selected subject
+  const getFilteredDocuments = (subjectTitle?: string): Document[] => {
+    if (!subjectTitle) {
+      return mockDocuments; // Return all documents if no subject specified
+    }
+
+    // Find documents from the specific section in current state
+    const allSections = [...iso9000Sections, ...iso2Sections, ...edcSections];
+    const targetSection = allSections.find(section => section.title === subjectTitle);
+    
+    if (targetSection) {
+      // Convert section documents to Document format for DocsDBPage
+      return targetSection.documents.map(doc => ({
+        id: doc.id,
+        title: doc.title,
+        type: doc.type,
+        url: doc.url,
+        department: subjectTitle, // Use subject title as department
+        uploadedAt: 'uploadedAt' in doc ? doc.uploadedAt : new Date().toISOString(),
+        uploadedBy: 'uploadedBy' in doc ? doc.uploadedBy : 'Unknown',
+        fileSize: 'fileSize' in doc ? doc.fileSize : 0,
+        fileType: 'fileType' in doc ? doc.fileType : 'unknown',
+        securityLevel: 'securityLevel' in doc ? doc.securityLevel : 'Public',
+        approvalStatus: 'approved' as const,
+        tags: [],
+        description: `Document from ${subjectTitle} section`,
+        lastModified: new Date(),
+        accessType: 'read' as const,
+        status: 'active' as const,
+        collaborators: [],
+        fileExtension: 'fileType' in doc ? doc.fileType : 'unknown'
+      }));
+    }
+
+    return mockDocuments; // Fallback to all documents
   };
 
   const handleBackToMain = () => {
@@ -563,6 +607,8 @@ function App() {
           <ISO2Page 
             onNavigateToDocsDB={handleNavigateToDocsDB}
             onShowAllResults={handleShowAllResults}
+            sections={iso2Sections}
+            onUpdateSections={setIso2Sections}
           />
         </LayoutComponent>
         <ThemeToggle />
@@ -585,6 +631,8 @@ function App() {
           <EDCPage 
             onNavigateToDocsDB={handleNavigateToDocsDB}
             onShowAllResults={handleShowAllResults}
+            sections={edcSections}
+            onUpdateSections={setEdcSections}
           />
         </LayoutComponent>
         <ThemeToggle />
@@ -604,7 +652,7 @@ function App() {
     return (
       <ThemeProvider>
         <LayoutComponent {...layoutProps}>
-          <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+          <div className="px-4 py-8 mx-auto max-w-7xl lg:px-8">
             {/* Header Section */}
             <motion.div 
               className="mb-8"
@@ -612,11 +660,11 @@ function App() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center space-x-4">
                   <div className="relative">
                     <div className="flex items-center space-x-3">
-                      <h1 className="text-3xl font-bold text-gray-800 dark:text-white opacity-0">
+                      <h1 className="text-3xl font-bold text-gray-800 opacity-0 dark:text-white">
                         CE (Cyber Security)
                       </h1>
                     </div>
@@ -649,113 +697,113 @@ function App() {
 
             {/* Empty State with World-Class UX */}
             <motion.div 
-              className="flex flex-col items-center justify-center py-20"
+              className="flex flex-col justify-center items-center py-20"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
               {/* Shield Icon with Primary Accent */}
               <div className="relative mb-8">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/20 flex items-center justify-center mb-4">
+                <div className="flex justify-center items-center mb-4 w-24 h-24 bg-gradient-to-br rounded-full from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/20">
                   <Shield className="w-12 h-12 text-primary-600 dark:text-primary-400" />
                 </div>
                 {/* Floating accent dots */}
-                <div className="absolute -top-2 -right-2 w-4 h-4 bg-primary-500 rounded-full opacity-60 animate-pulse"></div>
-                <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-primary-400 rounded-full opacity-40 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full opacity-60 animate-pulse bg-primary-500"></div>
+                <div className="absolute -bottom-1 -left-1 w-3 h-3 rounded-full opacity-40 animate-pulse bg-primary-400" style={{ animationDelay: '0.5s' }}></div>
               </div>
 
               {/* Main Message */}
-              <div className="text-center max-w-2xl mx-auto mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+              <div className="mx-auto mb-8 max-w-2xl text-center">
+                <h2 className="mb-4 text-2xl font-bold text-gray-800 dark:text-white">
                   No Cyber Security Documents Yet
                 </h2>
-                <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+                <p className="mb-6 text-lg text-gray-600 dark:text-gray-400">
                   Start building your cyber security knowledge base by uploading documents or creating new security topics.
                 </p>
               </div>
 
               {/* Action Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl w-full mb-8">
+              <div className="grid grid-cols-1 gap-6 mb-8 w-full max-w-4xl md:grid-cols-2">
                 {/* Upload Card */}
                 <motion.div
-                  className="glass-panel rounded-2xl p-8 text-center hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                  className="p-8 text-center rounded-2xl transition-all duration-300 cursor-pointer glass-panel hover:shadow-lg group"
                   whileHover={{ scale: 1.02, y: -4 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setUploadModalOpen(true)}
                 >
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <div className="flex justify-center items-center mx-auto mb-4 w-16 h-16 bg-gradient-to-br rounded-full transition-transform duration-300 from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/20 group-hover:scale-110">
                     <Upload className="w-8 h-8 text-primary-600 dark:text-primary-400" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+                  <h3 className="mb-2 text-xl font-semibold text-gray-800 dark:text-white">
                     Upload Documents
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  <p className="mb-4 text-gray-600 dark:text-gray-400">
                     Upload security policies, procedures, and compliance documents
                   </p>
-                  <div className="flex items-center justify-center text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">
+                  <div className="flex justify-center items-center transition-colors text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300">
                     <span className="text-sm font-medium">Get Started</span>
-                    <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </div>
                 </motion.div>
 
                 {/* Create Subject Card */}
                 <motion.div
-                  className="glass-panel rounded-2xl p-8 text-center hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                  className="p-8 text-center rounded-2xl transition-all duration-300 cursor-pointer glass-panel hover:shadow-lg group"
                   whileHover={{ scale: 1.02, y: -4 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setAddDepartmentModalOpen(true)}
                 >
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <div className="flex justify-center items-center mx-auto mb-4 w-16 h-16 bg-gradient-to-br rounded-full transition-transform duration-300 from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/20 group-hover:scale-110">
                     <Plus className="w-8 h-8 text-primary-600 dark:text-primary-400" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+                  <h3 className="mb-2 text-xl font-semibold text-gray-800 dark:text-white">
                     Create New Subject
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  <p className="mb-4 text-gray-600 dark:text-gray-400">
                     Organize your security documents into structured topics
                   </p>
-                  <div className="flex items-center justify-center text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">
+                  <div className="flex justify-center items-center transition-colors text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300">
                     <span className="text-sm font-medium">Create Subject</span>
-                    <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </div>
                 </motion.div>
               </div>
 
               {/* Security Level Info */}
               <motion.div 
-                className="glass-panel rounded-2xl p-6 max-w-3xl w-full hidden"
+                className="hidden p-6 w-full max-w-3xl rounded-2xl glass-panel"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 text-center">
+                <h4 className="mb-4 text-lg font-semibold text-center text-gray-800 dark:text-white">
                   Security Classification Levels
                 </h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                   <div className="text-center">
-                    <div className="w-8 h-8 mx-auto mb-2 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <div className="flex justify-center items-center mx-auto mb-2 w-8 h-8 bg-green-100 rounded-full dark:bg-green-900/30">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                     </div>
                     <p className="text-sm font-medium text-gray-800 dark:text-white">Public</p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">General access</p>
                   </div>
                   <div className="text-center">
-                    <div className="w-8 h-8 mx-auto mb-2 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
-                      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div className="flex justify-center items-center mx-auto mb-2 w-8 h-8 bg-yellow-100 rounded-full dark:bg-yellow-900/30">
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
                     </div>
                     <p className="text-sm font-medium text-gray-800 dark:text-white">Restricted</p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">Limited access</p>
                   </div>
                   <div className="text-center">
-                    <div className="w-8 h-8 mx-auto mb-2 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                      <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                    <div className="flex justify-center items-center mx-auto mb-2 w-8 h-8 bg-orange-100 rounded-full dark:bg-orange-900/30">
+                      <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
                     </div>
                     <p className="text-sm font-medium text-gray-800 dark:text-white">Confidential</p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">Sensitive data</p>
                   </div>
                   <div className="text-center">
-                    <div className="w-8 h-8 mx-auto mb-2 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div className="flex justify-center items-center mx-auto mb-2 w-8 h-8 bg-red-100 rounded-full dark:bg-red-900/30">
+                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                     </div>
                     <p className="text-sm font-medium text-gray-800 dark:text-white">Top Secret</p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">Highest security</p>
@@ -789,6 +837,8 @@ function App() {
             onNavigateToDocsDB={handleNavigateToDocsDB} 
             onNavigateToPendingApprovals={handleNavigateToPendingApprovals}
             onShowAllResults={handleShowAllResults}
+            sections={iso9000Sections}
+            onUpdateSections={setIso9000Sections}
           />
         </LayoutComponent>
         <ThemeToggle />
@@ -824,6 +874,8 @@ function App() {
             onBack={handleBackToMain} 
             user={user!}
             onShowAllResults={handleShowAllResults}
+            subjectTitle={selectedSubjectTitle}
+            documents={getFilteredDocuments(selectedSubjectTitle)}
           />
         </LayoutComponent>
         <ThemeToggle />
@@ -921,16 +973,16 @@ function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-gray-500/20 dark:bg-gray-500/30 backdrop-blur-sm flex items-center justify-center"
+            className="flex fixed inset-0 z-50 justify-center items-center backdrop-blur-sm bg-gray-500/20 dark:bg-gray-500/30"
           >
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              className="glass-panel rounded-2xl p-8 text-center max-w-md mx-4"
+              className="p-8 mx-4 max-w-md text-center rounded-2xl glass-panel"
             >
-              <Upload className="w-16 h-16 mx-auto mb-4 text-eteal-600 dark:text-eteal-400" />
-              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+              <Upload className="mx-auto mb-4 w-16 h-16 text-eteal-600 dark:text-eteal-400" />
+              <h3 className="mb-2 text-xl font-semibold text-slate-900 dark:text-white">
                 Drop files to upload
               </h3>
               <p className="text-slate-600 dark:text-slate-400">
@@ -949,17 +1001,17 @@ function App() {
   console.log('Fallback render - currentPage:', currentPage);
   return (
     <ThemeProvider>
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+          <h1 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
             Page Not Found
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="mb-4 text-gray-600 dark:text-gray-400">
             Current page: {currentPage}
           </p>
           <button
             onClick={() => setCurrentPage('main')}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+            className="px-4 py-2 text-white rounded-lg bg-primary-600 hover:bg-primary-700"
           >
             Go to Main Page
           </button>

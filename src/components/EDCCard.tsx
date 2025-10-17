@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ChevronRight, FileText } from 'lucide-react';
+import { ChevronRight, FileText, Upload } from 'lucide-react';
 
 interface EDCDocument {
   id: string;
@@ -20,9 +20,11 @@ interface EDCCardProps {
   section: EDCSection;
   onShowAll: () => void;
   onDocumentClick: (document: EDCDocument) => void;
+  onUpload?: (sectionTitle: string) => void;
+  onCardClick?: (sectionTitle: string) => void;
 }
 
-export default function EDCCard({ section, onShowAll, onDocumentClick }: EDCCardProps) {
+export default function EDCCard({ section, onShowAll, onDocumentClick, onUpload, onCardClick }: EDCCardProps) {
   // Show all documents if 5 or fewer, otherwise show first 5
   const displayedDocuments = section.documents.length <= 5 
     ? section.documents 
@@ -32,9 +34,15 @@ export default function EDCCard({ section, onShowAll, onDocumentClick }: EDCCard
     onDocumentClick(document);
   };
 
+  const handleCardClick = () => {
+    if (onCardClick) {
+      onCardClick(section.title);
+    }
+  };
+
   return (
     <motion.div 
-      className="edc-card relative overflow-hidden h-80 flex flex-col"
+      className="group edc-card relative overflow-hidden h-80 flex flex-col cursor-pointer"
       whileHover={{ 
         scale: 1.02, 
         y: -8,
@@ -42,6 +50,7 @@ export default function EDCCard({ section, onShowAll, onDocumentClick }: EDCCard
       }}
       whileTap={{ scale: 0.98 }}
       layout
+      onClick={handleCardClick}
     >
       {/* Random Shaped Patterns with Primary Accent Branding */}
       <div className="absolute inset-0 pointer-events-none" style={{ filter: 'blur(30px)' }}>
@@ -140,13 +149,32 @@ export default function EDCCard({ section, onShowAll, onDocumentClick }: EDCCard
               {section.title}
             </h3>
             <button
-              onClick={onShowAll}
+              onClick={(e) => {
+                e.stopPropagation();
+                onShowAll();
+              }}
               className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 mt-1 transition-colors duration-200 cursor-pointer"
             >
               {section.documents.length} documents
             </button>
           </div>
         </div>
+
+        {/* Upload Button */}
+        {onUpload && (
+          <motion.button
+            onClick={(e) => {
+              e.stopPropagation();
+              onUpload(section.title);
+            }}
+            className="glass-button-icon opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            title="Upload to this subject"
+          >
+            <Upload className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+          </motion.button>
+        )}
       </div>
 
       {/* Documents List */}
@@ -158,7 +186,10 @@ export default function EDCCard({ section, onShowAll, onDocumentClick }: EDCCard
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
             className="group cursor-pointer"
-            onClick={() => handleDocumentClick(document)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDocumentClick(document);
+            }}
           >
             <div className="p-2 rounded-lg hover:bg-primary-50/50 dark:hover:bg-primary-900/20 transition-all duration-200">
               <p className="hover:text-primary-600 dark:hover:text-primary-400 text-sm font-medium text-gray-800 dark:text-white truncate group-hover:underline transition-all duration-200">
@@ -173,7 +204,10 @@ export default function EDCCard({ section, onShowAll, onDocumentClick }: EDCCard
       {section.documents.length > 5 && (
         <div className="relative z-10 pt-4 mt-auto">
           <motion.button
-            onClick={onShowAll}
+            onClick={(e) => {
+              e.stopPropagation();
+              onShowAll();
+            }}
             className="flex items-center justify-between w-full p-3 rounded-lg hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100/50 dark:hover:from-primary-900/30 dark:hover:to-primary-800/20 transition-all duration-200 group"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

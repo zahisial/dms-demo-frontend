@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ChevronRight, FileText } from 'lucide-react';
+import { ChevronRight, FileText, Upload } from 'lucide-react';
 
 interface ISO2Document {
   id: string;
@@ -19,18 +19,26 @@ interface ISO2CardProps {
   section: ISO2Section;
   onShowAll: () => void;
   onDocumentClick: (document: ISO2Document) => void;
+  onUpload?: (sectionTitle: string) => void;
+  onCardClick?: (sectionTitle: string) => void;
 }
 
-export default function ISO2Card({ section, onShowAll, onDocumentClick }: ISO2CardProps) {
+export default function ISO2Card({ section, onShowAll, onDocumentClick, onUpload, onCardClick }: ISO2CardProps) {
   const displayedDocuments = section.documents.slice(0, 5);
 
   const handleDocumentClick = (document: ISO2Document) => {
     onDocumentClick(document);
   };
 
+  const handleCardClick = () => {
+    if (onCardClick) {
+      onCardClick(section.title);
+    }
+  };
+
   return (
     <motion.div 
-      className="iso2-card"
+      className="group iso2-card cursor-pointer"
       whileHover={{ 
         scale: 1.02, 
         y: -8,
@@ -38,6 +46,7 @@ export default function ISO2Card({ section, onShowAll, onDocumentClick }: ISO2Ca
       }}
       whileTap={{ scale: 0.98 }}
       layout
+      onClick={handleCardClick}
     >
       {/* Section Header */}
       <div className="flex items-center justify-between mb-4">
@@ -56,6 +65,22 @@ export default function ISO2Card({ section, onShowAll, onDocumentClick }: ISO2Ca
             </p>
           </div>
         </div>
+
+        {/* Upload Button */}
+        {onUpload && (
+          <motion.button
+            onClick={(e) => {
+              e.stopPropagation();
+              onUpload(section.title);
+            }}
+            className="glass-button-icon opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            title="Upload to this subject"
+          >
+            <Upload className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+          </motion.button>
+        )}
       </div>
 
       {/* Documents List */}
@@ -67,7 +92,10 @@ export default function ISO2Card({ section, onShowAll, onDocumentClick }: ISO2Ca
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
             className="group cursor-pointer"
-            onClick={() => handleDocumentClick(document)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDocumentClick(document);
+            }}
           >
             <div className="p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-all duration-200">
               <p className="hover:text-primary-600 text-sm font-medium text-gray-800 dark:text-white truncate group-hover:underline transition-all duration-200">
@@ -81,7 +109,10 @@ export default function ISO2Card({ section, onShowAll, onDocumentClick }: ISO2Ca
       {/* Show All Button */}
       <div className="pt-4 mt-auto">
         <motion.button
-          onClick={onShowAll}
+          onClick={(e) => {
+            e.stopPropagation();
+            onShowAll();
+          }}
           className="flex items-center justify-between w-full p-3 rounded-lg bg-gray-50/50 dark:bg-slate-700/30 hover:bg-gray-100 dark:hover:bg-slate-600/50 transition-all duration-200 group"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}

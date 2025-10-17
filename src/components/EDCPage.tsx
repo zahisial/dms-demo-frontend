@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, MoreHorizontal, Search, Clock, CheckCircle, Upload } from 'lucide-react';
+import { mockEDCSections, type EDCSection, type EDCDocument } from '../data/mockData';
 import EDCCard from './EDCCard';
 import NewCardModal from './NewCardModal';
 import DocumentPreviewModal from './DocumentPreviewModal';
@@ -9,14 +10,6 @@ import UploadModal from './UploadModal';
 import Toaster, { useToaster } from './Toaster';
 import SearchBar from './SearchBar';
 import { mockDocuments } from '../data/mockData';
-
-interface EDCDocument {
-  id: string;
-  title: string;
-  type: string;
-  url: string;
-  securityLevel: 'Public' | 'Restricted' | 'Confidential' | 'Top Secret';
-}
 
 interface Document {
   id: string;
@@ -41,19 +34,14 @@ interface Document {
   description?: string;
 }
 
-interface EDCSection {
-  id: string;
-  title: string;
-  color: string;
-  documents: EDCDocument[];
-}
-
 interface EDCPageProps {
-  onNavigateToDocsDB: () => void;
+  onNavigateToDocsDB: (subjectTitle?: string) => void;
   onShowAllResults?: (query: string) => void;
+  sections?: EDCSection[];
+  onUpdateSections?: (sections: EDCSection[]) => void;
 }
 
-export default function EDCPage({ onNavigateToDocsDB, onShowAllResults }: EDCPageProps) {
+export default function EDCPage({ onNavigateToDocsDB, onShowAllResults, sections: propSections, onUpdateSections }: EDCPageProps) {
   const [newCardModalOpen, setNewCardModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -62,6 +50,7 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults }: EDCPag
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [uploadSubject, setUploadSubject] = useState<string>('');
   const { toasts, removeToast, showSuccess } = useToaster();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -82,91 +71,16 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults }: EDCPag
     };
   }, [showDropdown]);
   
-  // State for EDC sections with random document counts
-  const [edcSections, setEdcSections] = useState<EDCSection[]>([
-    {
-      id: '1',
-      title: 'Data Center Infrastructure',
-      color: '#08bed5', // Primary bright accent
-      documents: [
-        { id: '1', title: 'Server Configuration', type: 'Configuration', url: '#', securityLevel: 'Confidential' },
-        { id: '2', title: 'Network Architecture', type: 'Documentation', url: '#', securityLevel: 'Top Secret' },
-        { id: '3', title: 'Power Management', type: 'Procedure', url: '#', securityLevel: 'Restricted' },
-        { id: '4', title: 'Cooling Systems', type: 'Manual', url: '#', securityLevel: 'Public' },
-        { id: '5', title: 'Security Protocols', type: 'Policy', url: '#', securityLevel: 'Top Secret' },
-        { id: '6', title: 'Rack Management', type: 'Procedure', url: '#', securityLevel: 'Restricted' },
-        { id: '7', title: 'Cable Management', type: 'Guideline', url: '#', securityLevel: 'Public' },
-        { id: '8', title: 'Environmental Controls', type: 'Manual', url: '#', securityLevel: 'Confidential' }
-      ]
-    },
-    {
-      id: '2',
-      title: 'Data Management',
-      color: '#03778d', // Primary dark accent
-      documents: [
-        { id: '9', title: 'Data Backup Strategy', type: 'Policy', url: '#', securityLevel: 'Top Secret' },
-        { id: '10', title: 'Data Retention', type: 'Procedure', url: '#', securityLevel: 'Confidential' },
-        { id: '11', title: 'Data Classification', type: 'Guideline', url: '#', securityLevel: 'Restricted' },
-        { id: '12', title: 'Data Migration', type: 'Plan', url: '#', securityLevel: 'Top Secret' }
-      ]
-    },
-    {
-      id: '3',
-      title: 'System Monitoring',
-      color: '#08bed5', // Primary bright accent
-      documents: [
-        { id: '13', title: 'Performance Metrics', type: 'Dashboard', url: '#', securityLevel: 'Public' },
-        { id: '14', title: 'Alert Configuration', type: 'Setup', url: '#', securityLevel: 'Restricted' },
-        { id: '15', title: 'Log Management', type: 'Procedure', url: '#', securityLevel: 'Confidential' },
-        { id: '16', title: 'Health Checks', type: 'Script', url: '#', securityLevel: 'Public' },
-        { id: '17', title: 'Capacity Planning', type: 'Report', url: '#', securityLevel: 'Restricted' },
-        { id: '18', title: 'Resource Monitoring', type: 'Dashboard', url: '#', securityLevel: 'Public' },
-        { id: '19', title: 'Threshold Management', type: 'Configuration', url: '#', securityLevel: 'Confidential' },
-        { id: '20', title: 'Reporting Tools', type: 'Manual', url: '#', securityLevel: 'Public' },
-        { id: '21', title: 'Dashboard Setup', type: 'Guide', url: '#', securityLevel: 'Restricted' },
-        { id: '22', title: 'Notification Rules', type: 'Policy', url: '#', securityLevel: 'Top Secret' },
-        { id: '23', title: 'Monitoring Schedule', type: 'Calendar', url: '#', securityLevel: 'Confidential' },
-        { id: '24', title: 'System Alerts', type: 'Configuration', url: '#', securityLevel: 'Restricted' }
-      ]
-    },
-    {
-      id: '4',
-      title: 'Security & Compliance',
-      color: '#03778d', // Primary dark accent
-      documents: [
-        { id: '25', title: 'Access Control', type: 'Policy', url: '#', securityLevel: 'Top Secret' },
-        { id: '26', title: 'Audit Procedures', type: 'Checklist', url: '#', securityLevel: 'Confidential' },
-        { id: '27', title: 'Incident Response', type: 'Plan', url: '#', securityLevel: 'Top Secret' },
-        { id: '28', title: 'Compliance Framework', type: 'Document', url: '#', securityLevel: 'Restricted' },
-        { id: '29', title: 'Security Training', type: 'Material', url: '#', securityLevel: 'Public' }
-      ]
-    },
-    {
-      id: '5',
-      title: 'Disaster Recovery',
-      color: '#08bed5', // Primary bright accent
-      documents: [
-        { id: '30', title: 'DR Strategy', type: 'Plan', url: '#', securityLevel: 'Top Secret' },
-        { id: '31', title: 'Backup Procedures', type: 'SOP', url: '#', securityLevel: 'Confidential' },
-        { id: '32', title: 'Recovery Testing', type: 'Schedule', url: '#', securityLevel: 'Restricted' }
-      ]
-    },
-    {
-      id: '6',
-      title: 'Operations & Maintenance',
-      color: '#03778d', // Primary dark accent
-      documents: [
-        { id: '33', title: 'Maintenance Schedule', type: 'Calendar', url: '#', securityLevel: 'Public' },
-        { id: '34', title: 'Change Management', type: 'Process', url: '#', securityLevel: 'Restricted' },
-        { id: '35', title: 'Vendor Management', type: 'Agreement', url: '#', securityLevel: 'Confidential' },
-        { id: '36', title: 'Service Level Agreements', type: 'SLA', url: '#', securityLevel: 'Public' },
-        { id: '37', title: 'Performance Reports', type: 'Dashboard', url: '#', securityLevel: 'Public' },
-        { id: '38', title: 'Work Order System', type: 'Procedure', url: '#', securityLevel: 'Restricted' },
-        { id: '39', title: 'Asset Management', type: 'Database', url: '#', securityLevel: 'Confidential' },
-        { id: '40', title: 'Maintenance Logs', type: 'Record', url: '#', securityLevel: 'Restricted' }
-      ]
+  // Use centralized EDC sections data from props or local state
+  const [localSections, setLocalSections] = useState<EDCSection[]>(mockEDCSections);
+  const edcSections = propSections || localSections;
+  const setEdcSections = onUpdateSections || ((sections: EDCSection[] | ((prev: EDCSection[]) => EDCSection[])) => {
+    if (typeof sections === 'function') {
+      setLocalSections(sections);
+    } else {
+      setLocalSections(sections);
     }
-  ]);
+  });
 
   const handleAddNewCard = (card: { title: string; color: string; icon: string }) => {
     const newSection: EDCSection = {
@@ -204,15 +118,49 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults }: EDCPag
   };
 
   const handleUploadComplete = (files: File[], subject: string) => {
-    // Show success notification
-    showSuccess(
-      'Upload Successful',
-      `${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully to ${subject}. Click the edit icon to modify document details.`,
-      6000
-    );
+    // Find the section that matches the subject
+    const targetSection = edcSections.find(section => section.title === subject);
     
-    // Here you would typically add the uploaded files to your document list
-    console.log('Files uploaded:', files);
+    if (targetSection) {
+      // Create new documents from uploaded files
+      const newDocuments: EDCDocument[] = files.map((file, index) => ({
+        id: `uploaded-${Date.now()}-${index}`,
+        title: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
+        type: 'Uploaded Document',
+        url: URL.createObjectURL(file), // Create temporary URL for preview
+        securityLevel: 'Public' as const,
+        uploadedAt: new Date().toISOString(),
+        uploadedBy: 'Current User', // You can get this from user context
+        fileSize: file.size,
+        fileType: file.type.split('/')[1] || 'unknown'
+      }));
+
+      // Update the section with new documents
+      const updatedSections = edcSections.map(section => 
+        section.id === targetSection.id 
+          ? { ...section, documents: [...section.documents, ...newDocuments] }
+          : section
+      );
+
+      // Update the sections state
+      setEdcSections(updatedSections);
+
+      // Show success notification
+      showSuccess(
+        'Upload Successful',
+        `${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully to ${subject}. Documents are now visible in the card.`,
+        6000
+      );
+    } else {
+      // Fallback if section not found
+      showSuccess(
+        'Upload Successful',
+        `${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully.`,
+        6000
+      );
+    }
+    
+    console.log('Files uploaded to section:', subject, files);
   };
 
   const handleEditUploadedDocument = (file: File) => {
@@ -256,6 +204,17 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults }: EDCPag
     console.log('Document approved:', documentId);
     alert(`Document "${selectedDocument?.title}" has been approved`);
   };
+
+  const handleCardUpload = (sectionTitle: string) => {
+    setUploadSubject(sectionTitle);
+    setUploadModalOpen(true);
+  };
+
+  // Calculate dynamic counts
+  const recentlyVisitedCount = 0; // TODO: Track document views
+  const pendingApprovalCount = edcSections.reduce((count, section) => {
+    return count + section.documents.filter(doc => doc.securityLevel === 'Top Secret' || doc.securityLevel === 'Confidential').length;
+  }, 0);
 
   // Filter sections based on search query
   const filteredSections = edcSections.filter(section =>
@@ -312,9 +271,11 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults }: EDCPag
                           <Clock className="w-4 h-4" />
                           <span>Recently Visited</span>
                         </div>
-                        <span className="px-2 py-1 text-xs rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
-                          8
-                        </span>
+                        {recentlyVisitedCount > 0 && (
+                          <span className="px-2 py-1 text-xs rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
+                            {recentlyVisitedCount}
+                          </span>
+                        )}
                       </button>
                       <button
                         onClick={() => {
@@ -323,13 +284,15 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults }: EDCPag
                         }}
                         className="flex justify-between items-center px-4 py-2 w-full text-sm text-gray-700 transition-colors dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
-                        <div className="flex items-center text-left space-x-3">
+                        <div className="flex items-center space-x-3 text-left">
                           <CheckCircle className="w-4 h-4" />
                           <span>Pending for Approval</span>
                         </div>
-                        <span className="px-2 py-1 text-xs text-orange-600 bg-orange-100 rounded-full dark:bg-orange-900/30 dark:text-orange-400">
-                          3
-                        </span>
+                        {pendingApprovalCount > 0 && (
+                          <span className="px-2 py-1 text-xs text-orange-600 bg-orange-100 rounded-full dark:bg-orange-900/30 dark:text-orange-400">
+                            {pendingApprovalCount}
+                          </span>
+                        )}
                       </button>
                     </div>
                   </motion.div>
@@ -353,7 +316,10 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults }: EDCPag
             </div>
             
             <motion.button
-              onClick={() => setUploadModalOpen(true)}
+              onClick={() => {
+                setUploadSubject('');
+                setUploadModalOpen(true);
+              }}
               className="glass-button-secondary"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -394,8 +360,10 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults }: EDCPag
             >
               <EDCCard
                 section={section}
-                onShowAll={() => onNavigateToDocsDB()}
+                onShowAll={() => onNavigateToDocsDB(section.title)}
                 onDocumentClick={handleDocumentClick}
+                onUpload={handleCardUpload}
+                onCardClick={(sectionTitle) => onNavigateToDocsDB(sectionTitle)}
               />
             </motion.div>
           ))}
@@ -444,9 +412,14 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults }: EDCPag
 
       <UploadModal
         isOpen={uploadModalOpen}
-        onClose={() => setUploadModalOpen(false)}
+        onClose={() => {
+          setUploadModalOpen(false);
+          setUploadSubject('');
+        }}
         onUploadComplete={handleUploadComplete}
         onEditDocument={handleEditUploadedDocument}
+        initialSubject={uploadSubject}
+        edcSections={edcSections}
       />
 
       <Toaster

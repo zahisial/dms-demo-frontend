@@ -38,9 +38,11 @@ interface DocsDBPageProps {
   user?: UserType | null;
   onShowAllResults?: (query: string) => void;
   onDocumentClick?: (document: Document) => void;
+  subjectTitle?: string; // Add subject title prop
+  documents?: Document[]; // Add documents prop for filtering
 }
 
-export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentClick }: DocsDBPageProps) {
+export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentClick, subjectTitle, documents: propDocuments }: DocsDBPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('All');
   const [selectedDepartment, setSelectedDepartment] = useState('All');
@@ -61,8 +63,8 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [bulkActionType, setBulkActionType] = useState<'approve' | 'reject' | 'delete' | 'security' | null>(null);
 
-  // Use centralized mock data
-  const documents: Document[] = mockDocuments;
+  // Use prop documents or fallback to mock documents
+  const documents: Document[] = propDocuments || mockDocuments;
 
 
 
@@ -486,7 +488,7 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
             )}
             <div>
               <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
-                All Documents
+                {subjectTitle ? `${subjectTitle} ` : 'All Documents'}
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {filteredDocuments.length} documents found

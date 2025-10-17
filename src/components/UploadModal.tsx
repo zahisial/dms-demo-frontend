@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getAllDepartmentPaths, type ISO9000Section, type ISO2Section, type EDCSection } from '../data/mockData';
 import { 
   X, 
   Upload, 
@@ -28,9 +29,23 @@ interface UploadModalProps {
   onClose: () => void;
   onUploadComplete: (files: File[], subject: string) => void;
   onEditDocument?: (file: File) => void;
+  initialSubject?: string;
+  // Page-specific sections for dropdown
+  iso9000Sections?: ISO9000Section[];
+  iso2Sections?: ISO2Section[];
+  edcSections?: EDCSection[];
 }
 
-export default function UploadModal({ isOpen, onClose, onUploadComplete, onEditDocument }: UploadModalProps) {
+export default function UploadModal({ 
+  isOpen, 
+  onClose, 
+  onUploadComplete, 
+  onEditDocument, 
+  initialSubject,
+  iso9000Sections = [],
+  iso2Sections = [],
+  edcSections = []
+}: UploadModalProps) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -38,21 +53,29 @@ export default function UploadModal({ isOpen, onClose, onUploadComplete, onEditD
   const [selectedSubject, setSelectedSubject] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Available subjects/departments for file upload
-  const availableSubjects = [
-    'Finance',
-    'HR',
-    'Engineering', 
-    'Marketing',
-    'Operations',
-    'Main/Finance/Budget Reports',
-    'Main/Finance/Expense Policies',
-    'Main/Finance/Audit Documents',
-    'Main/Operations/Standard Operating Procedures',
-    'Main/HR/Employee Policies',
-    'Main/Engineering/Technical Documentation',
-    'Main/Marketing/Campaign Materials'
-  ];
+  // Set initial subject when modal opens
+  React.useEffect(() => {
+    if (isOpen && initialSubject) {
+      setSelectedSubject(initialSubject);
+    }
+  }, [isOpen, initialSubject]);
+
+  // Get available subjects based on which page is calling the modal
+  const availableSubjects = useMemo(() => {
+    // Priority: Use page-specific sections if provided
+    if (iso9000Sections.length > 0) {
+      return iso9000Sections.map(section => section.title);
+    }
+    if (iso2Sections.length > 0) {
+      return iso2Sections.map(section => section.title);
+    }
+    if (edcSections.length > 0) {
+      return edcSections.map(section => section.title);
+    }
+    
+    // Fallback: Use department paths if no page-specific sections
+    return getAllDepartmentPaths();
+  }, [iso9000Sections, iso2Sections, edcSections]);
 
   const acceptedFileTypes = {
     images: ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg'],
@@ -68,13 +91,14 @@ export default function UploadModal({ isOpen, onClose, onUploadComplete, onEditD
     ...acceptedFileTypes.videos
   ];
 
-  const getFileIcon = (fileName: string) => {
+  const getFileIcon = (fileName: string, status?: string) => {
     const extension = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
     
+    // Keep original colors - don't change based on status
     if (acceptedFileTypes.images.includes(extension)) {
       return <Image className="w-5 h-5 text-blue-500" />;
     } else if (acceptedFileTypes.documents.includes(extension)) {
-      return <FileText className="w-5 h-5 text-green-500" />;
+      return <FileText className="w-5 h-5 text-gray-900" />;
     } else if (acceptedFileTypes.spreadsheets.includes(extension)) {
       return <FileSpreadsheet className="w-5 h-5 text-orange-500" />;
     } else if (acceptedFileTypes.videos.includes(extension)) {
@@ -130,7 +154,7 @@ export default function UploadModal({ isOpen, onClose, onUploadComplete, onEditD
   };
 
   const simulateUpload = async (file: UploadedFile): Promise<void> => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const interval = setInterval(() => {
         setUploadedFiles(prev => prev.map(f => {
           if (f.id === file.id) {
@@ -194,9 +218,10 @@ export default function UploadModal({ isOpen, onClose, onUploadComplete, onEditD
   };
 
   const handleClose = () => {
-    if (!isUploading) {
+    if (!isUploading || uploadCompleted) {
       setUploadedFiles([]);
       setUploadCompleted(false);
+      setIsUploading(false);
       onClose();
     }
   };
@@ -212,7 +237,11 @@ export default function UploadModal({ isOpen, onClose, onUploadComplete, onEditD
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black bg-opacity-50"
-              onClick={handleClose}
+              onClick={() => {
+                if (!isUploading || uploadCompleted) {
+                  handleClose();
+                }
+              }}
             />
 
             {/* Modal */}
@@ -229,10 +258,10 @@ export default function UploadModal({ isOpen, onClose, onUploadComplete, onEditD
                 </h2>
                 <motion.button
                   onClick={handleClose}
-                  disabled={isUploading}
+                  disabled={isUploading && !uploadCompleted}
                   className="glass-button-icon disabled:opacity-50"
-                  whileHover={{ scale: isUploading ? 1 : 1.05 }}
-                  whileTap={{ scale: isUploading ? 1 : 0.95 }}
+                  whileHover={{ scale: (isUploading && !uploadCompleted) ? 1 : 1.05 }}
+                  whileTap={{ scale: (isUploading && !uploadCompleted) ? 1 : 0.95 }}
                 >
                   <X className="w-4 h-4 text-red-500 dark:text-red-400" />
                 </motion.button>
@@ -337,7 +366,7 @@ export default function UploadModal({ isOpen, onClose, onUploadComplete, onEditD
                           animate={{ opacity: 1, y: 0 }}
                           className="flex items-center space-x-3 p-3 glass-panel rounded-lg"
                         >
-                          {getFileIcon(file.file.name)}
+                          {getFileIcon(file.file.name, file.status)}
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                               {file.file.name}
@@ -351,8 +380,7 @@ export default function UploadModal({ isOpen, onClose, onUploadComplete, onEditD
                           {file.status === 'uploading' && (
                             <div className="flex-1 max-w-32">
                               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                <div 
-                                  className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+                                <div className="bg-primary-600 h-2 rounded-full transition-all duration-300"
                                   style={{ width: `${file.progress}%` }}
                                 />
                               </div>
@@ -406,12 +434,13 @@ export default function UploadModal({ isOpen, onClose, onUploadComplete, onEditD
               <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 dark:border-gray-700">
                 <motion.button
                   onClick={handleClose}
-                  disabled={isUploading}
-                  className="glass-button-secondary disabled:opacity-50"
-                  whileHover={{ scale: isUploading ? 1 : 1.05 }}
-                  whileTap={{ scale: isUploading ? 1 : 0.95 }}
+                  disabled={isUploading && !uploadCompleted}
+                  className={`${uploadCompleted ? 'bg-primary-500 hover:bg-primary-600 text-white' : 'glass-button-secondary'} disabled:opacity-50 flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors`}
+                  whileHover={{ scale: (isUploading && !uploadCompleted) ? 1 : 1.05 }}
+                  whileTap={{ scale: (isUploading && !uploadCompleted) ? 1 : 0.95 }}
                 >
-                  {uploadCompleted ? 'Done' : 'Cancel'}
+                  {uploadCompleted && <CheckCircle className="w-4 h-4" />}
+                  <span>{uploadCompleted ? 'Done' : 'Cancel'}</span>
                 </motion.button>
                 {!uploadCompleted && (
                   <motion.button

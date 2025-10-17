@@ -1,6 +1,55 @@
 import { User, Document, Department, AuditLog, Notification } from '../types';
 import { DocumentAcceptance } from '../types';
+import { Award, FileText, Shield, Users, Heart, TrendingUp } from 'lucide-react';
 
+// ISO Document Types
+export interface ISO9000Document {
+  id: string;
+  title: string;
+  type: string;
+  url: string;
+  securityLevel: 'Public' | 'Restricted' | 'Confidential' | 'Top Secret';
+}
+// ISO 2 Document Types
+export interface ISO2Document {
+  id: string;
+  title: string;
+  type: string;
+  url: string;
+}
+// EDC Document Types
+export interface EDCDocument {
+  id: string;
+  title: string;
+  type: string;
+  url: string;
+  securityLevel: 'Public' | 'Restricted' | 'Confidential' | 'Top Secret';
+}
+// ISO 9000 Sections Data  
+export interface ISO9000Section {
+  id: string;
+  title: string;
+  color: string;
+  icon: React.ComponentType<any>;
+  documents: ISO9000Document[];
+}
+
+// ISO 2 Sections Data
+export interface ISO2Section {
+  id: string;
+  title: string;
+  color: string;
+  documents: ISO2Document[];
+}
+  // EDC Sections Data
+export interface EDCSection {
+  id: string;
+  title: string;
+  color: string;
+  documents: EDCDocument[];
+}
+  
+// Users Data
 export const mockUsers: User[] = [
   {
     id: '1',
@@ -39,9 +88,9 @@ export const mockUsers: User[] = [
    avatar: 'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1'
   }
 ];
-
+// Get user
 export const mockUser: User = mockUsers[0];
-
+// Documents Data
 export const mockDocuments: Document[] = [
   {
     id: '1',
@@ -49,7 +98,7 @@ export const mockDocuments: Document[] = [
     type: 'Manual',
     fileType: 'pdf',
     fileSize: '2.1 MB',
-    department: 'Main/Human Resources/Policies/Employee Guidelines',
+    department: 'Human Resources/Policies/Employee Guidelines',
     uploadedBy: 'Sarah Johnson',
     uploadedAt: new Date('2024-01-15 10:30:00'),
     lastModified: new Date('2024-01-15 10:30:00'),
@@ -80,7 +129,7 @@ export const mockDocuments: Document[] = [
     type: 'Policy',
     fileType: 'docx',
     fileSize: '0.8 MB',
-    department: 'Main/Information Technology/Security Policies',
+    department: 'Information Technology/Security Policies',
     uploadedBy: 'Ahmed Al-Rashid',
     uploadedAt: new Date('2024-01-20 14:20:00'),
     lastModified: new Date('2024-01-20 14:20:00'),
@@ -106,7 +155,7 @@ export const mockDocuments: Document[] = [
     type: 'Form',
     fileType: 'xlsx',
     fileSize: '0.9 MB',
-    department: 'Main/Finance/Budget Reports/2024 Q1',
+    department: 'Finance/Budget Reports/2024 Q1',
     uploadedBy: 'Fatima Al-Zahra',
     uploadedAt: new Date('2024-02-01 11:00:00'),
     lastModified: new Date('2024-02-01 11:00:00'),
@@ -123,7 +172,7 @@ export const mockDocuments: Document[] = [
     type: 'SOP',
     fileType: 'pdf',
     fileSize: '1.5 MB',
-    department: 'Main/Operations/Standard Operating Procedures',
+    department: 'Operations/Standard Operating Procedures',
     uploadedBy: 'Sarah Johnson',
     uploadedAt: new Date('2024-01-10 08:45:00'),
     lastModified: new Date('2024-01-10 08:45:00'),
@@ -141,7 +190,7 @@ export const mockDocuments: Document[] = [
     type: 'Guide',
     fileType: 'docx',
     fileSize: '0.8 MB',
-    department: 'Main/Marketing/Brand Guidelines',
+    department: 'Marketing/Brand Guidelines',
     uploadedBy: 'Ahmed Al-Rashid',
     uploadedAt: new Date('2024-01-25 16:45:00'),
     lastModified: new Date('2024-01-25 16:45:00'),
@@ -158,7 +207,7 @@ export const mockDocuments: Document[] = [
     type: 'Manual',
     fileType: 'pdf',
     fileSize: '1.5 MB',
-    department: 'Main/Human Resources/Policies/Employee Guidelines',
+    department: 'Human Resources/Policies/Employee Guidelines',
     uploadedBy: 'Ahmed Al-Rashid',
     uploadedAt: new Date('2024-01-12 13:20:00'),
     lastModified: new Date('2024-01-12 13:20:00'),
@@ -176,7 +225,7 @@ export const mockDocuments: Document[] = [
     type: 'Policy',
     fileType: 'docx',
     fileSize: '0.8 MB',
-    department: 'Main/Human Resources/Policies/Code of Conduct',
+    department: 'Human Resources/Policies/Code of Conduct',
     uploadedBy: 'Sarah Johnson',
     uploadedAt: new Date('2024-01-18 15:10:00'),
     lastModified: new Date('2024-01-18 15:10:00'),
@@ -194,7 +243,7 @@ export const mockDocuments: Document[] = [
     type: 'Guide',
     fileType: 'pdf',
     fileSize: '1.5 MB',
-    department: 'Main/Human Resources/Benefits',
+    department: 'Human Resources/Benefits',
     uploadedBy: 'Fatima Al-Zahra',
     uploadedAt: new Date('2024-01-08 09:30:00'),
     lastModified: new Date('2024-01-08 09:30:00'),
@@ -213,7 +262,7 @@ export const mockDocuments: Document[] = [
     type: 'Form',
     fileType: 'xlsx',
     fileSize: '0.9 MB',
-    department: 'Main/Human Resources/Training Materials',
+    department: 'Human Resources/Training Materials',
     uploadedBy: 'Ahmed Al-Rashid',
     uploadedAt: new Date('2024-01-22 11:45:00'),
     lastModified: new Date('2024-01-22 11:45:00'),
@@ -229,7 +278,7 @@ export const mockDocuments: Document[] = [
     type: 'Policy',
     fileType: 'pdf',
     fileSize: '1.5 MB',
-    department: 'Main/Human Resources/Policies/Code of Conduct',
+    department: 'Human Resources/Policies/Code of Conduct',
     uploadedBy: 'Sarah Johnson',
     uploadedAt: new Date('2024-01-30 17:20:00'),
     lastModified: new Date('2024-01-30 17:20:00'),
@@ -247,7 +296,7 @@ export const mockDocuments: Document[] = [
     type: 'Manual',
     fileType: 'docx',
     fileSize: '0.8 MB',
-    department: 'Main/Information Technology/System Documentation/API Documentation',
+    department: 'Information Technology/System Documentation/API Documentation',
     uploadedBy: 'Ahmed Al-Rashid',
     uploadedAt: new Date('2024-02-05 12:15:00'),
     lastModified: new Date('2024-02-05 12:15:00'),
@@ -265,7 +314,7 @@ export const mockDocuments: Document[] = [
     type: 'Form',
     fileType: 'xlsx',
     fileSize: '0.9 MB',
-    department: 'Main/Finance/Budget Reports/2024 Q2',
+    department: 'Finance/Budget Reports/2024 Q2',
     uploadedBy: 'Fatima Al-Zahra',
     uploadedAt: new Date('2024-02-10 14:30:00'),
     lastModified: new Date('2024-02-10 14:30:00'),
@@ -621,7 +670,7 @@ export const mockDocuments: Document[] = [
     requiresAcceptance: true
   }
 ];
-
+// Document Acceptances Data
 export const mockDocumentAcceptances: DocumentAcceptance[] = [
   {
     id: '1',
@@ -660,7 +709,7 @@ export const mockDepartments: Department[] = [
     documentCount: 12,
     pendingCount: 3,
     parentId: null,
-    path: 'Main/Human Resources',
+    path: 'Human Resources',
     children: [
       {
         id: '1-1',
@@ -669,7 +718,7 @@ export const mockDepartments: Department[] = [
         documentCount: 5,
         pendingCount: 1,
         parentId: '1',
-        path: 'Main/Human Resources/Policies',
+        path: 'Human Resources/Policies',
         children: [
           {
             id: '1-1-1',
@@ -678,7 +727,7 @@ export const mockDepartments: Department[] = [
             documentCount: 3,
             pendingCount: 0,
             parentId: '1-1',
-            path: 'Main/Human Resources/Policies/Employee Guidelines'
+            path: 'Human Resources/Policies/Employee Guidelines'
           },
           {
             id: '1-1-2',
@@ -687,7 +736,7 @@ export const mockDepartments: Department[] = [
             documentCount: 2,
             pendingCount: 1,
             parentId: '1-1',
-            path: 'Main/Human Resources/Policies/Code of Conduct'
+            path: 'Human Resources/Policies/Code of Conduct'
           }
         ]
       },
@@ -698,7 +747,7 @@ export const mockDepartments: Department[] = [
         documentCount: 4,
         pendingCount: 1,
         parentId: '1',
-        path: 'Main/Human Resources/Benefits'
+        path: 'Human Resources/Benefits'
       },
       {
         id: '1-3',
@@ -707,7 +756,7 @@ export const mockDepartments: Department[] = [
         documentCount: 3,
         pendingCount: 1,
         parentId: '1',
-        path: 'Main/Human Resources/Training Materials'
+        path: 'Human Resources/Training Materials'
       }
     ]
   },
@@ -718,7 +767,7 @@ export const mockDepartments: Department[] = [
     documentCount: 15,
     pendingCount: 2,
     parentId: null,
-    path: 'Main/Information Technology',
+    path: 'Information Technology',
     children: [
       {
         id: '2-1',
@@ -727,7 +776,7 @@ export const mockDepartments: Department[] = [
         documentCount: 6,
         pendingCount: 1,
         parentId: '2',
-        path: 'Main/Information Technology/Security Policies'
+        path: 'Information Technology/Security Policies'
       },
       {
         id: '2-2',
@@ -736,7 +785,7 @@ export const mockDepartments: Department[] = [
         documentCount: 7,
         pendingCount: 1,
         parentId: '2',
-        path: 'Main/Information Technology/System Documentation',
+        path: 'Information Technology/System Documentation',
         children: [
           {
             id: '2-2-1',
@@ -745,7 +794,7 @@ export const mockDepartments: Department[] = [
             documentCount: 4,
             pendingCount: 0,
             parentId: '2-2',
-            path: 'Main/Information Technology/System Documentation/API Documentation'
+            path: 'Information Technology/System Documentation/API Documentation'
           },
           {
             id: '2-2-2',
@@ -754,7 +803,7 @@ export const mockDepartments: Department[] = [
             documentCount: 3,
             pendingCount: 1,
             parentId: '2-2',
-            path: 'Main/Information Technology/System Documentation/Database Schemas'
+            path: 'Information Technology/System Documentation/Database Schemas'
           }
         ]
       },
@@ -765,7 +814,7 @@ export const mockDepartments: Department[] = [
         documentCount: 2,
         pendingCount: 0,
         parentId: '2',
-        path: 'Main/Information Technology/User Manuals'
+        path: 'Information Technology/User Manuals'
       }
     ]
   },
@@ -776,7 +825,7 @@ export const mockDepartments: Department[] = [
     documentCount: 18,
     pendingCount: 4,
     parentId: null,
-    path: 'Main/Finance',
+    path: 'Finance',
     children: [
       {
         id: '3-1',
@@ -785,7 +834,7 @@ export const mockDepartments: Department[] = [
         documentCount: 8,
         pendingCount: 2,
         parentId: '3',
-        path: 'Main/Finance/Budget Reports',
+        path: 'Finance/Budget Reports',
         children: [
           {
             id: '3-1-1',
@@ -794,7 +843,7 @@ export const mockDepartments: Department[] = [
             documentCount: 4,
             pendingCount: 0,
             parentId: '3-1',
-            path: 'Main/Finance/Budget Reports/2024 Q1'
+            path: 'Finance/Budget Reports/2024 Q1'
           },
           {
             id: '3-1-2',
@@ -803,7 +852,7 @@ export const mockDepartments: Department[] = [
             documentCount: 4,
             pendingCount: 2,
             parentId: '3-1',
-            path: 'Main/Finance/Budget Reports/2024 Q2'
+            path: 'Finance/Budget Reports/2024 Q2'
           }
         ]
       },
@@ -814,7 +863,7 @@ export const mockDepartments: Department[] = [
         documentCount: 5,
         pendingCount: 1,
         parentId: '3',
-        path: 'Main/Finance/Expense Policies'
+        path: 'Finance/Expense Policies'
       },
       {
         id: '3-3',
@@ -823,7 +872,7 @@ export const mockDepartments: Department[] = [
         documentCount: 5,
         pendingCount: 1,
         parentId: '3',
-        path: 'Main/Finance/Audit Documents'
+        path: 'Finance/Audit Documents'
       }
     ]
   },
@@ -834,7 +883,7 @@ export const mockDepartments: Department[] = [
     documentCount: 14,
     pendingCount: 3,
     parentId: null,
-    path: 'Main/Legal',
+    path: 'Legal',
     children: [
       {
         id: '4-1',
@@ -843,7 +892,7 @@ export const mockDepartments: Department[] = [
         documentCount: 8,
         pendingCount: 2,
         parentId: '4',
-        path: 'Main/Legal/Contracts',
+        path: 'Legal/Contracts',
         children: [
           {
             id: '4-1-1',
@@ -852,7 +901,7 @@ export const mockDepartments: Department[] = [
             documentCount: 5,
             pendingCount: 1,
             parentId: '4-1',
-            path: 'Main/Legal/Contracts/Employee Contracts'
+            path: 'Legal/Contracts/Employee Contracts'
           },
           {
             id: '4-1-2',
@@ -861,7 +910,7 @@ export const mockDepartments: Department[] = [
             documentCount: 3,
             pendingCount: 1,
             parentId: '4-1',
-            path: 'Main/Legal/Contracts/Vendor Agreements'
+            path: 'Legal/Contracts/Vendor Agreements'
           }
         ]
       },
@@ -872,7 +921,7 @@ export const mockDepartments: Department[] = [
         documentCount: 6,
         pendingCount: 1,
         parentId: '4',
-        path: 'Main/Legal/Compliance'
+        path: 'Legal/Compliance'
       }
     ]
   },
@@ -883,7 +932,7 @@ export const mockDepartments: Department[] = [
     documentCount: 11,
     pendingCount: 2,
     parentId: null,
-    path: 'Main/Operations',
+    path: 'Operations',
     children: [
       {
         id: '5-1',
@@ -892,7 +941,7 @@ export const mockDepartments: Department[] = [
         documentCount: 7,
         pendingCount: 1,
         parentId: '5',
-        path: 'Main/Operations/Standard Operating Procedures'
+        path: 'Operations/Standard Operating Procedures'
       },
       {
         id: '5-2',
@@ -901,7 +950,7 @@ export const mockDepartments: Department[] = [
         documentCount: 4,
         pendingCount: 1,
         parentId: '5',
-        path: 'Main/Operations/Quality Assurance'
+        path: 'Operations/Quality Assurance'
       }
     ]
   },
@@ -912,7 +961,7 @@ export const mockDepartments: Department[] = [
     documentCount: 13,
     pendingCount: 2,
     parentId: null,
-    path: 'Main/Marketing',
+    path: 'Marketing',
     children: [
       {
         id: '6-1',
@@ -921,7 +970,7 @@ export const mockDepartments: Department[] = [
         documentCount: 4,
         pendingCount: 0,
         parentId: '6',
-        path: 'Main/Marketing/Brand Guidelines'
+        path: 'Marketing/Brand Guidelines'
       },
       {
         id: '6-2',
@@ -930,7 +979,7 @@ export const mockDepartments: Department[] = [
         documentCount: 9,
         pendingCount: 2,
         parentId: '6',
-        path: 'Main/Marketing/Campaign Materials',
+        path: 'Marketing/Campaign Materials',
         children: [
           {
             id: '6-2-1',
@@ -939,7 +988,7 @@ export const mockDepartments: Department[] = [
             documentCount: 4,
             pendingCount: 1,
             parentId: '6-2',
-            path: 'Main/Marketing/Campaign Materials/2024 Q1 Campaign'
+            path: 'Marketing/Campaign Materials/2024 Q1 Campaign'
           },
           {
             id: '6-2-2',
@@ -948,14 +997,14 @@ export const mockDepartments: Department[] = [
             documentCount: 5,
             pendingCount: 1,
             parentId: '6-2',
-            path: 'Main/Marketing/Campaign Materials/2024 Q2 Campaign'
+            path: 'Marketing/Campaign Materials/2024 Q2 Campaign'
           }
         ]
       }
     ]
   }
 ];
-
+// 
 export const mockAuditLogs: AuditLog[] = [
   {
     id: '1',
@@ -1003,7 +1052,7 @@ export const mockAuditLogs: AuditLog[] = [
     timestamp: new Date('2024-01-22T16:45:00')
   }
 ];
-
+// Notifications Data
 export const mockNotifications: Record<string, Notification[]> = {
   admin: [
     {
@@ -1204,7 +1253,303 @@ export const mockNotifications: Record<string, Notification[]> = {
     }
   ]
 };
-
+// Get user notifications
 export const getUserNotifications = (userRole: 'admin' | 'manager' | 'employee'): Notification[] => {
   return mockNotifications[userRole] || [];
 };
+
+// Get all department paths for upload modal
+export const getAllDepartmentPaths = (): string[] => {
+  const paths: string[] = [];
+  
+  const extractPaths = (dept: Department) => {
+    if (dept.path) {
+      paths.push(dept.path);
+    }
+    if (dept.children) {
+      dept.children.forEach(child => extractPaths(child));
+    }
+  };
+  
+  mockDepartments.forEach(dept => extractPaths(dept));
+  return paths.sort();
+};
+
+// ISO 9000 Sections Data
+export const mockISO9000Sections: ISO9000Section[] = [
+  {
+    id: '1',
+    title: 'Quality Management System',
+    color: '#08bed5',
+    icon: Award,
+    documents: [
+      { id: '1', title: 'Quality Policy', type: 'Policy', url: '#', securityLevel: 'Public' },
+      { id: '2', title: 'Quality Objectives', type: 'Document', url: '#', securityLevel: 'Restricted' },
+      { id: '3', title: 'Management Review', type: 'Procedure', url: '#', securityLevel: 'Confidential' },
+      { id: '4', title: 'Quality Manual', type: 'Manual', url: '#', securityLevel: 'Public' },
+      { id: '5', title: 'Process Mapping', type: 'Diagram', url: '#', securityLevel: 'Restricted' },
+      { id: '6', title: 'Risk Assessment', type: 'Assessment', url: '#', securityLevel: 'Confidential' },
+      { id: '7', title: 'Corrective Actions', type: 'Procedure', url: '#', securityLevel: 'Public' }
+    ]
+  },
+  {
+    id: '2',
+    title: 'Document Control',
+    color: '#03778d',
+    icon: FileText,
+    documents: [
+      { id: '8', title: 'Document Control Procedure', type: 'SOP', url: '#', securityLevel: 'Public' },
+      { id: '9', title: 'Document Approval Matrix', type: 'Matrix', url: '#', securityLevel: 'Restricted' },
+      { id: '10', title: 'Version Control', type: 'Guideline', url: '#', securityLevel: 'Public' },
+      { id: '11', title: 'Document Retention', type: 'Policy', url: '#', securityLevel: 'Confidential' },
+      { id: '12', title: 'Access Control', type: 'Procedure', url: '#', securityLevel: 'Top Secret' },
+      { id: '13', title: 'Document Templates', type: 'Template', url: '#', securityLevel: 'Public' },
+      { id: '14', title: 'Review Schedule', type: 'Calendar', url: '#', securityLevel: 'Restricted' },
+      { id: '15', title: 'Distribution List', type: 'List', url: '#', securityLevel: 'Confidential' }
+    ]
+  },
+  {
+    id: '3',
+    title: 'Internal Audits',
+    color: '#08bed5',
+    icon: Shield,
+    documents: [
+      { id: '16', title: 'Audit Program', type: 'Program', url: '#', securityLevel: 'Restricted' },
+      { id: '17', title: 'Audit Checklist', type: 'Checklist', url: '#', securityLevel: 'Public' },
+      { id: '18', title: 'Audit Schedule', type: 'Schedule', url: '#', securityLevel: 'Restricted' },
+      { id: '19', title: 'Non-conformity Report', type: 'Report', url: '#', securityLevel: 'Confidential' }
+    ]
+  },
+  {
+    id: '4',
+    title: 'Training & Competence',
+    color: '#03778d',
+    icon: Users,
+    documents: [
+      { id: '20', title: 'Training Matrix', type: 'Matrix', url: '#', securityLevel: 'Public' },
+      { id: '21', title: 'Competence Assessment', type: 'Assessment', url: '#', securityLevel: 'Restricted' },
+      { id: '22', title: 'Training Records', type: 'Record', url: '#', securityLevel: 'Confidential' },
+      { id: '23', title: 'Training Materials', type: 'Material', url: '#', securityLevel: 'Public' },
+      { id: '24', title: 'Certification Program', type: 'Program', url: '#', securityLevel: 'Restricted' },
+      { id: '25', title: 'Skills Development', type: 'Plan', url: '#', securityLevel: 'Confidential' },
+      { id: '26', title: 'Performance Evaluation', type: 'Evaluation', url: '#', securityLevel: 'Top Secret' },
+      { id: '27', title: 'Training Effectiveness', type: 'Report', url: '#', securityLevel: 'Restricted' },
+      { id: '28', title: 'Continuous Learning', type: 'Policy', url: '#', securityLevel: 'Public' }
+    ]
+  },
+  {
+    id: '5',
+    title: 'Customer Satisfaction',
+    color: '#08bed5',
+    icon: Heart,
+    documents: [
+      { id: '29', title: 'Customer Feedback', type: 'Survey', url: '#', securityLevel: 'Public' },
+      { id: '30', title: 'Complaint Handling', type: 'Procedure', url: '#', securityLevel: 'Restricted' },
+      { id: '31', title: 'Service Level Agreement', type: 'SLA', url: '#', securityLevel: 'Confidential' }
+    ]
+  },
+  {
+    id: '6',
+    title: 'Continuous Improvement',
+    color: '#03778d',
+    icon: TrendingUp,
+    documents: [
+      { id: '32', title: 'Improvement Projects', type: 'Project', url: '#', securityLevel: 'Public' },
+      { id: '33', title: 'KPI Dashboard', type: 'Dashboard', url: '#', securityLevel: 'Restricted' },
+      { id: '34', title: 'Performance Metrics', type: 'Metrics', url: '#', securityLevel: 'Confidential' },
+      { id: '35', title: 'Benchmarking', type: 'Study', url: '#', securityLevel: 'Top Secret' },
+      { id: '36', title: 'Innovation Process', type: 'Process', url: '#', securityLevel: 'Restricted' },
+      { id: '37', title: 'Best Practices', type: 'Guide', url: '#', securityLevel: 'Public' }
+    ]
+  },
+  {
+    id: '7',
+    title: 'Risk Management',
+    color: '#08bed5',
+    icon: Shield,
+    documents: [
+      { id: '38', title: 'Risk Assessment Matrix', type: 'Matrix', url: '#', securityLevel: 'Confidential' },
+      { id: '39', title: 'Risk Mitigation Plan', type: 'Plan', url: '#', securityLevel: 'Restricted' },
+      { id: '40', title: 'Business Continuity', type: 'Procedure', url: '#', securityLevel: 'Top Secret' },
+      { id: '41', title: 'Emergency Response', type: 'Protocol', url: '#', securityLevel: 'Confidential' },
+      { id: '42', title: 'Risk Register', type: 'Register', url: '#', securityLevel: 'Restricted' }
+    ]
+  },
+  {
+    id: '8',
+    title: 'Process Management',
+    color: '#03778d',
+    icon: FileText,
+    documents: [
+      { id: '43', title: 'Process Documentation', type: 'SOP', url: '#', securityLevel: 'Public' },
+      { id: '44', title: 'Process Flow Charts', type: 'Diagram', url: '#', securityLevel: 'Public' },
+      { id: '45', title: 'Process Optimization', type: 'Report', url: '#', securityLevel: 'Restricted' },
+      { id: '46', title: 'Process KPIs', type: 'Metrics', url: '#', securityLevel: 'Confidential' },
+      { id: '47', title: 'Process Ownership', type: 'Matrix', url: '#', securityLevel: 'Restricted' },
+      { id: '48', title: 'Process Review', type: 'Procedure', url: '#', securityLevel: 'Public' },
+      { id: '49', title: 'Standard Operating Procedures', type: 'SOP', url: '#', securityLevel: 'Public' }
+    ]
+  }
+];
+
+// ISO2 Sections Data (ISO 9001, 14001, 45001, 27001, 50001, 22000)
+export const mockISO2Sections: ISO2Section[] = [
+  {
+    id: '1',
+    title: 'Quality Management System',
+    color: '#0AACCC',
+    documents: [
+      { id: '1', title: 'Quality Policy', type: 'Policy', url: '#' },
+      { id: '2', title: 'Quality Objectives', type: 'Document', url: '#' },
+      { id: '3', title: 'Management Review', type: 'Procedure', url: '#' },
+      { id: '4', title: 'Internal Audit', type: 'Procedure', url: '#' },
+      { id: '5', title: 'Corrective Actions', type: 'Form', url: '#' }
+    ]
+  },
+  {
+    id: '2',
+    title: 'Environmental Management',
+    color: '#10B981',
+    documents: [
+      { id: '6', title: 'Environmental Policy', type: 'Policy', url: '#' },
+      { id: '7', title: 'Environmental Aspects', type: 'Register', url: '#' },
+      { id: '8', title: 'Legal Compliance', type: 'Checklist', url: '#' },
+      { id: '9', title: 'Emergency Response', type: 'Plan', url: '#' },
+      { id: '10', title: 'Environmental Training', type: 'Record', url: '#' }
+    ]
+  },
+  {
+    id: '3',
+    title: 'Occupational Health & Safety',
+    color: '#F59E0B',
+    documents: [
+      { id: '11', title: 'OH&S Policy', type: 'Policy', url: '#' },
+      { id: '12', title: 'Risk Assessment', type: 'Form', url: '#' },
+      { id: '13', title: 'Safety Procedures', type: 'SOP', url: '#' },
+      { id: '14', title: 'Incident Investigation', type: 'Form', url: '#' },
+      { id: '15', title: 'Safety Training Records', type: 'Register', url: '#' }
+    ]
+  },
+  {
+    id: '4',
+    title: 'Information Security',
+    color: '#8B5CF6',
+    documents: [
+      { id: '16', title: 'Information Security Policy', type: 'Policy', url: '#' },
+      { id: '17', title: 'Risk Management', type: 'Procedure', url: '#' },
+      { id: '18', title: 'Access Control', type: 'SOP', url: '#' },
+      { id: '19', title: 'Incident Management', type: 'Plan', url: '#' },
+      { id: '20', title: 'Security Awareness', type: 'Training', url: '#' }
+    ]
+  },
+  {
+    id: '5',
+    title: 'Energy Management',
+    color: '#EF4444',
+    documents: [
+      { id: '21', title: 'Energy Policy', type: 'Policy', url: '#' },
+      { id: '22', title: 'Energy Baseline', type: 'Report', url: '#' },
+      { id: '23', title: 'Energy Review', type: 'Assessment', url: '#' },
+      { id: '24', title: 'Energy Performance', type: 'Indicators', url: '#' },
+      { id: '25', title: 'Energy Action Plan', type: 'Plan', url: '#' }
+    ]
+  },
+  {
+    id: '6',
+    title: 'Food Safety Management',
+    color: '#06B6D4',
+    documents: [
+      { id: '26', title: 'Food Safety Policy', type: 'Policy', url: '#' },
+      { id: '27', title: 'HACCP Plan', type: 'Plan', url: '#' },
+      { id: '28', title: 'Prerequisite Programs', type: 'SOP', url: '#' },
+      { id: '29', title: 'Traceability System', type: 'Procedure', url: '#' },
+      { id: '30', title: 'Corrective Actions', type: 'Form', url: '#' }
+    ]
+  }
+];
+
+// EDC (Edarat Data Center) Sections Data
+export const mockEDCSections: EDCSection[] = [
+  {
+    id: '1',
+    title: 'Data Center Infrastructure',
+    color: '#08bed5',
+    documents: [
+      { id: '1', title: 'Server Configuration', type: 'Configuration', url: '#', securityLevel: 'Confidential' },
+      { id: '2', title: 'Network Architecture', type: 'Documentation', url: '#', securityLevel: 'Top Secret' },
+      { id: '3', title: 'Power Management', type: 'Procedure', url: '#', securityLevel: 'Restricted' },
+      { id: '4', title: 'Cooling Systems', type: 'Manual', url: '#', securityLevel: 'Public' },
+      { id: '5', title: 'Security Protocols', type: 'Policy', url: '#', securityLevel: 'Top Secret' },
+      { id: '6', title: 'Rack Management', type: 'Procedure', url: '#', securityLevel: 'Restricted' },
+      { id: '7', title: 'Cable Management', type: 'Guideline', url: '#', securityLevel: 'Public' },
+      { id: '8', title: 'Environmental Controls', type: 'Manual', url: '#', securityLevel: 'Confidential' }
+    ]
+  },
+  {
+    id: '2',
+    title: 'Data Management',
+    color: '#03778d',
+    documents: [
+      { id: '9', title: 'Data Backup Strategy', type: 'Policy', url: '#', securityLevel: 'Top Secret' },
+      { id: '10', title: 'Data Retention', type: 'Procedure', url: '#', securityLevel: 'Confidential' },
+      { id: '11', title: 'Data Classification', type: 'Guideline', url: '#', securityLevel: 'Restricted' },
+      { id: '12', title: 'Data Migration', type: 'Plan', url: '#', securityLevel: 'Top Secret' }
+    ]
+  },
+  {
+    id: '3',
+    title: 'System Monitoring',
+    color: '#08bed5',
+    documents: [
+      { id: '13', title: 'Performance Metrics', type: 'Dashboard', url: '#', securityLevel: 'Public' },
+      { id: '14', title: 'Alert Configuration', type: 'Setup', url: '#', securityLevel: 'Restricted' },
+      { id: '15', title: 'Log Management', type: 'Procedure', url: '#', securityLevel: 'Confidential' },
+      { id: '16', title: 'Health Checks', type: 'Script', url: '#', securityLevel: 'Public' },
+      { id: '17', title: 'Capacity Planning', type: 'Report', url: '#', securityLevel: 'Restricted' },
+      { id: '18', title: 'Resource Monitoring', type: 'Dashboard', url: '#', securityLevel: 'Public' },
+      { id: '19', title: 'Threshold Management', type: 'Configuration', url: '#', securityLevel: 'Confidential' },
+      { id: '20', title: 'Reporting Tools', type: 'Manual', url: '#', securityLevel: 'Public' },
+      { id: '21', title: 'Dashboard Setup', type: 'Guide', url: '#', securityLevel: 'Restricted' },
+      { id: '22', title: 'Notification Rules', type: 'Policy', url: '#', securityLevel: 'Top Secret' },
+      { id: '23', title: 'Monitoring Schedule', type: 'Calendar', url: '#', securityLevel: 'Confidential' },
+      { id: '24', title: 'System Alerts', type: 'Configuration', url: '#', securityLevel: 'Restricted' }
+    ]
+  },
+  {
+    id: '4',
+    title: 'Security & Compliance',
+    color: '#03778d',
+    documents: [
+      { id: '25', title: 'Access Control', type: 'Policy', url: '#', securityLevel: 'Top Secret' },
+      { id: '26', title: 'Audit Procedures', type: 'Checklist', url: '#', securityLevel: 'Confidential' },
+      { id: '27', title: 'Incident Response', type: 'Plan', url: '#', securityLevel: 'Top Secret' },
+      { id: '28', title: 'Compliance Framework', type: 'Document', url: '#', securityLevel: 'Restricted' },
+      { id: '29', title: 'Security Training', type: 'Material', url: '#', securityLevel: 'Public' }
+    ]
+  },
+  {
+    id: '5',
+    title: 'Disaster Recovery',
+    color: '#08bed5',
+    documents: [
+      { id: '30', title: 'DR Strategy', type: 'Plan', url: '#', securityLevel: 'Top Secret' },
+      { id: '31', title: 'Backup Procedures', type: 'SOP', url: '#', securityLevel: 'Confidential' },
+      { id: '32', title: 'Recovery Testing', type: 'Schedule', url: '#', securityLevel: 'Restricted' }
+    ]
+  },
+  {
+    id: '6',
+    title: 'Operations & Maintenance',
+    color: '#03778d',
+    documents: [
+      { id: '33', title: 'Maintenance Schedule', type: 'Calendar', url: '#', securityLevel: 'Public' },
+      { id: '34', title: 'Change Management', type: 'Process', url: '#', securityLevel: 'Restricted' },
+      { id: '35', title: 'Vendor Management', type: 'Agreement', url: '#', securityLevel: 'Confidential' },
+      { id: '36', title: 'Service Level Agreements', type: 'SLA', url: '#', securityLevel: 'Public' },
+      { id: '37', title: 'Performance Reports', type: 'Dashboard', url: '#', securityLevel: 'Public' },
+      { id: '38', title: 'Work Order System', type: 'Procedure', url: '#', securityLevel: 'Restricted' },
+      { id: '39', title: 'Asset Management', type: 'Database', url: '#', securityLevel: 'Confidential' },
+      { id: '40', title: 'Maintenance Logs', type: 'Record', url: '#', securityLevel: 'Restricted' }
+    ]
+  }
+];

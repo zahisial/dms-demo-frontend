@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, MoreHorizontal, Search, Clock, CheckCircle, Upload } from 'lucide-react';
+import { mockISO2Sections, type ISO2Section, type ISO2Document } from '../data/mockData';
 import ISO2Card from './ISO2Card';
 import NewCardModal from './NewCardModal';
 import DocumentPreviewModal from './DocumentPreviewModal';
@@ -9,13 +10,6 @@ import UploadModal from './UploadModal';
 import Toaster, { useToaster } from './Toaster';
 import SearchBar from './SearchBar';
 import { mockDocuments } from '../data/mockData';
-
-interface ISO2Document {
-  id: string;
-  title: string;
-  type: string;
-  url: string;
-}
 
 interface Document {
   id: string;
@@ -40,19 +34,14 @@ interface Document {
   description?: string;
 }
 
-interface ISO2Section {
-  id: string;
-  title: string;
-  color: string;
-  documents: ISO2Document[];
-}
-
 interface ISO2PageProps {
-  onNavigateToDocsDB: () => void;
+  onNavigateToDocsDB: (subjectTitle?: string) => void;
   onShowAllResults?: (query: string) => void;
+  sections?: ISO2Section[];
+  onUpdateSections?: (sections: ISO2Section[]) => void;
 }
 
-export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults }: ISO2PageProps) {
+export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults, sections: propSections, onUpdateSections }: ISO2PageProps) {
   const [newCardModalOpen, setNewCardModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -61,6 +50,7 @@ export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults }: ISO2P
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [uploadSubject, setUploadSubject] = useState<string>('');
   const { toasts, removeToast, showSuccess } = useToaster();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -81,81 +71,16 @@ export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults }: ISO2P
     };
   }, [showDropdown]);
   
-  // State for ISO2 sections
-  const [iso2Sections, setIso2Sections] = useState<ISO2Section[]>([
-    {
-      id: '1',
-      title: 'Quality Management System',
-      color: '#0AACCC',
-      documents: [
-        { id: '1', title: 'Quality Policy', type: 'Policy', url: '#' },
-        { id: '2', title: 'Quality Objectives', type: 'Document', url: '#' },
-        { id: '3', title: 'Management Review', type: 'Procedure', url: '#' },
-        { id: '4', title: 'Internal Audit', type: 'Procedure', url: '#' },
-        { id: '5', title: 'Corrective Actions', type: 'Form', url: '#' }
-      ]
-    },
-    {
-      id: '2',
-      title: 'Environmental Management',
-      color: '#10B981',
-      documents: [
-        { id: '6', title: 'Environmental Policy', type: 'Policy', url: '#' },
-        { id: '7', title: 'Environmental Aspects', type: 'Register', url: '#' },
-        { id: '8', title: 'Legal Compliance', type: 'Checklist', url: '#' },
-        { id: '9', title: 'Emergency Response', type: 'Plan', url: '#' },
-        { id: '10', title: 'Environmental Training', type: 'Record', url: '#' }
-      ]
-    },
-    {
-      id: '3',
-      title: 'Occupational Health & Safety',
-      color: '#F59E0B',
-      documents: [
-        { id: '11', title: 'OH&S Policy', type: 'Policy', url: '#' },
-        { id: '12', title: 'Risk Assessment', type: 'Form', url: '#' },
-        { id: '13', title: 'Safety Procedures', type: 'SOP', url: '#' },
-        { id: '14', title: 'Incident Investigation', type: 'Form', url: '#' },
-        { id: '15', title: 'Safety Training Records', type: 'Register', url: '#' }
-      ]
-    },
-    {
-      id: '4',
-      title: 'Information Security',
-      color: '#8B5CF6',
-      documents: [
-        { id: '16', title: 'Information Security Policy', type: 'Policy', url: '#' },
-        { id: '17', title: 'Risk Management', type: 'Procedure', url: '#' },
-        { id: '18', title: 'Access Control', type: 'SOP', url: '#' },
-        { id: '19', title: 'Incident Management', type: 'Plan', url: '#' },
-        { id: '20', title: 'Security Awareness', type: 'Training', url: '#' }
-      ]
-    },
-    {
-      id: '5',
-      title: 'Energy Management',
-      color: '#EF4444',
-      documents: [
-        { id: '21', title: 'Energy Policy', type: 'Policy', url: '#' },
-        { id: '22', title: 'Energy Baseline', type: 'Report', url: '#' },
-        { id: '23', title: 'Energy Review', type: 'Assessment', url: '#' },
-        { id: '24', title: 'Energy Performance', type: 'Indicators', url: '#' },
-        { id: '25', title: 'Energy Action Plan', type: 'Plan', url: '#' }
-      ]
-    },
-    {
-      id: '6',
-      title: 'Food Safety Management',
-      color: '#06B6D4',
-      documents: [
-        { id: '26', title: 'Food Safety Policy', type: 'Policy', url: '#' },
-        { id: '27', title: 'HACCP Plan', type: 'Plan', url: '#' },
-        { id: '28', title: 'Prerequisite Programs', type: 'SOP', url: '#' },
-        { id: '29', title: 'Traceability System', type: 'Procedure', url: '#' },
-        { id: '30', title: 'Corrective Actions', type: 'Form', url: '#' }
-      ]
+  // Use centralized ISO2 sections data from props or local state
+  const [localSections, setLocalSections] = useState<ISO2Section[]>(mockISO2Sections);
+  const iso2Sections = propSections || localSections;
+  const setIso2Sections = onUpdateSections || ((sections: ISO2Section[] | ((prev: ISO2Section[]) => ISO2Section[])) => {
+    if (typeof sections === 'function') {
+      setLocalSections(sections);
+    } else {
+      setLocalSections(sections);
     }
-  ]);
+  });
 
   const handleAddNewCard = (card: { title: string; color: string; icon: string }) => {
     const newSection: ISO2Section = {
@@ -193,15 +118,49 @@ export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults }: ISO2P
   };
 
   const handleUploadComplete = (files: File[], subject: string) => {
-    // Show success notification
-    showSuccess(
-      'Upload Successful',
-      `${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully to ${subject}. Click the edit icon to modify document details.`,
-      6000
-    );
+    // Find the section that matches the subject
+    const targetSection = iso2Sections.find(section => section.title === subject);
     
-    // Here you would typically add the uploaded files to your document list
-    console.log('Files uploaded:', files);
+    if (targetSection) {
+      // Create new documents from uploaded files
+      const newDocuments: ISO2Document[] = files.map((file, index) => ({
+        id: `uploaded-${Date.now()}-${index}`,
+        title: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
+        type: 'Uploaded Document',
+        url: URL.createObjectURL(file), // Create temporary URL for preview
+        securityLevel: 'Public' as const,
+        uploadedAt: new Date().toISOString(),
+        uploadedBy: 'Current User', // You can get this from user context
+        fileSize: file.size,
+        fileType: file.type.split('/')[1] || 'unknown'
+      }));
+
+      // Update the section with new documents
+      const updatedSections = iso2Sections.map(section => 
+        section.id === targetSection.id 
+          ? { ...section, documents: [...section.documents, ...newDocuments] }
+          : section
+      );
+
+      // Update the sections state
+      setIso2Sections(updatedSections);
+
+      // Show success notification
+      showSuccess(
+        'Upload Successful',
+        `${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully to ${subject}. Documents are now visible in the card.`,
+        6000
+      );
+    } else {
+      // Fallback if section not found
+      showSuccess(
+        'Upload Successful',
+        `${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully.`,
+        6000
+      );
+    }
+    
+    console.log('Files uploaded to section:', subject, files);
   };
 
   const handleEditUploadedDocument = (file: File) => {
@@ -245,6 +204,15 @@ export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults }: ISO2P
     console.log('Document approved:', documentId);
     alert(`Document "${selectedDocument?.title}" has been approved`);
   };
+
+  const handleCardUpload = (sectionTitle: string) => {
+    setUploadSubject(sectionTitle);
+    setUploadModalOpen(true);
+  };
+
+  // Calculate dynamic counts
+  const recentlyVisitedCount = 0; // TODO: Track document views
+  const pendingApprovalCount = iso2Sections.reduce((count, section) => count + section.documents.length, 0);
 
   // Filter sections based on search query
   const filteredSections = iso2Sections.filter(section =>
@@ -301,9 +269,11 @@ export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults }: ISO2P
                           <Clock className="w-4 h-4" />
                           <span>Recently Visited</span>
                         </div>
-                        <span className="text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-2 py-1 rounded-full">
-                          12
-                        </span>
+                        {recentlyVisitedCount > 0 && (
+                          <span className="text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-2 py-1 rounded-full">
+                            {recentlyVisitedCount}
+                          </span>
+                        )}
                       </button>
                       <button
                         onClick={() => {
@@ -316,9 +286,11 @@ export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults }: ISO2P
                           <CheckCircle className="w-4 h-4" />
                           <span>Pending for Approval</span>
                         </div>
-                        <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-2 py-1 rounded-full">
-                          5
-                        </span>
+                        {pendingApprovalCount > 0 && (
+                          <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-2 py-1 rounded-full">
+                            {pendingApprovalCount}
+                          </span>
+                        )}
                       </button>
                     </div>
                   </motion.div>
@@ -342,7 +314,10 @@ export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults }: ISO2P
             </div>
             
             <motion.button
-              onClick={() => setUploadModalOpen(true)}
+              onClick={() => {
+                setUploadSubject('');
+                setUploadModalOpen(true);
+              }}
               className="glass-button-secondary"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -383,8 +358,10 @@ export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults }: ISO2P
             >
               <ISO2Card
                 section={section}
-                onShowAll={() => onNavigateToDocsDB()}
+                onShowAll={() => onNavigateToDocsDB(section.title)}
                 onDocumentClick={handleDocumentClick}
+                onUpload={handleCardUpload}
+                onCardClick={(sectionTitle) => onNavigateToDocsDB(sectionTitle)}
               />
             </motion.div>
           ))}
@@ -433,9 +410,14 @@ export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults }: ISO2P
 
       <UploadModal
         isOpen={uploadModalOpen}
-        onClose={() => setUploadModalOpen(false)}
+        onClose={() => {
+          setUploadModalOpen(false);
+          setUploadSubject('');
+        }}
         onUploadComplete={handleUploadComplete}
         onEditDocument={handleEditUploadedDocument}
+        initialSubject={uploadSubject}
+        iso2Sections={iso2Sections}
       />
 
       <Toaster

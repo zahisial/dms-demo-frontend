@@ -173,9 +173,9 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
     return (
       <div className="relative group">
         {children}
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded shadow-lg whitespace-nowrap z-50">
+        <div className="absolute bottom-full left-1/2 z-50 px-2 py-1 mb-2 text-xs text-white whitespace-nowrap bg-gray-900 rounded shadow-lg transform -translate-x-1/2">
           {text}
-          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+          <div className="absolute top-full left-1/2 border-4 border-transparent transform -translate-x-1/2 border-t-gray-900"></div>
         </div>
       </div>
     );
@@ -189,20 +189,20 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
   ];
   
   const tabs = user?.role === 'employee' ? [allTabs[0]] : allTabs;
-
+// Info Tab
   const renderInfoTab = () => (
     <div className="space-y-6">
       {/* Description */}
       <div>
-        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</h4>
-        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+        <h4 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Description</h4>
+        <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
           {document.description || "Security best practices for API development and integration."}
         </p>
       </div>
 
       {/* Tags */}
       <div>
-        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</h4>
+        <h4 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Tags</h4>
         <div className="flex flex-wrap gap-2">
           {document.tags.map((tag, index) => (
             <motion.button
@@ -212,7 +212,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Tag className="w-3 h-3 mr-1" />
+              <Tag className="mr-1 w-3 h-3" />
               {tag}
             </motion.button>
           ))}
@@ -221,7 +221,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
 
       {/* Document Details */}
       <div>
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex justify-between items-center mb-3">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Document Details</h4>
           <span 
             className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(document.status)}`}
@@ -242,7 +242,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
           </div>
           <div className="flex justify-between items-start py-2 border-b border-gray-100 dark:border-gray-700">
             <span className="text-sm text-gray-600 dark:text-gray-400">Subject:</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white text-right">
+            <span className="text-sm font-medium text-right text-gray-900 dark:text-white">
               {document.department}
             </span>
           </div>
@@ -283,9 +283,9 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
       {/* Approver - Only visible to managers and admins */}
       {(user?.role === 'manager' || user?.role === 'admin') && (
         <div>
-          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Approver</h4>
+          <h4 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Approver</h4>
           {document.approver ? (
-            <div className="flex items-center space-x-3 p-3 bg-white dark:bg-gray-700 rounded-lg">
+            <div className="flex items-center p-3 space-x-3 bg-white rounded-lg dark:bg-gray-700">
               <div className="relative">
                 <img
                   src={document.approver.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(document.approver.name)}&background=6366f1&color=fff&size=40`}
@@ -296,7 +296,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
                     e.currentTarget.nextElementSibling?.classList.remove('hidden');
                   }}
                 />
-                <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-sm font-medium text-primary-600 dark:text-primary-400 border-2 border-white dark:border-gray-800 hidden">
+                <div className="flex hidden justify-center items-center w-10 h-10 text-sm font-medium rounded-full border-2 border-white bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 dark:border-gray-800">
                   {document.approver.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                 </div>
               </div>
@@ -313,7 +313,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
               </div>
             </div>
           ) : (
-            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="p-3 bg-gray-50 rounded-lg dark:bg-gray-800">
               <p className="text-sm text-gray-500 dark:text-gray-400">No approver assigned</p>
             </div>
           )}
@@ -322,10 +322,10 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
 
       {/* Acknowledgment Section - Only for employees */}
       {user?.role === 'employee' && (
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-          <div className="items-center justify-between">
-            <div className='w-full pb-4'>
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Document Acknowledgment</h4>
+        <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="justify-between items-center">
+            <div className='pb-4 w-full'>
+              <h4 className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Document Acknowledgment</h4>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Please acknowledge that you have read and understood this document
               </p>
@@ -335,8 +335,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
               disabled={acknowledged}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
                 acknowledged
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 cursor-not-allowed'
-                  : 'bg-primary-600 hover:bg-primary-700 text-white hover:shadow-lg'
+                  ? 'text-green-700 bg-green-100 cursor-not-allowed dark:bg-green-900/30 dark:text-green-400'
+                  : 'text-white bg-primary-600 hover:bg-primary-700 hover:shadow-lg'
               }`}
               whileHover={!acknowledged ? { scale: 1.05 } : {}}
               whileTap={!acknowledged ? { scale: 0.95 } : {}}
@@ -358,12 +358,12 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
       )}
     </div>
   );
-
+// Activity Tab
   const renderActivityTab = () => (
     <div className="space-y-4">
-      <div className="text-center py-8">
-        <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Activity Feed</h3>
+      <div className="py-8 text-center">
+        <Activity className="mx-auto mb-4 w-12 h-12 text-gray-400" />
+        <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">Activity Feed</h3>
         <p className="text-gray-500 dark:text-gray-400">
           Document activity and changes will be displayed here
         </p>
@@ -371,8 +371,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
       
       {/* Mock activity items */}
       <div className="space-y-3">
-        <div className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-          <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center">
+        <div className="flex items-start p-3 space-x-3 bg-gray-50 rounded-lg dark:bg-gray-700">
+          <div className="flex justify-center items-center w-8 h-8 bg-gray-100 rounded-full dark:bg-gray-900/30">
             <CheckCircle className="w-4 h-4 text-gray-600 dark:text-gray-400" />
           </div>
           <div className="flex-1">
@@ -381,8 +381,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
           </div>
         </div>
         
-        <div className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-          <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center">
+        <div className="flex items-start p-3 space-x-3 bg-gray-50 rounded-lg dark:bg-gray-700">
+          <div className="flex justify-center items-center w-8 h-8 bg-gray-100 rounded-full dark:bg-gray-900/30">
             <Edit className="w-4 h-4 text-gray-600 dark:text-gray-400" />
           </div>
           <div className="flex-1">
@@ -391,8 +391,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
           </div>
         </div>
         
-        <div className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-          <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center">
+        <div className="flex items-start p-3 space-x-3 bg-gray-50 rounded-lg dark:bg-gray-700">
+          <div className="flex justify-center items-center w-8 h-8 bg-gray-100 rounded-full dark:bg-gray-900/30">
             <File className="w-4 h-4 text-gray-600 dark:text-gray-400" />
           </div>
           <div className="flex-1">
@@ -403,12 +403,12 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
       </div>
     </div>
   );
-
+// Version Tab
   const renderVersionTab = () => (
     <div className="space-y-4">
-      <div className="text-center py-8">
-        <GitBranch className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Version History</h3>
+      <div className="py-8 text-center">
+        <GitBranch className="mx-auto mb-4 w-12 h-12 text-gray-400" />
+        <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">Version History</h3>
         <p className="text-gray-500 dark:text-gray-400">
           Document versions and revision history
         </p>
@@ -416,9 +416,9 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
       
       {/* Mock version items */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-800">
+        <div className="flex justify-between items-center p-3 rounded-lg border bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+            <div className="flex justify-center items-center w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30">
               <CheckCircle className="w-4 h-4 text-primary-600 dark:text-primary-400" />
             </div>
             <div>
@@ -429,9 +429,9 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
           <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(document.uploadedAt)}</span>
         </div>
         
-        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg dark:bg-gray-700">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+            <div className="flex justify-center items-center w-8 h-8 bg-gray-100 rounded-full dark:bg-gray-600">
               <File className="w-4 h-4 text-gray-600 dark:text-gray-400" />
             </div>
             <div>
@@ -442,9 +442,9 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
           <span className="text-xs text-gray-500 dark:text-gray-400">15-01-2024 14:30</span>
         </div>
         
-        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg dark:bg-gray-700">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+            <div className="flex justify-center items-center w-8 h-8 bg-gray-100 rounded-full dark:bg-gray-600">
               <File className="w-4 h-4 text-gray-600 dark:text-gray-400" />
             </div>
             <div>
@@ -461,14 +461,14 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="overflow-y-auto fixed inset-0 z-50">
           <div className="flex min-h-screen">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+              className="fixed inset-0 backdrop-blur-sm bg-black/50"
               onClick={onClose}
             />
 
@@ -477,10 +477,10 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
-              className="relative flex-1 flex flex-col bg-white dark:bg-gray-900"
+              className="flex relative flex-col flex-1 bg-white dark:bg-gray-900"
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-3">
                     <FileText className="w-8 h-8 text-gray-500" />
@@ -562,7 +562,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
                                   onMouseEnter={() => setShowTooltip('delete')}
                                   onMouseLeave={() => setShowTooltip(null)}
                                   onClick={handleDelete}
-                                  className="glass-button-icon text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                  className="text-red-600 glass-button-icon hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
                                 >
@@ -622,7 +622,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
                           {user?.role === 'employee' && acknowledged && (
                             <Tooltip text="Acknowledged Document" show={showTooltip === 'acknowledged'}>
                             <motion.div
-                              className="flex items-center space-x-2 px-3 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg"
+                              className="flex items-center px-3 py-2 space-x-2 text-green-700 bg-green-100 rounded-lg dark:bg-green-900/30 dark:text-green-400"
                               initial={{ opacity: 0, scale: 0.8 }}
                               animate={{ opacity: 1, scale: 1 }}
                             >
@@ -644,7 +644,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
                           <Tooltip text="Close Document Preview" show={showTooltip === 'close'}>
                           <motion.button
                             onClick={onClose}
-                            className="p-2 glass-button-icon hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                            className="p-2 rounded-lg transition-colors glass-button-icon hover:bg-gray-100 dark:hover:bg-gray-700"
                           >
                             <X className="w-5 h-5 text-red-500 dark:text-red-400" />
                           </motion.button>
@@ -653,14 +653,14 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
               </div>
 
               {/* Content Area */}
-              <div className="flex-1 flex">
+              <div className="flex flex-1">
                 {/* Document Preview */}
-                <div className="flex-1 p-6 relative">
+                <div className="relative flex-1 p-6">
 
-                  <div className="h-full bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                  <div className="flex justify-center items-center h-full bg-gray-50 rounded-lg dark:bg-gray-800">
                     <div className="text-center">
-                      <FileText className="w-24 h-24 stroke-1 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                      <FileText className="mx-auto mb-4 w-24 h-24 text-gray-400 stroke-1" />
+                      <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
                         Document Preview
                       </h3>
                       <p className="text-gray-500 dark:text-gray-400">
@@ -671,10 +671,10 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
                 </div>
 
                 {/* Toggle Button - Centered between panels */}
-                <div className="flex items-center justify-center border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800" onClick={() => setIsInfoPanelVisible(!isInfoPanelVisible)}>
+                <div className="flex justify-center items-center bg-gray-50 border-l border-gray-200 dark:border-gray-700 dark:bg-gray-800" onClick={() => setIsInfoPanelVisible(!isInfoPanelVisible)}>
                   <motion.button
                     
-                    className="p-2 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                    className="p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-600"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     title={isInfoPanelVisible ? "Hide Info Panel" : "Show Info Panel"}
@@ -695,7 +695,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
                       animate={{ width: 384, opacity: 1 }}
                       exit={{ width: 0, opacity: 0 }}
                       transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className="border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 overflow-hidden"
+                      className="overflow-hidden bg-gray-50 border-l border-gray-200 dark:border-gray-700 dark:bg-gray-800"
                     >
                   {/* Tab Navigation */}
                   <div className="border-b border-gray-200 dark:border-gray-700">
@@ -721,7 +721,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
                   </div>
 
                   {/* Tab Content */}
-                  <div className="p-6 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+                  <div className="overflow-y-auto p-6" style={{ maxHeight: 'calc(100vh - 200px)' }}>
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={activeTab}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { mockISO9000Sections, type ISO9000Section, type ISO9000Document } from '../data/mockData';
 import { 
   Plus, 
   MoreHorizontal, 
@@ -58,14 +59,6 @@ import Toaster, { useToaster } from './Toaster';
 import SearchBar from './SearchBar';
 import { mockDocuments } from '../data/mockData';
 
-interface ISO9000Document {
-  id: string;
-  title: string;
-  type: string;
-  url: string;
-  securityLevel: 'Public' | 'Restricted' | 'Confidential' | 'Top Secret';
-}
-
 interface Document {
   id: string;
   title: string;
@@ -89,21 +82,15 @@ interface Document {
   description?: string;
 }
 
-interface ISO9000Section {
-  id: string;
-  title: string;
-  color: string;
-  icon: React.ComponentType<any>;
-  documents: ISO9000Document[];
-}
-
 interface ISO9000PageProps {
-  onNavigateToDocsDB: () => void;
+  onNavigateToDocsDB: (subjectTitle?: string) => void;
   onNavigateToPendingApprovals?: () => void;
   onShowAllResults?: (query: string) => void;
+  sections?: ISO9000Section[];
+  onUpdateSections?: (sections: ISO9000Section[]) => void;
 }
 
-export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApprovals, onShowAllResults }: ISO9000PageProps) {
+export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApprovals, onShowAllResults, sections: propSections, onUpdateSections }: ISO9000PageProps) {
   const [newCardModalOpen, setNewCardModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -112,6 +99,7 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [uploadSubject, setUploadSubject] = useState<string>('');
   const { toasts, removeToast, showSuccess } = useToaster();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -132,122 +120,16 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
     };
   }, [showDropdown]);
   
-  // State for ISO9000 sections with random document counts
-  const [iso9000Sections, setIso9000Sections] = useState<ISO9000Section[]>([
-    {
-      id: '1',
-      title: 'Quality Management System',
-      color: '#08bed5', // Primary bright accent
-      icon: Award,
-      documents: [
-        { id: '1', title: 'Quality Policy', type: 'Policy', url: '#', securityLevel: 'Public' },
-        { id: '2', title: 'Quality Objectives', type: 'Document', url: '#', securityLevel: 'Restricted' },
-        { id: '3', title: 'Management Review', type: 'Procedure', url: '#', securityLevel: 'Confidential' },
-        { id: '4', title: 'Quality Manual', type: 'Manual', url: '#', securityLevel: 'Public' },
-        { id: '5', title: 'Process Mapping', type: 'Diagram', url: '#', securityLevel: 'Restricted' },
-        { id: '6', title: 'Risk Assessment', type: 'Assessment', url: '#', securityLevel: 'Confidential' },
-        { id: '7', title: 'Corrective Actions', type: 'Procedure', url: '#', securityLevel: 'Public' }
-      ]
-    },
-    {
-      id: '2',
-      title: 'Document Control',
-      color: '#03778d', // Primary dark accent
-      icon: FileText,
-      documents: [
-        { id: '8', title: 'Document Control Procedure', type: 'SOP', url: '#', securityLevel: 'Public' },
-        { id: '9', title: 'Document Approval Matrix', type: 'Matrix', url: '#', securityLevel: 'Restricted' },
-        { id: '10', title: 'Version Control', type: 'Guideline', url: '#', securityLevel: 'Public' },
-        { id: '11', title: 'Document Retention', type: 'Policy', url: '#', securityLevel: 'Confidential' },
-        { id: '12', title: 'Access Control', type: 'Procedure', url: '#', securityLevel: 'Top Secret' },
-        { id: '13', title: 'Document Templates', type: 'Template', url: '#', securityLevel: 'Public' },
-        { id: '14', title: 'Review Schedule', type: 'Calendar', url: '#', securityLevel: 'Restricted' },
-        { id: '15', title: 'Distribution List', type: 'List', url: '#', securityLevel: 'Confidential' }
-      ]
-    },
-    {
-      id: '3',
-      title: 'Internal Audits',
-      color: '#08bed5', // Primary bright accent
-      icon: Shield,
-      documents: [
-        { id: '16', title: 'Audit Program', type: 'Program', url: '#', securityLevel: 'Restricted' },
-        { id: '17', title: 'Audit Checklist', type: 'Checklist', url: '#', securityLevel: 'Public' },
-        { id: '18', title: 'Audit Schedule', type: 'Schedule', url: '#', securityLevel: 'Restricted' },
-        { id: '19', title: 'Non-conformity Report', type: 'Report', url: '#', securityLevel: 'Confidential' }
-      ]
-    },
-    {
-      id: '4',
-      title: 'Training & Competence',
-      color: '#03778d', // Primary dark accent
-      icon: Users,
-      documents: [
-        { id: '20', title: 'Training Matrix', type: 'Matrix', url: '#', securityLevel: 'Public' },
-        { id: '21', title: 'Competence Assessment', type: 'Assessment', url: '#', securityLevel: 'Restricted' },
-        { id: '22', title: 'Training Records', type: 'Record', url: '#', securityLevel: 'Confidential' },
-        { id: '23', title: 'Training Materials', type: 'Material', url: '#', securityLevel: 'Public' },
-        { id: '24', title: 'Certification Program', type: 'Program', url: '#', securityLevel: 'Restricted' },
-        { id: '25', title: 'Skills Development', type: 'Plan', url: '#', securityLevel: 'Confidential' },
-        { id: '26', title: 'Performance Evaluation', type: 'Evaluation', url: '#', securityLevel: 'Top Secret' },
-        { id: '27', title: 'Training Effectiveness', type: 'Report', url: '#', securityLevel: 'Restricted' },
-        { id: '28', title: 'Continuous Learning', type: 'Policy', url: '#', securityLevel: 'Public' }
-      ]
-    },
-    {
-      id: '5',
-      title: 'Customer Satisfaction',
-      color: '#08bed5', // Primary bright accent
-      icon: Heart,
-      documents: [
-        { id: '29', title: 'Customer Feedback', type: 'Survey', url: '#', securityLevel: 'Public' },
-        { id: '30', title: 'Complaint Handling', type: 'Procedure', url: '#', securityLevel: 'Restricted' },
-        { id: '31', title: 'Service Level Agreement', type: 'SLA', url: '#', securityLevel: 'Confidential' }
-      ]
-    },
-    {
-      id: '6',
-      title: 'Continuous Improvement',
-      color: '#03778d', // Primary dark accent
-      icon: TrendingUp,
-      documents: [
-        { id: '32', title: 'Improvement Projects', type: 'Project', url: '#', securityLevel: 'Public' },
-        { id: '33', title: 'KPI Dashboard', type: 'Dashboard', url: '#', securityLevel: 'Restricted' },
-        { id: '34', title: 'Performance Metrics', type: 'Metrics', url: '#', securityLevel: 'Confidential' },
-        { id: '35', title: 'Benchmarking', type: 'Study', url: '#', securityLevel: 'Top Secret' },
-        { id: '36', title: 'Innovation Process', type: 'Process', url: '#', securityLevel: 'Restricted' },
-        { id: '37', title: 'Best Practices', type: 'Guide', url: '#', securityLevel: 'Public' }
-      ]
-    },
-    {
-      id: '7',
-      title: 'Risk Management',
-      color: '#08bed5', // Primary bright accent
-      icon: Shield,
-      documents: [
-        { id: '38', title: 'Risk Assessment Matrix', type: 'Matrix', url: '#', securityLevel: 'Confidential' },
-        { id: '39', title: 'Risk Mitigation Plan', type: 'Plan', url: '#', securityLevel: 'Restricted' },
-        { id: '40', title: 'Business Continuity', type: 'Procedure', url: '#', securityLevel: 'Top Secret' },
-        { id: '41', title: 'Emergency Response', type: 'Protocol', url: '#', securityLevel: 'Confidential' },
-        { id: '42', title: 'Risk Register', type: 'Register', url: '#', securityLevel: 'Restricted' }
-      ]
-    },
-    {
-      id: '8',
-      title: 'Process Management',
-      color: '#03778d', // Primary dark accent
-      icon: FileText,
-      documents: [
-        { id: '43', title: 'Process Documentation', type: 'SOP', url: '#', securityLevel: 'Public' },
-        { id: '44', title: 'Process Flow Charts', type: 'Diagram', url: '#', securityLevel: 'Public' },
-        { id: '45', title: 'Process Optimization', type: 'Report', url: '#', securityLevel: 'Restricted' },
-        { id: '46', title: 'Process KPIs', type: 'Metrics', url: '#', securityLevel: 'Confidential' },
-        { id: '47', title: 'Process Ownership', type: 'Matrix', url: '#', securityLevel: 'Restricted' },
-        { id: '48', title: 'Process Review', type: 'Procedure', url: '#', securityLevel: 'Public' },
-        { id: '49', title: 'Standard Operating Procedures', type: 'SOP', url: '#', securityLevel: 'Public' }
-      ]
+  // Use centralized ISO9000 sections data from props or local state
+  const [localSections, setLocalSections] = useState<ISO9000Section[]>(mockISO9000Sections);
+  const iso9000Sections = propSections || localSections;
+  const setIso9000Sections = onUpdateSections || ((sections: ISO9000Section[] | ((prev: ISO9000Section[]) => ISO9000Section[])) => {
+    if (typeof sections === 'function') {
+      setLocalSections(sections);
+    } else {
+      setLocalSections(sections);
     }
-  ]);
+  });
 
   const handleAddNewCard = (card: { title: string; color: string; icon: string }) => {
     // Import the icon component dynamically based on the icon name
@@ -336,15 +218,49 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
   };
 
   const handleUploadComplete = (files: File[], subject: string) => {
-    // Show success notification
-    showSuccess(
-      'Upload Successful',
-      `${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully to ${subject}. Click the edit icon to modify document details.`,
-      6000
-    );
+    // Find the section that matches the subject
+    const targetSection = iso9000Sections.find(section => section.title === subject);
     
-    // Here you would typically add the uploaded files to your document list
-    console.log('Files uploaded:', files);
+    if (targetSection) {
+      // Create new documents from uploaded files
+      const newDocuments: ISO9000Document[] = files.map((file, index) => ({
+        id: `uploaded-${Date.now()}-${index}`,
+        title: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
+        type: 'Uploaded Document',
+        url: URL.createObjectURL(file), // Create temporary URL for preview
+        securityLevel: 'Public' as const,
+        uploadedAt: new Date().toISOString(),
+        uploadedBy: 'Current User', // You can get this from user context
+        fileSize: file.size,
+        fileType: file.type.split('/')[1] || 'unknown'
+      }));
+
+      // Update the section with new documents
+      const updatedSections = iso9000Sections.map(section => 
+        section.id === targetSection.id 
+          ? { ...section, documents: [...section.documents, ...newDocuments] }
+          : section
+      );
+
+      // Update the sections state
+      setIso9000Sections(updatedSections);
+
+      // Show success notification
+      showSuccess(
+        'Upload Successful',
+        `${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully to ${subject}. Documents are now visible in the card.`,
+        6000
+      );
+    } else {
+      // Fallback if section not found
+      showSuccess(
+        'Upload Successful',
+        `${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully.`,
+        6000
+      );
+    }
+    
+    console.log('Files uploaded to section:', subject, files);
   };
 
   const handleEditUploadedDocument = (file: File) => {
@@ -389,7 +305,18 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
     alert(`Document "${selectedDocument?.title}" has been approved`);
   };
 
+  const handleCardUpload = (sectionTitle: string) => {
+    setUploadSubject(sectionTitle);
+    setUploadModalOpen(true);
+  };
+
   // Filter sections based on search query
+  // Calculate dynamic counts
+  const recentlyVisitedCount = 0; // TODO: Track document views
+  const pendingApprovalCount = iso9000Sections.reduce((count, section) => {
+    return count + section.documents.filter(doc => doc.securityLevel === 'Top Secret' || doc.securityLevel === 'Confidential').length;
+  }, 0);
+
   const filteredSections = iso9000Sections.filter(section =>
     section.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     section.documents.some(doc => 
@@ -398,7 +325,7 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
   );
 
   return (
-    <div className="max-w-8xl mx-auto px-4 lg:px-8 py-8">
+    <div className="px-4 py-8 mx-auto max-w-8xl lg:px-8">
       {/* Header Section */}
       <motion.div 
         className="mb-8"
@@ -406,9 +333,9 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-4">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-white opacity-0">
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
               ISO
             </h1>
           </div>
@@ -432,22 +359,24 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute top-full right-0 mt-2 w-60 glass-panel rounded-lg shadow-lg z-50"
+                    className="absolute right-0 top-full z-50 mt-2 w-60 rounded-lg shadow-lg glass-panel"
                   >
                     <div className="py-2">
                       <button
                         onClick={() => {
                           setShowDropdown(false);
                         }}
-                        className="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        className="flex justify-between items-center px-4 py-2 w-full text-sm text-gray-700 transition-colors dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
                         <div className="flex items-center space-x-3">
                           <Clock className="w-4 h-4" />
                           <span>Recently Visited</span>
                         </div>
-                        <span className="text-xs font-bold bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full">
-                          6
+                        {recentlyVisitedCount > 0 && (
+                        <span className="px-2 py-1 text-xs font-bold text-gray-600 bg-gray-100 rounded-full dark:bg-gray-900/30 dark:text-gray-400">
+                            {recentlyVisitedCount}
                         </span>
+                        )}
                       </button>
                       <button
                         onClick={() => {
@@ -456,15 +385,17 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
                             onNavigateToPendingApprovals();
                           }
                         }}
-                        className="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        className="flex justify-between items-center px-4 py-2 w-full text-sm text-gray-700 transition-colors dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
-                        <div className="flex items-center text-left space-x-3">
+                        <div className="flex items-center space-x-3 text-left">
                           <CheckCircle className="w-4 h-4" />
                           <span>Pending for Approval</span>
                         </div>
-                        <span className="text-xs font-bold  bg-gray-100 dark:bg-red-900/30 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full">
-                          2
+                        {pendingApprovalCount > 0 && (
+                        <span className="px-2 py-1 text-xs font-bold text-gray-600 bg-gray-100 rounded-full dark:bg-red-900/30 dark:text-gray-400">
+                            {pendingApprovalCount}
                         </span>
+                        )}
                       </button>
                     </div>
                   </motion.div>
@@ -473,7 +404,10 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
             </div>
             
             <motion.button
-              onClick={() => setUploadModalOpen(true)}
+              onClick={() => {
+                setUploadSubject('');
+                setUploadModalOpen(true);
+              }}
               className="glass-button-secondary"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -510,8 +444,9 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
       </motion.div>
 
       {/* ISO9000 Cards Grid */}
+      {/* {console.log(JSON.stringify(filteredSections))} */}
       <motion.div 
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+        className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.4 }}
@@ -527,8 +462,10 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
             >
               <ISO9000Card
                 section={section}
-                onShowAll={() => onNavigateToDocsDB()}
+                onShowAll={() => onNavigateToDocsDB(section.title)}
                 onDocumentClick={handleDocumentClick}
+                onUpload={handleCardUpload}
+                onCardClick={(sectionTitle) => onNavigateToDocsDB(sectionTitle)}
               />
             </motion.div>
           ))}
@@ -577,9 +514,14 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
 
       <UploadModal
         isOpen={uploadModalOpen}
-        onClose={() => setUploadModalOpen(false)}
+        onClose={() => {
+          setUploadModalOpen(false);
+          setUploadSubject('');
+        }}
         onUploadComplete={handleUploadComplete}
         onEditDocument={handleEditUploadedDocument}
+        initialSubject={uploadSubject}
+        iso9000Sections={iso9000Sections}
       />
 
       <Toaster
@@ -587,5 +529,6 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
         onRemove={removeToast}
       />
     </div>
+    
   );
 }
