@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -113,6 +113,24 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const { toasts, removeToast, showSuccess } = useToaster();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
   
   // State for ISO9000 sections with random document counts
   const [iso9000Sections, setIso9000Sections] = useState<ISO9000Section[]>([
@@ -397,7 +415,7 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
           
           <div className="flex items-center space-x-3">
             {/* 3 Dots Menu */}
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <motion.button
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="glass-button-icon"

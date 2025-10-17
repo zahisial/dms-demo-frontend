@@ -178,24 +178,24 @@ export default function NewCardModal({ isOpen, onClose, onAdd }: NewCardModalPro
                 </div>
                 <button
                   onClick={handleClose}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  className="p-2 glass-button-icon hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
-                  <X className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  <X className="w-4 h-4 text-red-500 dark:text-red-400" />
                 </button>
               </div>
 
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Card Title */}
+                {/* Subject Title */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Card Title
+                  Subject Title
                   </label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Enter card title..."
+                    placeholder="Enter subject title..."
                     className="glass-input w-full"
                     required
                     autoFocus
@@ -236,7 +236,7 @@ export default function NewCardModal({ isOpen, onClose, onAdd }: NewCardModalPro
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                     <div className="flex items-center space-x-2">
                       <FileText className="w-4 h-4" />
-                      <span>Card Icon</span>
+                      <span>Subject Icon</span>
                     </div>
                   </label>
                   <div className="grid grid-cols-8 gap-2 max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-3 bg-gray-50 dark:bg-gray-800">
@@ -284,7 +284,7 @@ export default function NewCardModal({ isOpen, onClose, onAdd }: NewCardModalPro
                       })()}
                       <div>
                         <h4 className="font-bold text-gray-800 dark:text-white text-lg">
-                          {title || 'Card Title'}
+                          {title || 'Subject Title'}
                         </h4>
                         <p className="text-xs text-gray-600 dark:text-white/60 mt-1">
                           0 documents
@@ -309,7 +309,7 @@ export default function NewCardModal({ isOpen, onClose, onAdd }: NewCardModalPro
                     disabled={!title.trim()}
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Add Card</span>
+                    <span>Add Subject</span>
                   </button>
                 </div>
               </form>

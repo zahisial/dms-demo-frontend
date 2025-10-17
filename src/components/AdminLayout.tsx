@@ -78,7 +78,7 @@ export default function AdminLayout({
   // Filter sidebar items based on user role
   const allSidebarItems = [
     { id: 'docsdb' as AdminView, label: 'Documents', icon: 'icon_db.png', roles: ['admin', 'manager', 'employee'] },
-    { id: 'iso9000' as AdminView, label: 'ISO9000', icon: 'icon_iso.png', roles: ['admin', 'manager', 'employee'] },
+    { id: 'iso9000' as AdminView, label: 'ISO9001', icon: 'icon_iso.png', roles: ['admin', 'manager', 'employee'] },
     { id: 'ce' as AdminView, label: 'CE', icon: 'icon_cs.png', roles: ['admin', 'manager', 'employee'] },
   ];
   

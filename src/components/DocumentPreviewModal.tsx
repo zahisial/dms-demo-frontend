@@ -586,7 +586,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
                               )}
 
                               {/* Copy Link Button */}
-                              <Tooltip text="Copy Link" show={showTooltip === 'share'}>
+                              <Tooltip text="Copy Document Link" show={showTooltip === 'share'}>
                                 <motion.button
                                   onMouseEnter={() => setShowTooltip('share')}
                                   onMouseLeave={() => setShowTooltip(null)}
@@ -602,6 +602,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
                           
                           {/* Employee User Buttons */}
                           {user?.role === 'employee' && !acknowledged && (
+                            <Tooltip text="Acknowledge Document" show={showTooltip === 'acknowledge'}>
                             <motion.button
                               onClick={handleAcknowledge}
                               className="glass-button-primary"
@@ -611,10 +612,12 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
                               <UserCheck className="w-4 h-4" />
                               <span>Acknowledge</span>
                             </motion.button>
+                          </Tooltip>
                           )}
                           
                           {/* Acknowledged State - Only for employees */}
                           {user?.role === 'employee' && acknowledged && (
+                            <Tooltip text="Acknowledged Document" show={showTooltip === 'acknowledged'}>
                             <motion.div
                               className="flex items-center space-x-2 px-3 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg"
                               initial={{ opacity: 0, scale: 0.8 }}
@@ -623,8 +626,10 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
                               <CheckCircle className="w-4 h-4" />
                               <span className="text-sm font-medium">Acknowledged</span>
                             </motion.div>
+                            </Tooltip>
                           )}
-                          
+
+                          <Tooltip text="More Actions" show={showTooltip === 'more'}>
                           <motion.button
                             className="glass-button-icon"
                             whileHover={{ scale: 1.05 }}
@@ -632,12 +637,15 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
                           >
                             <MoreHorizontal className="w-4 h-4" />
                           </motion.button>
-                          <button
+                          </Tooltip>
+                          <Tooltip text="Close Document Preview" show={showTooltip === 'close'}>
+                          <motion.button
                             onClick={onClose}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                            className="p-2 glass-button-icon hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                           >
-                            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                          </button>
+                            <X className="w-5 h-5 text-red-500 dark:text-red-400" />
+                          </motion.button>
+                          </Tooltip>
                         </div>
               </div>
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, MoreHorizontal, Search, Clock, CheckCircle, Upload } from 'lucide-react';
 import EDCCard from './EDCCard';
@@ -63,6 +63,24 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults }: EDCPag
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const { toasts, removeToast, showSuccess } = useToaster();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
   
   // State for EDC sections with random document counts
   const [edcSections, setEdcSections] = useState<EDCSection[]>([
@@ -258,7 +276,7 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults }: EDCPag
       >
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-4">
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <div className="flex items-center space-x-3">
                 <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
                   EDC (Edarat Data Center)

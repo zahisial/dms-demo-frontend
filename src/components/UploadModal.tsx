@@ -234,7 +234,7 @@ export default function UploadModal({ isOpen, onClose, onUploadComplete, onEditD
                   whileHover={{ scale: isUploading ? 1 : 1.05 }}
                   whileTap={{ scale: isUploading ? 1 : 0.95 }}
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4 text-red-500 dark:text-red-400" />
                 </motion.button>
               </div>
 
