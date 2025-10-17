@@ -1,4 +1,6 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { X } from 'lucide-react';
 
 interface Notification {
   id: string;
@@ -34,12 +36,14 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
       <div className="glass-panel p-6 rounded-lg w-96 relative z-10">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Notifications</h2>
-          <button 
-            onClick={onClose}
-            className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-          >
-            ×
-          </button>
+          <motion.button
+                  onClick={onClose}
+                  className="glass-button-icon"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <X className="w-4 h-4 text-red-500 dark:text-red-400" />
+                </motion.button>
         </div>
         {notifications.length === 0 ? (
           <p className="text-sm text-slate-600 dark:text-slate-400">No new notifications.</p>
