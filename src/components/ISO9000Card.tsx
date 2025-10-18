@@ -54,7 +54,7 @@ export default function ISO9000Card({ section, onShowAll, onDocumentClick, onUpl
 
   return (
     <motion.div 
-      className="flex overflow-hidden relative flex-col w-full h-80 rounded-2xl border shadow-lg transition-all duration-300 group border-primary-200/30 dark:border-primary-700/30 hover:shadow-xl cursor-pointer"
+      className="flex overflow-hidden relative flex-col w-full h-96 rounded-2xl border shadow-lg transition-all duration-300 cursor-pointer group border-primary-200/30 dark:border-primary-700/30 hover:shadow-xl"
       style={{ 
         backgroundColor: backgroundColor,
         backgroundImage: `url(${backgroundImage})`,
@@ -115,7 +115,7 @@ export default function ISO9000Card({ section, onShowAll, onDocumentClick, onUpl
       </div>
 
       {/* Documents List */}
-      <div className="flex relative z-10 flex-col flex-1 justify-start px-6">
+      <div className="flex relative z-10 flex-col flex-1 justify-start px-6 mb-2 min-h-52">
         {displayedDocuments.map((document, index) => (
           <motion.div 
             key={document.id}
@@ -128,7 +128,7 @@ export default function ISO9000Card({ section, onShowAll, onDocumentClick, onUpl
               handleDocumentClick(document);
             }}
           >
-            <div className="p-2 rounded-lg border transition-all duration-200 hover:bg-white/60 dark:hover:bg-black/60 border-primary-200/30 dark:border-primary-700/30">
+            <div className="p-2 mb-2 rounded-lg border transition-all duration-200 hover:bg-white/60 dark:hover:bg-black/60 border-primary-200/30 dark:border-primary-700/30">
               <p className="text-sm font-medium text-gray-800 truncate transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 dark:text-white group-hover:underline">
                 {document.title}
               </p>

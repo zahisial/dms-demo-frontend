@@ -1,49 +1,15 @@
 import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   ArrowLeft, 
-  FileText,
-  Clock,
-  File,
-  FileSpreadsheet,
-  Check,
-  FileCheck
+  FileCheck,
+  Check
 } from 'lucide-react';
 import DocumentPreviewModal from './DocumentPreviewModal';
 import DocumentEditModal from './DocumentEditModal';
-
-interface Document {
-  id: string;
-  title: string;
-  type: string;
-  department: string;
-  uploadedBy: string;
-  uploadedAt: string;
-  fileSize: string;
-  status: 'approved' | 'pending' | 'revision';
-  tags: string[];
-  fileExtension: string;
-  isLocked?: boolean;
-  isPublic?: boolean;
-  securityLevel?: 'Public' | 'Restricted' | 'Confidential' | 'Top Secret';
-  description?: string;
-  submittedForApproval?: string;
-  approver?: {
-    id: string;
-    name: string;
-    title: string;
-    email: string;
-    avatar?: string;
-    approved?: boolean;
-  };
-  priority?: 'low' | 'medium' | 'high' | 'urgent';
-}
-
-interface User {
-  id: string;
-  name: string;
-  role: 'admin' | 'manager' | 'employee';
-}
+import UniversalDocumentsTable from './UniversalDocumentsTable';
+import { pendingApprovalsColumns } from './tableConfigs';
+import { Document, User } from '../types';
 
 interface PendingApprovalsPageProps {
   onBack: () => void;
@@ -274,38 +240,28 @@ export default function PendingApprovalsPage({ onBack, user }: PendingApprovalsP
     setEditingDocument(null);
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30';
-      case 'high': return 'text-orange-600 bg-orange-100 dark:text-orange-400 dark:bg-orange-900/30';
-      case 'medium': return 'text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/30';
-      case 'low': return 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30';
-      default: return 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-900/30';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'text-white dark:text-white';
-      case 'approved': return 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30';
-      case 'rejected': return 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30';
-      case 'revision': return 'text-orange-600 bg-orange-100 dark:text-orange-400 dark:bg-orange-900/30';
-      default: return 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-900/30';
-    }
-  };
-
-  const getFileIcon = (extension: string) => {
-    switch (extension.toLowerCase()) {
-      case 'pdf':
-        return <FileText className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
-      case 'docx':
-      case 'doc':
-        return <File className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
-      case 'xlsx':
-      case 'xls':
-        return <FileSpreadsheet className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
-      default:
-        return <File className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
+  // Custom actions renderer for pending approvals
+  const renderCustomActions = (document: Document) => {
+    if (document.approver && !document.approver.approved) {
+      return (
+        <motion.button
+          onClick={() => handleSendReminder(document.approver!)}
+          className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Send Reminder
+        </motion.button>
+      );
+    } else if (document.approver && document.approver.approved) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+          <Check className="w-3 h-3 mr-1" />
+          Approved
+        </span>
+      );
+    } else {
+      return <span className="text-sm text-gray-500 dark:text-gray-400">No action needed</span>;
     }
   };
 
@@ -354,122 +310,16 @@ export default function PendingApprovalsPage({ onBack, user }: PendingApprovalsP
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
       >
-        <div className="w-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Document
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Subject
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Submitted
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Approver
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              <AnimatePresence>
-                {filteredAndSortedDocuments.map((document, index) => (
-                  <motion.tr
-                    key={document.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors duration-200"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-3">
-                        {getFileIcon(document.fileExtension)}
-                        <div>
-                          <button
-                            onClick={() => handleView(document)}
-                            className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline transition-colors duration-200 text-left"
-                          >
-                            {document.title}
-                          </button>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {document.fileExtension} • {document.fileSize}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900 dark:text-white">
-                        {document.department}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(document.submittedForApproval || document.uploadedAt).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {document.approver ? (
-                        <div className="flex items-center space-x-3">
-                          <div className="relative">
-                            <img
-                              src={document.approver.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(document.approver.name)}&background=6366f1&color=fff&size=32`}
-                              alt={document.approver.name}
-                              className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800"
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                                e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                              }}
-                            />
-                            <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-xs font-medium text-primary-600 dark:text-primary-400 border-2 border-white dark:border-gray-800 hidden">
-                              {document.approver.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                            </div>
-                            {document.approver.approved && (
-                              <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                                <Check className="w-2.5 h-2.5 text-white" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">
-                              {document.approver.name}
-                            </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {document.approver.title}
-                            </span>
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-sm text-gray-500 dark:text-gray-400">No approver assigned</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {document.approver && !document.approver.approved ? (
-                        <motion.button
-                          onClick={() => handleSendReminder(document.approver!)}
-                          className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          Send Reminder
-                        </motion.button>
-                      ) : document.approver && document.approver.approved ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                          <Check className="w-3 h-3 mr-1" />
-                          Approved
-                        </span>
-                      ) : (
-                        <span className="text-sm text-gray-500 dark:text-gray-400">No action needed</span>
-                      )}
-                    </td>
-                  </motion.tr>
-                ))}
-              </AnimatePresence>
-            </tbody>
-          </table>
-        </div>
+        <UniversalDocumentsTable
+          documents={filteredAndSortedDocuments}
+          columns={pendingApprovalsColumns}
+          user={user}
+          showCheckbox={false}
+          showActions={true}
+          onDocumentClick={handleDocumentClick}
+          onView={handleView}
+          customActions={renderCustomActions}
+        />
       </motion.div>
 
       {/* Empty State */}

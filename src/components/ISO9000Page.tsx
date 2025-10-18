@@ -57,7 +57,10 @@ import DocumentEditModal from './DocumentEditModal';
 import UploadModal from './UploadModal';
 import Toaster, { useToaster } from './Toaster';
 import SearchBar from './SearchBar';
+import UniversalDocumentsTable from './UniversalDocumentsTable';
+import { isoCardDocumentsColumns } from './tableConfigs';
 import { mockDocuments } from '../data/mockData';
+import { ArrowLeft } from 'lucide-react';
 
 interface Document {
   id: string;
@@ -100,6 +103,8 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [uploadSubject, setUploadSubject] = useState<string>('');
+  const [selectedSection, setSelectedSection] = useState<ISO9000Section | null>(null);
+  const [showTableView, setShowTableView] = useState(false);
   const { toasts, removeToast, showSuccess } = useToaster();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -192,29 +197,46 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
     setIso9000Sections(prev => [...prev, newSection]);
   };
 
-  const handleDocumentClick = (document: ISO9000Document) => {
-    console.log('ISO9000Page: Document clicked:', document.title);
-    // Convert ISO9000Document to Document format for view
-    const viewDocument: Document = {
-      id: document.id,
-      title: document.title,
-      type: document.type as any,
+  // Convert ISO9000Document to Document format
+  const convertToDocument = (isoDoc: ISO9000Document, sectionTitle: string): Document => {
+    return {
+      id: isoDoc.id,
+      title: isoDoc.title,
+      type: isoDoc.type as any,
       fileType: 'pdf' as any,
       fileSize: '1.2 MB',
-      department: 'ISO9000 Management',
-      uploadedBy: 'System Admin',
-      uploadedAt: new Date(),
+      department: sectionTitle,
+      uploadedBy: isoDoc.uploadedBy || 'System Admin',
+      uploadedAt: isoDoc.uploadedAt ? new Date(isoDoc.uploadedAt) : new Date(),
       lastModified: new Date(),
       accessType: 'public',
       approvalStatus: 'approved',
-      tags: ['ISO9000', 'Quality', 'Management'],
-      description: `${document.title} - ISO9000 quality management document`,
-      url: '#'
+      tags: ['ISO9000', 'Quality', sectionTitle],
+      description: `${isoDoc.title} - ISO9000 quality management document`,
+      url: isoDoc.url || '#',
+      securityLevel: isoDoc.securityLevel || 'Public'
     };
+  };
+
+  const handleDocumentClick = (document: ISO9000Document) => {
+    console.log('ISO9000Page: Document clicked:', document.title);
+    const viewDocument = convertToDocument(document, selectedSection?.title || 'ISO9000 Management');
     
     console.log('ISO9000Page: Opening DocumentPreviewModal for:', viewDocument.title);
     setSelectedDocument(viewDocument);
     setPreviewModalOpen(true);
+  };
+
+  // Handle card click to show table view
+  const handleCardClick = (section: ISO9000Section) => {
+    setSelectedSection(section);
+    setShowTableView(true);
+  };
+
+  // Handle back from table view
+  const handleBackToCards = () => {
+    setShowTableView(false);
+    setSelectedSection(null);
   };
 
   const handleUploadComplete = (files: File[], subject: string) => {
@@ -443,34 +465,83 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
 
       </motion.div>
 
-      {/* ISO9000 Cards Grid */}
-      {/* {console.log(JSON.stringify(filteredSections))} */}
-      <motion.div 
-        className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-      >
-        <AnimatePresence>
-          {filteredSections.map((section, index) => (
-            <motion.div
-              key={section.id}
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: -20 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-            >
-              <ISO9000Card
-                section={section}
-                onShowAll={() => onNavigateToDocsDB(section.title)}
-                onDocumentClick={handleDocumentClick}
-                onUpload={handleCardUpload}
-                onCardClick={(sectionTitle) => onNavigateToDocsDB(sectionTitle)}
-              />
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </motion.div>
+      {/* Conditional Rendering: Cards View or Table View */}
+      {!showTableView ? (
+        <>
+          {/* ISO9000 Cards Grid */}
+          <motion.div 
+            className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <AnimatePresence>
+              {filteredSections.map((section, index) => (
+                <motion.div
+                  key={section.id}
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                >
+                  <ISO9000Card
+                    section={section}
+                    onShowAll={() => handleCardClick(section)}
+                    onDocumentClick={handleDocumentClick}
+                    onUpload={handleCardUpload}
+                    onCardClick={() => handleCardClick(section)}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        </>
+      ) : (
+        <>
+          {/* Table View for Selected Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            {/* Back Button and Section Title */}
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <motion.button
+                  onClick={handleBackToCards}
+                  className="glass-button-icon"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </motion.button>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+                    {selectedSection?.title}
+                  </h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {selectedSection?.documents.length} document{selectedSection?.documents.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Universal Table */}
+            <UniversalDocumentsTable
+              documents={selectedSection?.documents.map(doc => convertToDocument(doc, selectedSection.title)) || []}
+              columns={isoCardDocumentsColumns}
+              showCheckbox={false}
+              showActions={true}
+              onDocumentClick={(doc) => handleDocumentClick(doc as any)}
+              onView={(doc) => {
+                const viewDocument = convertToDocument(doc as any, selectedSection?.title || '');
+                setSelectedDocument(viewDocument);
+                setPreviewModalOpen(true);
+              }}
+            />
+          </motion.div>
+        </>
+      )}
 
       {/* New Card Modal */}
       <NewCardModal
