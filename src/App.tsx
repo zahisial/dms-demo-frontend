@@ -8,6 +8,7 @@ import FolderView from './components/FolderView';
 import ThemeToggle from './components/ThemeToggle';
 import { SearchFilters } from './components/SearchBar';
 import SearchResultsPage from './components/SearchResultsPage';
+import DocumentDetailPage from './components/DocumentDetailPage';
 import DocumentPreviewModal from './components/DocumentPreviewModal';
 import UploadModal from './components/UploadModal';
 import FeedbackModal from './components/FeedbackModal';
@@ -525,6 +526,16 @@ function App() {
     setSearchResultsQuery('');
   };
 
+  const handleNavigateToDocument = (document: Document) => {
+    setSelectedDocument(document);
+    setCurrentPage('document');
+  };
+
+  const handleBackFromDocument = () => {
+    setCurrentPage('search-results');
+    setSelectedDocument(null);
+  };
+
   const handleDocumentSelection = (documentId: string, selected: boolean) => {
     setSelectedDocuments(prev => {
       const newSet = new Set(prev);
@@ -728,8 +739,43 @@ function App() {
           <SearchResultsPage
             searchQuery={searchResultsQuery}
             allDocuments={documents}
-            onDocumentClick={handleDocumentClick}
+            onDocumentClick={handleNavigateToDocument}
             onBack={handleBackFromSearch}
+          />
+        </LayoutComponent>
+        <ThemeToggle />
+      </ThemeProvider>
+    );
+  }
+
+  // Render Document Detail page
+  if (currentPage === 'document' && selectedDocument) {
+    return (
+      <ThemeProvider>
+        <LayoutComponent {...layoutProps}>
+          <DocumentDetailPage
+            document={selectedDocument}
+            user={user}
+            onBack={handleBackFromDocument}
+            onEdit={(document) => {
+              setCurrentPage('search-results');
+              // Handle edit logic here
+              console.log('Edit document:', document.title);
+            }}
+            onDelete={(document) => {
+              setCurrentPage('search-results');
+              // Handle delete logic here
+              console.log('Delete document:', document.title);
+            }}
+            onDownload={(document) => {
+              console.log('Download document:', document.title);
+            }}
+            onShare={(document) => {
+              console.log('Share document:', document.title);
+            }}
+            onReminder={(document) => {
+              console.log('Send reminder for document:', document.title);
+            }}
           />
         </LayoutComponent>
         <ThemeToggle />
