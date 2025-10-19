@@ -1,58 +1,23 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { mockISO9000Sections, type ISO9000Section, type ISO9000Document } from '../data/mockData';
+import { mockCESections, type CESection, type CEDocument, mockUsers } from '../data/mockData';
 import { 
   Plus, 
   MoreHorizontal, 
-  Search, 
   Clock, 
   CheckCircle, 
   Upload, 
-  Award, 
-  FileText, 
-  Users, 
-  Shield, 
-  Heart, 
-  TrendingUp,
+  Shield,
   Check,
   Bell,
   Trash2,
-  Folder,
-  Settings,
-  Database,
-  BarChart3,
-  Calendar,
-  Mail,
-  Phone,
-  MapPin,
-  Star,
-  Zap,
-  Target,
-  Briefcase,
-  Home,
-  Building,
-  Globe,
-  Lock,
-  Key,
-  Camera,
-  Image,
-  Music,
-  Video,
   Download,
   Share2,
   Edit3,
-  Save,
-  Filter,
   Eye,
-  AlertCircle,
-  Info,
-  HelpCircle,
-  MessageCircle,
-  User,
-  Users2,
-  ArrowLeft
+  ArrowLeft,
+  ArrowRight
 } from 'lucide-react';
-import ISO9000Card from './ISO9000Card';
 import NewCardModal from './NewCardModal';
 import DocumentPreviewModal from './DocumentPreviewModal';
 import DocumentEditModal from './DocumentEditModal';
@@ -63,16 +28,16 @@ import UniversalDocumentsTable from './UniversalDocumentsTable';
 import { isoCardDocumentsColumns, isoCardDocumentsColumnsWithSubject } from './tableConfigs';
 import { mockDocuments } from '../data/mockData';
 import { Document } from '../types';
+import ISO9000Card from './ISO9000Card';
 
-interface ISO9000PageProps {
-  onNavigateToDocsDB: (subjectTitle?: string) => void;
-  onNavigateToPendingApprovals?: () => void;
+interface CEPageProps {
+  onNavigateToDocsDB?: (subjectTitle?: string) => void;
   onShowAllResults?: (query: string) => void;
-  sections?: ISO9000Section[];
-  onUpdateSections?: (sections: ISO9000Section[]) => void;
+  sections?: CESection[];
+  onUpdateSections?: (sections: CESection[]) => void;
 }
 
-export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApprovals, onShowAllResults, sections: propSections, onUpdateSections }: ISO9000PageProps) {
+export default function CEPage({ onNavigateToDocsDB, onShowAllResults, sections: propSections, onUpdateSections }: CEPageProps) {
   const [newCardModalOpen, setNewCardModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -82,7 +47,7 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [uploadSubject, setUploadSubject] = useState<string>('');
-  const [selectedSection, setSelectedSection] = useState<ISO9000Section | null>(null);
+  const [selectedSection, setSelectedSection] = useState<CESection | null>(null);
   const [showTableView, setShowTableView] = useState(false);
   const [tableViewType, setTableViewType] = useState<'section' | 'recent' | 'pending'>('section');
   const [sortBy, setSortBy] = useState('title');
@@ -109,11 +74,11 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showDropdown]);
-  
-  // Use centralized ISO9000 sections data from props or local state
-  const [localSections, setLocalSections] = useState<ISO9000Section[]>(mockISO9000Sections);
-  const iso9000Sections = propSections || localSections;
-  const setIso9000Sections = onUpdateSections || ((sections: ISO9000Section[] | ((prev: ISO9000Section[]) => ISO9000Section[])) => {
+
+  // Use centralized CE sections data from props or local state
+  const [localSections, setLocalSections] = useState<CESection[]>(mockCESections);
+  const ceSections = propSections || localSections;
+  const setCESections = onUpdateSections || ((sections: CESection[] | ((prev: CESection[]) => CESection[])) => {
     if (typeof sections === 'function') {
       setLocalSections(sections);
     } else {
@@ -122,68 +87,18 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
   });
 
   const handleAddNewCard = (card: { title: string; color: string; icon: string }) => {
-    // Import the icon component dynamically based on the icon name
-    const getIconComponent = (iconName: string) => {
-      const iconMap: { [key: string]: any } = {
-        'FileText': FileText,
-        'Folder': Folder,
-        'Users': Users,
-        'Settings': Settings,
-        'Shield': Shield,
-        'Database': Database,
-        'BarChart3': BarChart3,
-        'Calendar': Calendar,
-        'Mail': Mail,
-        'Phone': Phone,
-        'MapPin': MapPin,
-        'Clock': Clock,
-        'Star': Star,
-        'Heart': Heart,
-        'Zap': Zap,
-        'Target': Target,
-        'Award': Award,
-        'Briefcase': Briefcase,
-        'Home': Home,
-        'Building': Building,
-        'Globe': Globe,
-        'Lock': Lock,
-        'Key': Key,
-        'Camera': Camera,
-        'Image': Image,
-        'Music': Music,
-        'Video': Video,
-        'Download': Download,
-        'Upload': Upload,
-        'Share2': Share2,
-        'Edit3': Edit3,
-        'Save': Save,
-        'Search': Search,
-        'Filter': Filter,
-        'Eye': Eye,
-        'Check': Check,
-        'AlertCircle': AlertCircle,
-        'Info': Info,
-        'HelpCircle': HelpCircle,
-        'MessageCircle': MessageCircle,
-        'Bell': Bell,
-        'User': User,
-        'Users2': Users2,
-      };
-      return iconMap[iconName] || Award;
-    };
-
-    const newSection: ISO9000Section = {
+    const newSection: CESection = {
       id: Date.now().toString(),
       title: card.title,
       color: card.color,
-      icon: getIconComponent(card.icon),
+      icon: Shield, // Default icon
       documents: []
     };
-    setIso9000Sections(prev => [...prev, newSection]);
+    setCESections((prev: CESection[]) => [...prev, newSection]);
   };
 
-  const handleDocumentClick = (document: ISO9000Document | Document) => {
-    console.log('ISO9000Page: Document clicked:', document.title);
+  const handleDocumentClick = (document: CEDocument | Document) => {
+    console.log('CEPage: Document clicked:', document.title);
     // Track as recently viewed
     setRecentlyViewedDocs(prev => new Set([...prev, document.id]));
     // Documents now have full structure, use directly
@@ -209,13 +124,11 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
     e.stopPropagation();
     console.log('Downloading document:', document.title);
     alert(`Downloading "${document.title}"`);
-    // Add download logic here
   };
 
   const handleShare = (document: Document, e: React.MouseEvent) => {
     e.stopPropagation();
     console.log('Sharing document:', document.title);
-    // Copy link to clipboard
     navigator.clipboard.writeText(window.location.href + `?doc=${document.id}`);
     showSuccess('Link Copied', `Link for "${document.title}" copied to clipboard!`, 3000);
   };
@@ -225,7 +138,6 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
     if (confirm(`Are you sure you want to delete "${document.title}"?`)) {
       console.log('Deleting document:', document.title);
       showSuccess('Document Deleted', `"${document.title}" has been deleted successfully.`, 3000);
-      // Add delete logic here
     }
   };
 
@@ -284,7 +196,7 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
   };
 
   // Handle card click to show table view
-  const handleCardClick = (section: ISO9000Section) => {
+  const handleCardClick = (section: CESection) => {
     setSelectedSection(section);
     setShowTableView(true);
   };
@@ -298,11 +210,9 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
 
   // Show recently visited documents
   const handleShowRecentlyVisited = () => {
-    // If we're already in table view with a section, switch to recent view for that section
     if (showTableView && selectedSection && tableViewType === 'section') {
       setTableViewType('recent');
     } else {
-      // Otherwise show all recent documents
       setTableViewType('recent');
       setShowTableView(true);
       setSelectedSection(null);
@@ -312,11 +222,9 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
 
   // Show pending documents
   const handleShowPendingApprovals = () => {
-    // If we're already in table view with a section, switch to pending view for that section
     if (showTableView && selectedSection && tableViewType === 'section') {
       setTableViewType('pending');
     } else {
-      // Otherwise show all pending documents
       setTableViewType('pending');
       setShowTableView(true);
       setSelectedSection(null);
@@ -326,7 +234,7 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
 
   // Get all documents from all sections
   const getAllDocuments = () => {
-    return iso9000Sections.flatMap(section => 
+    return ceSections.flatMap(section => 
       section.documents.map(doc => ({
         ...doc,
         sectionTitle: section.title
@@ -334,24 +242,20 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
     );
   };
 
-  // Get recently viewed documents (last day)
+  // Get recently viewed documents
   const getRecentlyViewedDocuments = () => {
-    // If viewing from a specific section, only show that section's recent docs
     if (selectedSection && tableViewType === 'section') {
       return selectedSection.documents.filter(doc => recentlyViewedDocs.has(doc.id));
     }
-    // Otherwise show all recent docs
     const allDocs = getAllDocuments();
     return allDocs.filter(doc => recentlyViewedDocs.has(doc.id));
   };
 
   // Get pending documents
   const getPendingDocuments = () => {
-    // If viewing from a specific section, only show that section's pending docs
     if (selectedSection && tableViewType === 'section') {
       return selectedSection.documents.filter(doc => doc.approvalStatus === 'pending');
     }
-    // Otherwise show all pending docs
     const allDocs = getAllDocuments();
     return allDocs.filter(doc => doc.approvalStatus === 'pending');
   };
@@ -359,10 +263,8 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
   // Handle sorting
   const handleSort = (field: string) => {
     if (sortBy === field) {
-      // Toggle sort order if same field
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
-      // Set new field and default to ascending
       setSortBy(field);
       setSortOrder('asc');
     }
@@ -372,7 +274,6 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
   const sortedDocuments = useMemo(() => {
     let docsToSort: any[] = [];
     
-    // Determine which documents to show based on view type
     if (tableViewType === 'recent') {
       docsToSort = getRecentlyViewedDocuments();
     } else if (tableViewType === 'pending') {
@@ -409,101 +310,24 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
       
       return sortOrder === 'asc' ? comparison : -comparison;
     });
-  }, [selectedSection?.documents, sortBy, sortOrder, tableViewType, recentlyViewedDocs, iso9000Sections]);
+  }, [selectedSection?.documents, sortBy, sortOrder, tableViewType, recentlyViewedDocs, ceSections]);
 
-  const handleUploadComplete = (files: File[], subject: string) => {
-    // Find the section that matches the subject
-    const targetSection = iso9000Sections.find(section => section.title === subject);
-    
-    if (targetSection) {
-      // Create new documents with COMPLETE structure
-      const newDocuments: ISO9000Document[] = files.map((file, index) => ({
-        id: `uploaded-${Date.now()}-${index}`,
-        title: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
-        type: 'Manual',
-        fileType: file.type.split('/')[1] || 'pdf',
-        fileSize: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
-        department: targetSection.title,
-        uploadedBy: 'ISO Administrator',
-        uploadedAt: new Date(),
-        lastModified: new Date(),
-        accessType: 'public',
-        approvalStatus: 'pending',
-        tags: ['ISO9000', targetSection.title, 'Uploaded'],
-        description: `Uploaded file: ${file.name}`,
-        url: URL.createObjectURL(file), // Create temporary URL for preview
-        securityLevel: 'Public',
-        assignedTo: '4', // Assign to ISO Administrator
-        assignedDate: new Date(),
-        approver: {
-          id: '4',
-          name: 'ISO Administrator',
-          title: 'Quality Manager',
-          email: 'admini_iso@edaratgroup.com',
-          avatar: 'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1',
-          approved: false
-        }
-      }));
-
-      // Update the section with new documents
-      const updatedSections = iso9000Sections.map(section => 
-        section.id === targetSection.id 
-          ? { ...section, documents: [...section.documents, ...newDocuments] }
-          : section
-      );
-
-      // Update the sections state
-      setIso9000Sections(updatedSections);
-
-      // Show success notification
-      showSuccess(
-        'Upload Successful',
-        `${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully to ${subject}. Documents are now visible in the card.`,
-        6000
-      );
-    } else {
-      // Fallback if section not found
-      showSuccess(
-        'Upload Successful',
-        `${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully.`,
-        6000
-      );
-    }
-    
-    console.log('Files uploaded to section:', subject, files);
+  const handleCardUpload = (sectionTitle: string) => {
+    setUploadSubject(sectionTitle);
+    setUploadModalOpen(true);
   };
 
-  const handleEditUploadedDocument = (file: File) => {
-    // Convert uploaded file to Document format for editing
-    const uploadedDocument: Document = {
-      id: Math.random().toString(36).substr(2, 9),
-      title: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
-      type: file.type || 'Unknown',
-      department: 'ISO9000 Management',
-      uploadedBy: 'Current User',
-      uploadedAt: new Date().toISOString(),
-      fileSize: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
-      status: 'pending',
-      tags: [],
-      collaborators: [],
-      fileExtension: file.name.split('.').pop()?.toUpperCase() || 'Unknown',
-      description: `Uploaded file: ${file.name}`,
-      isLocked: false,
-      isPublic: false,
-      securityLevel: 'internal'
-    };
-    
-    setEditingDocument(uploadedDocument);
-    setEditModalOpen(true);
-    setUploadModalOpen(false); // Close upload modal when opening edit modal
-  };
+  // Filter sections based on search query
+  const filteredSections = ceSections.filter(section =>
+    section.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    section.documents.some(doc => 
+      doc.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  );
 
-  const handleSaveDocument = (updatedDocument: Document) => {
-    console.log('Document updated:', updatedDocument);
-    // Here you would typically update the document in your backend/database
-    setEditModalOpen(false);
-    setEditingDocument(null);
-  };
+  console.log('CEPage - Total CE Sections:', ceSections.length);
+  console.log('CEPage - Filtered Sections:', filteredSections.length);
+  console.log('CEPage - Show Table View:', showTableView);
 
   const handleAcknowledge = (documentId: string) => {
     console.log('Document acknowledged:', documentId);
@@ -515,19 +339,11 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
     alert(`Document "${selectedDocument?.title}" has been approved`);
   };
 
-  const handleCardUpload = (sectionTitle: string) => {
-    setUploadSubject(sectionTitle);
-    setUploadModalOpen(true);
+  const handleSaveDocument = (updatedDocument: Document) => {
+    console.log('Document updated:', updatedDocument);
+    setEditModalOpen(false);
+    setEditingDocument(null);
   };
-
-  // Filter sections based on search query
-
-  const filteredSections = iso9000Sections.filter(section =>
-    section.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    section.documents.some(doc => 
-      doc.title.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
 
   return (
     <div className="px-4 py-8 mx-auto max-w-8xl lg:px-8">
@@ -541,119 +357,202 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-4">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-              ISO 9001
+              CE (Cyber Security)
             </h1>
           </div>
           
-          <div className="flex items-center space-x-3">
-            {/* 3 Dots Menu */}
-            <div className="relative" ref={dropdownRef}>
-             
+          {/* Only show header buttons when sections exist */}
+          {ceSections.length > 0 && (
+            <div className="flex items-center space-x-3">
+              {/* 3 Dots Menu */}
+              <div className="relative" ref={dropdownRef}>
+                <motion.button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="glass-button-icon"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <MoreHorizontal className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                </motion.button>
+                
+                {/* Dropdown Menu */}
+                <AnimatePresence>
+                  {showDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute right-0 top-full z-50 mt-2 w-60 rounded-lg shadow-lg glass-panel"
+                    >
+                      <div className="py-2">
+                        <button
+                          onClick={handleShowRecentlyVisited}
+                          className="flex justify-between items-center px-4 py-2 w-full text-sm text-gray-700 transition-colors dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <Clock className="w-4 h-4" />
+                            <span>Recently Visited{selectedSection && showTableView ? ` - ${selectedSection.title}` : ''}</span>
+                          </div>
+                          {getRecentlyViewedDocuments().length > 0 && (
+                          <span className="px-2 py-1 text-xs font-bold text-gray-600 bg-gray-100 rounded-full dark:bg-gray-900/30 dark:text-gray-400">
+                              {getRecentlyViewedDocuments().length}
+                          </span>
+                          )}
+                        </button>
+                        <button
+                          onClick={handleShowPendingApprovals}
+                          className="flex justify-between items-center px-4 py-2 w-full text-sm text-gray-700 transition-colors dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          <div className="flex items-center space-x-3 text-left">
+                            <CheckCircle className="w-4 h-4" />
+                            <span>Pending for Approval{selectedSection && showTableView ? ` - ${selectedSection.title}` : ''}</span>
+                          </div>
+                          {getPendingDocuments().length > 0 && (
+                          <span className="px-2 py-1 text-xs font-bold text-gray-600 bg-gray-100 rounded-full dark:bg-red-900/30 dark:text-gray-400">
+                              {getPendingDocuments().length}
+                          </span>
+                          )}
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
               
-              {/* Dropdown Menu */}
-              <AnimatePresence>
-                {showDropdown && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 top-full z-50 mt-2 w-60 rounded-lg shadow-lg glass-panel"
-                  >
-                    <div className="py-2">
-                      <button
-                        onClick={handleShowRecentlyVisited}
-                        className="flex justify-between items-center px-4 py-2 w-full text-sm text-gray-700 transition-colors dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <Clock className="w-4 h-4" />
-                          <span>Recently Visited{selectedSection && showTableView ? ` - ${selectedSection.title}` : ''}</span>
-                        </div>
-                        {getRecentlyViewedDocuments().length > 0 && (
-                        <span className="px-2 py-1 text-xs font-bold text-gray-600 bg-gray-100 rounded-full dark:bg-gray-900/30 dark:text-gray-400">
-                            {getRecentlyViewedDocuments().length}
-                        </span>
-                        )}
-                      </button>
-                      <button
-                        onClick={handleShowPendingApprovals}
-                        className="flex justify-between items-center px-4 py-2 w-full text-sm text-gray-700 transition-colors dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        <div className="flex items-center space-x-3 text-left">
-                          <CheckCircle className="w-4 h-4" />
-                          <span>Pending for Approval{selectedSection && showTableView ? ` - ${selectedSection.title}` : ''}</span>
-                        </div>
-                        {getPendingDocuments().length > 0 && (
-                        <span className="px-2 py-1 text-xs font-bold text-gray-600 bg-gray-100 rounded-full dark:bg-red-900/30 dark:text-gray-400">
-                            {getPendingDocuments().length}
-                        </span>
-                        )}
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <motion.button
+                onClick={() => {
+                  setUploadSubject('');
+                  setUploadModalOpen(true);
+                }}
+                className="glass-button-secondary"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Upload className="w-4 h-4" />
+                <span>Upload New</span>
+              </motion.button>
+              
+              <motion.button
+                onClick={() => setNewCardModalOpen(true)}
+                className="glass-button-primary"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Plus className="w-4 h-4" />
+                <span>New Subject</span>
+              </motion.button>
+              
+              {/* Search Bar */}
+              <div className="w-96">
+                <SearchBar
+                  onSearch={(query) => {
+                    setSearchQuery(query);
+                  }}
+                  onShowAllResults={onShowAllResults || (() => {})}
+                  onDocumentClick={(doc) => handleDocumentClick(doc as any)}
+                  documents={mockDocuments}
+                  placeholder="Search"
+                />
+              </div>
             </div>
-            
-            <motion.button
-              onClick={() => {
-                setUploadSubject('');
-                setUploadModalOpen(true);
-              }}
-              className="glass-button-secondary"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Upload className="w-4 h-4" />
-              <span>Upload New</span>
-            </motion.button>
-            
-            <motion.button
-              onClick={() => setNewCardModalOpen(true)}
-              className="glass-button-primary"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Plus className="w-4 h-4" />
-              <span>New Subject</span>
-            </motion.button>
-            
-            {/* Search Bar */}
-            
+          )}
           </div>
-        </div>
 
       </motion.div>
 
-      {/* Conditional Rendering: Cards View or Table View */}
+      {/* Conditional Rendering: Empty State, Cards View, or Table View */}
       {!showTableView ? (
         <>
-          {/* ISO9000 Cards Grid */}
-          <motion.div 
-            className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <AnimatePresence>
-              {filteredSections.map((section, index) => (
-                <motion.div
-                  key={section.id}
-                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                >
-                  <ISO9000Card
-                    section={section}
-                    onShowAll={() => handleCardClick(section)}
-                    onDocumentClick={handleDocumentClick}
-                    onUpload={handleCardUpload}
-                    onCardClick={() => handleCardClick(section)}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
+          {/* Show Empty State if no sections */}
+          {ceSections.length === 0 ? (
+            <>
+              {/* Empty State with World-Class UX */}
+              <motion.div 
+                className="flex flex-col justify-center items-center py-20"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+              >
+                {/* Shield Icon with Primary Accent */}
+                <div className="relative mb-8">
+                  <div className="flex justify-center items-center mb-4 w-24 h-24 bg-gradient-to-br rounded-full from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/20">
+                    <Shield className="w-12 h-12 text-primary-600 dark:text-primary-400" />
+                  </div>
+                  {/* Floating accent dots */}
+                  <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full opacity-60 animate-pulse bg-primary-500"></div>
+                  <div className="absolute -bottom-1 -left-1 w-3 h-3 rounded-full opacity-40 animate-pulse bg-primary-400" style={{ animationDelay: '0.5s' }}></div>
+                </div>
+
+                {/* Main Message */}
+                <div className="mx-auto mb-8 max-w-2xl text-center">
+                  <h2 className="mb-4 text-2xl font-bold text-gray-800 dark:text-white">
+                    No Cyber Security Documents Yet
+                  </h2>
+                  <p className="mb-6 text-lg text-gray-600 dark:text-gray-400">
+                    Start building your cyber security knowledge base by uploading documents or creating new security topics.
+                  </p>
+                </div>
+
+                {/* Action Cards */}
+                <div className="gap-6 mb-8 w-full max-w-4xl">
+                  {/* Upload Card */}
+                 
+
+                  {/* Create Subject Card */}
+                  <motion.div
+                    className="justify-center p-8 text-center rounded-2xl transition-all duration-300 cursor-pointer glass-panel hover:shadow-lg group"
+                    whileHover={{ scale: 1.02, y: -4, justifyContent: 'center' }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setNewCardModalOpen(true)}
+                  >
+                    <div className="flex justify-center items-center mx-auto mb-4 w-16 h-16 bg-gradient-to-br rounded-full transition-transform duration-300 from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/20 group-hover:scale-110">
+                      <Plus className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+                    </div>
+                    <h3 className="mb-2 text-xl font-semibold text-gray-800 dark:text-white">
+                      Create New Subject
+                    </h3>
+                    <p className="mb-4 text-gray-600 dark:text-gray-400">
+                      Organize your security documents into structured topics
+                    </p>
+                    <div className="flex justify-center items-center transition-colors text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300">
+                      <span className="text-sm font-medium">Create Subject</span>
+                      <ArrowRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </motion.div>
+                </div>
+              </motion.div>
+            </>
+          ) : (
+            <>
+              {/* CE Cards Grid */}
+              <motion.div 
+                className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <AnimatePresence>
+                  {filteredSections.map((section, index) => (
+                    <motion.div
+                      key={section.id}
+                      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                      transition={{ duration: 0.4, delay: index * 0.1 }}
+                    >
+                      <ISO9000Card
+                        section={section as any}
+                        onShowAll={() => handleCardClick(section)}
+                        onDocumentClick={handleDocumentClick}
+                        onUpload={handleCardUpload}
+                        onCardClick={() => handleCardClick(section)}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            </>
+          )}
         </>
       ) : (
         <>
@@ -711,14 +610,12 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
                       </div>
                       
                       <div className="flex items-center space-x-2">
-                        {/* Check if any selected documents are pending */}
                         {(() => {
                           const selectedDocs = sortedDocuments.filter(doc => selectedDocuments.has(doc.id));
                           const hasPending = selectedDocs.some(doc => doc.approvalStatus === 'pending');
                           
                           return (
                             <>
-                              {/* Bulk Approve - only if has pending docs */}
                               {hasPending && (
                                 <motion.button
                                   onClick={handleBulkApprove}
@@ -731,7 +628,6 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
                                 </motion.button>
                               )}
 
-                              {/* Bulk Reminder - only if has pending docs */}
                               {hasPending && (
                                 <motion.button
                                   onClick={handleBulkReminder}
@@ -744,7 +640,6 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
                                 </motion.button>
                               )}
                               
-                              {/* Bulk Delete - always show for admins */}
                               <motion.button
                                 onClick={handleBulkDelete}
                                 className="text-red-600 glass-button hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
@@ -769,11 +664,11 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
               documents={sortedDocuments as Document[]}
               columns={selectedSection ? isoCardDocumentsColumns : isoCardDocumentsColumnsWithSubject}
               user={{
-                id: '4',
-                name: 'ISO Administrator',
-                email: 'admini_iso@edaratgroup.com',
+                id: '1',
+                name: 'Sarah Johnson',
+                email: 'fms-admin@edaratgroup.com',
                 role: 'admin',
-                department: 'Quality Management'
+                department: 'Information Technology'
               }}
               showCheckbox={true}
               showActions={true}
@@ -823,7 +718,7 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
           name: 'Current User',
           email: 'user@example.com',
           role: 'admin',
-          department: 'ISO9000 Management'
+          department: 'Cyber Security'
         }}
         onAcknowledge={handleAcknowledge}
         onApprove={handleApprove}
@@ -845,17 +740,64 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
           setUploadModalOpen(false);
           setUploadSubject('');
         }}
-        onUploadComplete={handleUploadComplete}
-        onEditDocument={handleEditUploadedDocument}
+        onUploadComplete={(files, subject) => {
+          const targetSection = ceSections.find(section => section.title === subject);
+          
+          if (targetSection) {
+            const newDocuments: CEDocument[] = files.map((file, index) => ({
+              id: `ce-uploaded-${Date.now()}-${index}`,
+              title: file.name.replace(/\.[^/.]+$/, ""),
+              type: 'Manual',
+              fileType: file.type.split('/')[1] || 'pdf',
+              fileSize: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+              department: targetSection.title,
+              uploadedBy: 'Sarah Johnson',
+              uploadedAt: new Date(),
+              lastModified: new Date(),
+              accessType: 'public',
+              approvalStatus: 'pending',
+              tags: ['CE', 'Cyber Security', targetSection.title],
+              description: `Uploaded file: ${file.name}`,
+              url: URL.createObjectURL(file),
+              securityLevel: 'Public',
+              assignedTo: '1',
+              assignedDate: new Date(),
+              approver: {
+                id: '1',
+                name: 'Sarah Johnson',
+                title: 'IT Administrator',
+                email: 'fms-admin@edaratgroup.com',
+                avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1',
+                approved: false
+              }
+            }));
+
+            const updatedSections = ceSections.map(section => 
+              section.id === targetSection.id 
+                ? { ...section, documents: [...section.documents, ...newDocuments] }
+                : section
+            );
+
+            setCESections(updatedSections);
+
+            showSuccess(
+              'Upload Successful', 
+              `${files.length} file${files.length > 1 ? 's' : ''} uploaded to ${subject}. Documents are now visible in the card.`, 
+              6000
+            );
+          }
+        }}
+        onEditDocument={(file) => {
+          console.log('Edit uploaded file:', file.name);
+        }}
         initialSubject={uploadSubject}
-        iso9000Sections={iso9000Sections}
+        ceSections={ceSections}
       />
 
       <Toaster
         toasts={toasts}
-        onRemove={removeToast}
+        removeToast={removeToast}
       />
     </div>
-    
   );
 }

@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Home, List, Grid, TreePine, Bell, LogOut, Globe, Server, Shield, Award, Moon, Sun, Menu, Settings, FileCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User as UserType } from '../types';
-import { getUserNotifications } from '../data/mockData';
+import { getUserNotifications, mockDocuments } from '../data/mockData';
 import NotificationPanel from './NotificationPanel';
 import ProfileSettings from './ProfileSettings';
 import AvatarImage from './AvatarImage';
 import { useTheme } from '../contexts/ThemeContext';
 import Dashboard from './Dashboard';
 import TreeExamples from './TreeExamples';
+import SearchBar from './SearchBar';
 
 interface AdminLayoutProps {
   user: UserType;
@@ -27,6 +28,7 @@ interface AdminLayoutProps {
   currentPage?: 'main' | 'iso2' | 'edc' | 'ce' | 'iso9000' | 'pending-approvals' | 'docsdb' | 'document';
   onShowAllResults?: (query: string) => void;
   onDocumentClick?: (document: any) => void;
+  totalPendingCount?: number;  // Total pending documents across all pages
 }
 
 type AdminView = 'dashboard' | 'iso' | 'edc' | 'ce' | 'iso9000' | 'docsdb' | 'tree-examples';
@@ -47,13 +49,15 @@ export default function AdminLayout({
   onNavigateToPendingApprovals,
   currentPage = 'main',
   onShowAllResults,
-  onDocumentClick
+  onDocumentClick,
+  totalPendingCount = 0
 }: AdminLayoutProps) {
   const [activeView, setActiveView] = useState<AdminView>('iso9000');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { isDark, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useState(() => getUserNotifications(user.role));
 
@@ -99,22 +103,22 @@ export default function AdminLayout({
 
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Compact Sidebar - Only for admin users */}
       <AnimatePresence>
         {user.role === 'admin' && showSidebar && (
           <motion.div 
-            className="w-16 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col"
+            className="flex flex-col w-16 bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700"
             initial={{ x: -64 }}
             animate={{ x: 0 }}
             exit={{ x: -64 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
           {/* Menu Toggle */}
-          <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-700">
+          <div className="flex justify-center items-center h-16 border-b border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setShowSidebar(false)}
-              className="w-12 h-12 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200"
+              className="flex justify-center items-center w-12 h-12 text-gray-500 rounded-lg transition-colors duration-200 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300"
               title="Hide Menu"
             >
               <Menu className="w-5 h-5" />
@@ -123,7 +127,7 @@ export default function AdminLayout({
 
         {/* Navigation */}
         <nav className="flex-1 py-4">
-          <div className="space-y-2 px-2">
+          <div className="px-2 space-y-2">
             {sidebarItems.map((item) => {
               // Map currentPage to sidebar item IDs
               const isActive = (() => {
@@ -145,8 +149,8 @@ export default function AdminLayout({
                   onClick={() => handleSidebarItemClick(item.id)}
                   className={`w-12 h-12 flex items-center justify-center transition-colors duration-200 relative group ${
                     isActive 
-                      ? 'bg-gray-200 dark:bg-primary-50 relative w-20 rounded-l-lg rounded-r-full' 
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg'
+                      ? 'relative w-20 bg-gray-200 rounded-r-full rounded-l-lg dark:bg-primary-50' 
+                      : 'rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                   title={item.label}
                 >
@@ -163,10 +167,10 @@ export default function AdminLayout({
                       e.currentTarget.nextElementSibling?.classList.remove('hidden');
                     }}
                   />
-                  <div className="w-6 h-6 bg-gray-400 rounded hidden"></div>
+                  <div className="hidden w-6 h-6 bg-gray-400 rounded"></div>
                   
                   {/* Tooltip */}
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                  <div className="absolute left-full z-50 px-2 py-1 ml-2 text-xs text-white whitespace-nowrap bg-gray-900 rounded opacity-0 transition-opacity duration-200 pointer-events-none dark:bg-gray-700 group-hover:opacity-100">
                     {item.label}
                   </div>
                 </button>
@@ -177,7 +181,7 @@ export default function AdminLayout({
 
         {/* Invisible TreeExamples Access - Cmd+Click */}
         <div 
-          className="h-8 w-full cursor-default" 
+          className="w-full h-8 cursor-default" 
           onClick={(e) => {
             if (e.metaKey || e.ctrlKey) {
               setActiveView('tree-examples');
@@ -191,39 +195,50 @@ export default function AdminLayout({
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex flex-col flex-1">
         {/* Top Header */}
-        <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-6">
+        <header className="flex items-center px-6 h-16 bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
           {/* Left side - Menu Toggle + App Logo and Name */}
           <div className="flex items-center space-x-3">
             {/* Hamburger Menu - Show only for admin users when sidebar is hidden */}
             {user.role === 'admin' && !showSidebar && (
               <button
                 onClick={() => setShowSidebar(true)}
-                className="w-10 h-10 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200"
+                className="flex justify-center items-center w-10 h-10 text-gray-500 rounded-lg transition-colors duration-200 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300"
                 title="Show Menu"
               >
                 <Menu className="w-5 h-5" />
               </button>
             )}
-            <div className="flex items-center justify-center">
+            <div className="flex justify-center items-center">
               <img 
                 src="/logo_header_dms.png" 
                 alt="Edarat DMS"
-                className="h-10 w-auto object-contain rounded-sm"
+                className="object-contain w-auto h-10 rounded-sm"
                 style={{ maxHeight: '48px' }}
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                   e.currentTarget.nextElementSibling?.classList.remove('hidden');
                 }}
               />
-              <span className="text-primary-500 text-sm font-bold hidden">E</span>
+              <span className="hidden text-sm font-bold text-primary-500">E</span>
             </div>
             
           </div>
 
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-1 justify-end items-right">
             {/* middle section */}
+            <div className="w-96">
+              <SearchBar
+                onSearch={(query, filters) => {
+                  setSearchQuery(query);
+                }}
+                onShowAllResults={onShowAllResults || (() => {})}
+                onDocumentClick={(doc) => handleDocumentClick(doc as any)}
+                documents={mockDocuments}
+                placeholder="Search"
+              />
+            </div>
           </div>
 
           {/* Right side actions */}
@@ -231,7 +246,7 @@ export default function AdminLayout({
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-md transition-colors duration-200 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              className="p-2 text-gray-500 rounded-md transition-colors duration-200 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -240,7 +255,7 @@ export default function AdminLayout({
             {/* Notifications */}
             <button
               onClick={() => setShowNotifications(true)}
-              className="relative p-2 rounded-md transition-colors duration-200 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              className="relative p-2 text-gray-500 rounded-md transition-colors duration-200 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               title="Notifications"
             >
               <Bell className="w-4 h-4" />
@@ -255,13 +270,15 @@ export default function AdminLayout({
             {(user.role === 'manager' || user.role === 'admin') && (
               <button
                 onClick={onNavigateToPendingApprovals}
-                className="relative p-2 rounded-md transition-colors duration-200 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                className="relative p-2 text-gray-500 rounded-md transition-colors duration-200 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 title="Pending Approvals"
               >
                 <FileCheck className="w-4 h-4" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
-                  6
-                </span>
+                {totalPendingCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
+                    {totalPendingCount}
+                  </span>
+                )}
               </button>
             )}
 
@@ -269,15 +286,15 @@ export default function AdminLayout({
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                className="flex items-center p-2 space-x-2 rounded-md transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <AvatarImage 
                   src={user.avatar || ''} 
                   alt={user.name}
-                  className="w-7 h-7 rounded-full object-cover"
+                  className="object-cover w-7 h-7 rounded-full"
                   fallbackClassName="w-7 h-7 rounded-full flex items-center justify-center"
                 />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:block">
+                <span className="hidden text-sm font-medium text-gray-700 dark:text-gray-300 sm:block">
                   {user.name}
                 </span>
               </button>
@@ -289,25 +306,25 @@ export default function AdminLayout({
                     initial={{ opacity: 0, scale: 0.95, y: -5 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -5 }}
-                    className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 z-50"
+                    className="absolute right-0 top-full z-50 py-1 mt-2 w-48 bg-white rounded-lg border border-gray-200 shadow-lg dark:bg-gray-800 dark:border-gray-700"
                   >
                     <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
                       <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user.role}</p>
+                      <p className="text-xs text-gray-500 capitalize dark:text-gray-400">{user.role}</p>
                     </div>
                     <button
                       onClick={() => {
                         setShowProfileSettings(true);
                         setShowUserMenu(false);
                       }}
-                      className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2"
+                      className="flex items-center px-3 py-2 space-x-2 w-full text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       <Settings className="w-4 h-4" />
                       <span>Profile Settings</span>
                     </button>
                     <button
                       onClick={onLogout}
-                      className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2"
+                      className="flex items-center px-3 py-2 space-x-2 w-full text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       <LogOut className="w-4 h-4" />
                       <span>Sign Out</span>
@@ -320,7 +337,7 @@ export default function AdminLayout({
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-auto" style={{ height: 'calc(100vh - 4rem)' }}>
+        <main className="overflow-auto flex-1" style={{ height: 'calc(100vh - 4rem)' }}>
           {currentPage === 'main' ? (
             <Dashboard user={user} />
           ) : activeView === 'tree-examples' ? (

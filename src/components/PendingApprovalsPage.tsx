@@ -1,34 +1,89 @@
 import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, 
   FileCheck,
-  Check
+  Check,
+  Bell,
+  Trash2
 } from 'lucide-react';
 import DocumentPreviewModal from './DocumentPreviewModal';
 import DocumentEditModal from './DocumentEditModal';
 import UniversalDocumentsTable from './UniversalDocumentsTable';
-import { pendingApprovalsColumns } from './tableConfigs';
+import { isoCardDocumentsColumnsWithSubject } from './tableConfigs';
 import { Document, User } from '../types';
 
 interface PendingApprovalsPageProps {
   onBack: () => void;
   user?: User | null;
+  iso9000Sections?: any[];
+  ceSections?: any[];
+  edcSections?: any[];
+  iso2Sections?: any[];
 }
 
-export default function PendingApprovalsPage({ onBack, user }: PendingApprovalsPageProps) {
-  const [searchQuery] = useState('');
-  const [selectedDepartment] = useState<string>('all');
-  const [selectedPriority] = useState<string>('all');
-  const [sortBy] = useState<'date' | 'title' | 'department' | 'priority'>('date');
-  const [sortOrder] = useState<'asc' | 'desc'>('desc');
+export default function PendingApprovalsPage({ 
+  onBack, 
+  user,
+  iso9000Sections = [],
+  ceSections = [],
+  edcSections = [],
+  iso2Sections = []
+}: PendingApprovalsPageProps) {
+  const [sortBy, setSortBy] = useState('uploadedAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
+  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
 
-  // Mock data for pending approval documents
-  const pendingDocuments: Document[] = [
+  // Get all pending documents from all sections
+  const pendingDocuments = useMemo(() => {
+    const allDocs: Document[] = [];
+    
+    // Get from ISO9000 sections
+    iso9000Sections.forEach(section => {
+      section.documents.forEach((doc: any) => {
+        if (doc.approvalStatus === 'pending') {
+          allDocs.push(doc as Document);
+        }
+      });
+    });
+    
+    // Get from CE sections
+    ceSections.forEach(section => {
+      section.documents.forEach((doc: any) => {
+        if (doc.approvalStatus === 'pending') {
+          allDocs.push(doc as Document);
+        }
+      });
+    });
+    
+    // Get from EDC sections
+    edcSections.forEach(section => {
+      section.documents.forEach((doc: any) => {
+        if (doc.approvalStatus === 'pending') {
+          allDocs.push(doc as Document);
+        }
+      });
+    });
+    
+    // Get from ISO2 sections
+    iso2Sections.forEach(section => {
+      section.documents.forEach((doc: any) => {
+        if (doc.approvalStatus === 'pending') {
+          allDocs.push(doc as Document);
+        }
+      });
+    });
+    
+    return allDocs;
+  }, [iso9000Sections, ceSections, edcSections, iso2Sections]);
+
+  // OLD Mock data - Now replaced with real data from sections
+  const oldPendingDocuments: Document[] = [
     {
       id: '1',
       title: 'Q1 Financial Report',
@@ -170,22 +225,13 @@ export default function PendingApprovalsPage({ onBack, user }: PendingApprovalsP
   ];
 
 
-  const filteredAndSortedDocuments = useMemo(() => {
-    let filtered = pendingDocuments.filter(doc => {
-      const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           doc.department.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesDepartment = selectedDepartment === 'all' || doc.department === selectedDepartment;
-      const matchesPriority = selectedPriority === 'all' || doc.priority === selectedPriority;
-      
-      return matchesSearch && matchesDepartment && matchesPriority;
-    });
-
-    // Sort documents
-    filtered.sort((a, b) => {
+  // Sort pending documents
+  const sortedDocuments = useMemo(() => {
+    return [...pendingDocuments].sort((a, b) => {
       let comparison = 0;
       
       switch (sortBy) {
-        case 'date':
+        case 'uploadedAt':
           comparison = new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime();
           break;
         case 'title':
@@ -194,18 +240,22 @@ export default function PendingApprovalsPage({ onBack, user }: PendingApprovalsP
         case 'department':
           comparison = a.department.localeCompare(b.department);
           break;
-        case 'priority':
-          const priorityOrder = { urgent: 4, high: 3, medium: 2, low: 1 };
-          comparison = (priorityOrder[a.priority as keyof typeof priorityOrder] || 0) - 
-                      (priorityOrder[b.priority as keyof typeof priorityOrder] || 0);
+        case 'status':
+          comparison = a.approvalStatus.localeCompare(b.approvalStatus);
           break;
+        case 'securityLevel':
+          const securityOrder = { 'Public': 1, 'Restricted': 2, 'Confidential': 3, 'Top Secret': 4 };
+          const aSecurity = a.securityLevel || 'Public';
+          const bSecurity = b.securityLevel || 'Public';
+          comparison = (securityOrder[aSecurity as keyof typeof securityOrder] || 1) - (securityOrder[bSecurity as keyof typeof securityOrder] || 1);
+          break;
+        default:
+          comparison = 0;
       }
       
       return sortOrder === 'asc' ? comparison : -comparison;
     });
-
-    return filtered;
-  }, [pendingDocuments, searchQuery, selectedDepartment, selectedPriority, sortBy, sortOrder]);
+  }, [pendingDocuments, sortBy, sortOrder]);
 
 
   const handleView = (document: Document) => {
@@ -240,33 +290,97 @@ export default function PendingApprovalsPage({ onBack, user }: PendingApprovalsP
     setEditingDocument(null);
   };
 
-  // Custom actions renderer for pending approvals
-  const renderCustomActions = (document: Document) => {
-    if (document.approver && !document.approver.approved) {
-      return (
-        <motion.button
-          onClick={() => handleSendReminder(document.approver!)}
-          className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Send Reminder
-        </motion.button>
-      );
-    } else if (document.approver && document.approver.approved) {
-      return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-          <Check className="w-3 h-3 mr-1" />
-          Approved
-        </span>
-      );
-    } else {
-      return <span className="text-sm text-gray-500 dark:text-gray-400">No action needed</span>;
+  const handleEdit = (document: Document, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingDocument(document);
+    setEditModalOpen(true);
+  };
+
+  const handleDownload = (document: Document, e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('Downloading document:', document.title);
+    alert(`Downloading "${document.title}"`);
+  };
+
+  const handleShare = (document: Document, e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('Sharing document:', document.title);
+    navigator.clipboard.writeText(window.location.href + `?doc=${document.id}`);
+    alert('Link copied to clipboard!');
+  };
+
+  const handleDelete = (document: Document, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm(`Are you sure you want to delete "${document.title}"?`)) {
+      console.log('Deleting document:', document.title);
+      alert(`"${document.title}" deleted successfully!`);
     }
   };
 
+  const handleReminder = (document: Document, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (document.approver) {
+      handleSendReminder(document.approver);
+    }
+  };
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field as any);
+      setSortOrder('asc');
+    }
+  };
+
+  // Document selection handlers
+  const handleDocumentSelect = (documentId: string, selected: boolean) => {
+    setSelectedDocuments(prev => {
+      const newSet = new Set(prev);
+      if (selected) {
+        newSet.add(documentId);
+      } else {
+        newSet.delete(documentId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    const allIds = new Set(sortedDocuments.map(doc => doc.id));
+    setSelectedDocuments(allIds);
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedDocuments(new Set());
+  };
+
+  // Bulk action handlers
+  const handleBulkApprove = () => {
+    const count = selectedDocuments.size;
+    console.log('Bulk approving documents:', Array.from(selectedDocuments));
+    alert(`${count} document${count > 1 ? 's' : ''} approved successfully!`);
+    setSelectedDocuments(new Set());
+  };
+
+  const handleBulkDelete = () => {
+    const count = selectedDocuments.size;
+    if (confirm(`Are you sure you want to delete ${count} selected document${count > 1 ? 's' : ''}?`)) {
+      console.log('Bulk deleting documents:', Array.from(selectedDocuments));
+      alert(`${count} document${count > 1 ? 's' : ''} deleted successfully!`);
+      setSelectedDocuments(new Set());
+    }
+  };
+
+  const handleBulkReminder = () => {
+    const count = selectedDocuments.size;
+    console.log('Sending bulk reminders for documents:', Array.from(selectedDocuments));
+    alert(`Reminders sent for ${count} pending document${count > 1 ? 's' : ''}!`);
+    setSelectedDocuments(new Set());
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+    <div className="px-4 py-8 mx-auto max-w-8xl lg:px-8">
       {/* Header */}
       <motion.div 
         className="mb-8"
@@ -274,7 +388,7 @@ export default function PendingApprovalsPage({ onBack, user }: PendingApprovalsP
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-4">
             <motion.button
               onClick={onBack}
@@ -293,8 +407,8 @@ export default function PendingApprovalsPage({ onBack, user }: PendingApprovalsP
           
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-              <Clock className="w-4 h-4" />
-              <span>{filteredAndSortedDocuments.length} pending</span>
+              <FileCheck className="w-4 h-4" />
+              <span>{sortedDocuments.length} pending</span>
             </div>
           </div>
         </div>
@@ -303,35 +417,108 @@ export default function PendingApprovalsPage({ onBack, user }: PendingApprovalsP
         
       </motion.div>
 
+      {/* Bulk Actions Bar */}
+      <AnimatePresence>
+        {selectedDocuments.size > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="mb-4"
+          >
+            <div className="p-4 rounded-lg glass-panel">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {selectedDocuments.size} document{selectedDocuments.size > 1 ? 's' : ''} selected
+                  </span>
+                  <button
+                    onClick={handleDeselectAll}
+                    className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                  >
+                    Clear selection
+                  </button>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <motion.button
+                    onClick={handleBulkApprove}
+                    className="text-green-600 glass-button hover:text-green-800 dark:text-green-400 dark:hover:text-green-200"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Check className="w-4 h-4" />
+                    <span>Approve</span>
+                  </motion.button>
+
+                  <motion.button
+                    onClick={handleBulkReminder}
+                    className="text-orange-600 glass-button hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-200"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Bell className="w-4 h-4" />
+                    <span>Send Reminder</span>
+                  </motion.button>
+                  
+                  <motion.button
+                    onClick={handleBulkDelete}
+                    className="text-red-600 glass-button hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Delete</span>
+                  </motion.button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Documents Table */}
       <motion.div
-        className="glass-panel rounded-2xl"
+        className="rounded-2xl glass-panel"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
       >
         <UniversalDocumentsTable
-          documents={filteredAndSortedDocuments}
-          columns={pendingApprovalsColumns}
+          documents={sortedDocuments}
+          columns={isoCardDocumentsColumnsWithSubject}
           user={user}
-          showCheckbox={false}
+          showCheckbox={true}
           showActions={true}
+          selectedDocuments={selectedDocuments}
+          hoveredRow={hoveredRow}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onDocumentSelect={handleDocumentSelect}
+          onSelectAll={handleSelectAll}
+          onDeselectAll={handleDeselectAll}
+          onSort={handleSort}
+          onHoverChange={setHoveredRow}
           onDocumentClick={handleDocumentClick}
           onView={handleView}
-          customActions={renderCustomActions}
+          onEdit={handleEdit}
+          onDownload={handleDownload}
+          onShare={handleShare}
+          onDelete={handleDelete}
+          onReminder={handleReminder}
         />
       </motion.div>
 
       {/* Empty State */}
-      {filteredAndSortedDocuments.length === 0 && (
+      {sortedDocuments.length === 0 && (
         <motion.div
-          className="text-center py-12"
+          className="py-12 text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6 }}
         >
-          <FileCheck className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          <FileCheck className="mx-auto mb-4 w-16 h-16 text-gray-400" />
+          <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
             No pending approvals
           </h3>
           <p className="text-gray-500 dark:text-gray-400">

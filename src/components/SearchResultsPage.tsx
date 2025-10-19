@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { 
   Search, 
   FileText, 
@@ -9,7 +10,7 @@ import {
   Folder
 } from 'lucide-react';
 import { Document } from '../types';
-import SearchBar from './SearchBar';
+  
 
 interface SearchResultsPageProps {
   searchQuery: string;
@@ -134,7 +135,7 @@ export default function SearchResultsPage({
     
     return parts.map((part, index) => 
       regex.test(part) ? (
-        <mark key={index} className="bg-yellow-200 dark:bg-yellow-800 px-1 rounded">
+        <mark key={index} className="px-1 bg-yellow-200 rounded dark:bg-yellow-800">
           {part}
         </mark>
       ) : part
@@ -173,18 +174,20 @@ export default function SearchResultsPage({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
+      <div className="">
+        <div className="">
+          <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
-              <button
+            <motion.button
                 onClick={onBack}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200"
+                className="glass-button-icon"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              </button>
+                <ArrowLeft className="w-4 h-4" />
+              </motion.button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                   Search Results
@@ -197,16 +200,7 @@ export default function SearchResultsPage({
 
             {/* Header Right: Inline Search + View Mode Toggle */}
             <div className="flex items-center space-x-3">
-              <div className="w-72 sm:w-80 md:w-96">
-                <SearchBar
-                  onSearch={(q) => setQuery(q)}
-                  onShowAllResults={() => {}}
-                  onDocumentClick={onDocumentClick}
-                  documents={allDocuments}
-                  placeholder="Search"
-                  className="w-full"
-                />
-              </div>
+             
               <button
                 onClick={() => setFilters(prev => ({ ...prev, viewMode: 'list' }))}
                 className={`p-2 rounded-lg transition-colors duration-200 ${
@@ -232,12 +226,12 @@ export default function SearchResultsPage({
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="">
         <div className="flex gap-6">
           {/* Filters Sidebar */}
-          <div className="w-80 flex-shrink-0">
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 sticky top-6">
-              <div className="flex items-center justify-between mb-4">
+          <div className="flex-shrink-0 w-80">
+            <div className="sticky top-6 p-6 bg-white rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+              <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Filters</h2>
                 <button
                   onClick={clearFilters}
@@ -249,13 +243,13 @@ export default function SearchResultsPage({
 
               {/* Type Filter */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                   Document Type
                 </label>
                 <select
                   value={filters.type}
                   onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-3 py-2 w-full text-gray-900 bg-white rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="All">All Types</option>
                   {getUniqueValues('type').map(type => (
@@ -266,13 +260,13 @@ export default function SearchResultsPage({
 
               {/* Department Filter */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                   Subject
                 </label>
                 <select
                   value={filters.department}
                   onChange={(e) => setFilters(prev => ({ ...prev, department: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-3 py-2 w-full text-gray-900 bg-white rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="All">All Subjects</option>
                   {getUniqueValues('department').map(dept => (
@@ -283,13 +277,13 @@ export default function SearchResultsPage({
 
               {/* File Type Filter */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                   File Type
                 </label>
                 <select
                   value={filters.fileType}
                   onChange={(e) => setFilters(prev => ({ ...prev, fileType: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-3 py-2 w-full text-gray-900 bg-white rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="All">All File Types</option>
                   {getUniqueValues('fileType').map(ext => (
@@ -300,13 +294,13 @@ export default function SearchResultsPage({
 
               {/* Date Range Filter */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                   Date Range
                 </label>
                 <select
                   value={filters.dateRange}
                   onChange={(e) => setFilters(prev => ({ ...prev, dateRange: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-3 py-2 w-full text-gray-900 bg-white rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="All">All Time</option>
                   <option value="Today">Today</option>
@@ -318,7 +312,7 @@ export default function SearchResultsPage({
 
               {/* Sort Options */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                   Sort By
                 </label>
                 <select
@@ -327,7 +321,7 @@ export default function SearchResultsPage({
                     const [sortBy, sortOrder] = e.target.value.split('-');
                     setFilters(prev => ({ ...prev, sortBy, sortOrder: sortOrder as 'asc' | 'desc' }));
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-3 py-2 w-full text-gray-900 bg-white rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="relevance-desc">Most Relevant</option>
                   <option value="title-asc">Title A-Z</option>
@@ -349,25 +343,25 @@ export default function SearchResultsPage({
                   <div
                     key={document.id}
                     onClick={() => onDocumentClick(document)}
-                    className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-primary-300 dark:hover:border-primary-600 ${
+                    className={` p-6 cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-primary-300 dark:hover:border-primary-600 ${
                       filters.viewMode === 'list' ? 'flex items-start space-x-4' : ''
                     }`}
                   >
                     {/* Document Icon */}
                     <div className={`${filters.viewMode === 'grid' ? 'mb-4' : 'flex-shrink-0'}`}>
-                      <div className="w-12 h-12 bg-gray-100 dark:bg-gray-900 rounded-lg flex items-center justify-center">
+                      <div className="flex justify-center items-center w-12 h-12 bg-gray-100 rounded-lg dark:bg-gray-900">
                         <FileText className="w-6 h-6 text-gray-600 dark:text-gray-400" />
                       </div>
                     </div>
 
                     <div className={`${filters.viewMode === 'list' ? 'flex-1' : ''}`}>
                       {/* Title */}
-                      <h3 className="font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline transition-colors duration-200 text-left mb-2 line-clamp-2">
+                      <h3 className="mb-2 font-semibold text-left transition-colors duration-200 text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline line-clamp-2">
                         {highlightText(document.title, query)}
                       </h3>
 
                       {/* Document Path */}
-                      <div className="flex items-center gap-1 mb-2">
+                      <div className="flex gap-1 items-center mb-2">
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary-50 dark:bg-primary-900/20 text-xs text-primary-700 dark:text-primary-300 rounded-md font-medium">
                           <Folder className="w-3 h-3" />
                           {document.department}
@@ -375,20 +369,20 @@ export default function SearchResultsPage({
                       </div>
 
                       {/* Meta Tags */}
-                      <div className="flex flex-wrap items-center gap-2 mb-3">
-                        {/* <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 rounded-md">
+                      <div className="flex flex-wrap gap-2 items-center mb-3">
+                        {/* <span className="inline-flex gap-1 items-center px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded-md dark:bg-gray-700 dark:text-gray-300">
                           <FileText className="w-3 h-3" />
                           {document.fileType.toUpperCase()}
                         </span>
-                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 rounded-md">
+                        <span className="inline-flex gap-1 items-center px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded-md dark:bg-gray-700 dark:text-gray-300">
                           <HardDrive className="w-3 h-3" />
                           {document.type}
                         </span> */}
-                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 rounded-md">
+                        <span className="inline-flex gap-1 items-center px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded-md dark:bg-gray-700 dark:text-gray-300">
                           <Calendar className="w-3 h-3" />
                           {formatDate(document.uploadedAt)}
                         </span>
-                        {/* <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 rounded-md">
+                        {/* <span className="inline-flex gap-1 items-center px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded-md dark:bg-gray-700 dark:text-gray-300">
                           <User className="w-3 h-3" />
                           {document.uploadedBy}
                         </span> */}
@@ -405,9 +399,9 @@ export default function SearchResultsPage({
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              <div className="py-12 text-center">
+                <Search className="mx-auto mb-4 w-16 h-16 text-gray-400" />
+                <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
                   No results found
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400">

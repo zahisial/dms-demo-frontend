@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import {
   Eye,
   Edit,
-  Shield,
   FileText,
   FileSpreadsheet,
   File,
@@ -13,9 +12,11 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowUpDown,
-  Check
+  Download,
+  Share2,
+  Trash2,
+  Bell
 } from 'lucide-react';
-import DropdownMenu from './DropdownMenu';
 import { Document, User as UserType } from '../types';
 
 // Column configuration interface
@@ -57,6 +58,10 @@ interface UniversalDocumentsTableProps {
   onDocumentClick?: (document: Document) => void;
   onView?: (document: Document, e: React.MouseEvent) => void;
   onEdit?: (document: Document, e: React.MouseEvent) => void;
+  onDownload?: (document: Document, e: React.MouseEvent) => void;
+  onShare?: (document: Document, e: React.MouseEvent) => void;
+  onDelete?: (document: Document, e: React.MouseEvent) => void;
+  onReminder?: (document: Document, e: React.MouseEvent) => void;
   onHoverChange?: (documentId: string | null) => void;
   getDropdownItems?: (document: Document) => any[];
   customActions?: (document: Document) => React.ReactNode;
@@ -174,6 +179,10 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
   onDocumentClick,
   onView,
   onEdit,
+  onDownload,
+  onShare,
+  onDelete,
+  onReminder,
   onHoverChange,
   getDropdownItems,
   customActions,
@@ -285,6 +294,7 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
                       customActions(document)
                     ) : (
                       <div className="flex items-center space-x-2">
+                        {/* View - for all users */}
                         {onView && (
                           <motion.button
                             onClick={(e) => onView(document, e)}
@@ -292,10 +302,13 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             aria-label={`View ${document.title}`}
+                            title="View"
                           >
                             <Eye className="w-4 h-4" />
                           </motion.button>
                         )}
+                        
+                        {/* Edit - for managers/admins */}
                         {onEdit && (user?.role === 'manager' || user?.role === 'admin') && (
                           <motion.button
                             onClick={(e) => onEdit(document, e)}
@@ -303,19 +316,66 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             aria-label={`Edit ${document.title}`}
+                            title="Edit"
                           >
                             <Edit className="w-4 h-4" />
                           </motion.button>
                         )}
-                        {getDropdownItems && (
-                          <div className="relative">
-                            <DropdownMenu
-                              position="top-right"
-                              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg"
-                              buttonClassName="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
-                              items={getDropdownItems(document)}
-                            />
-                          </div>
+                        
+                        {/* Download - for all users if security is public */}
+                        {onDownload && document.securityLevel === 'Public' && (
+                          <motion.button
+                            onClick={(e) => onDownload(document, e)}
+                            className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            aria-label={`Download ${document.title}`}
+                            title="Download"
+                          >
+                            <Download className="w-4 h-4" />
+                          </motion.button>
+                        )}
+                        
+                        {/* Share - for managers/admins if security is public */}
+                        {onShare && (user?.role === 'manager' || user?.role === 'admin') && document.securityLevel === 'Public' && (
+                          <motion.button
+                            onClick={(e) => onShare(document, e)}
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            aria-label={`Share ${document.title}`}
+                            title="Share"
+                          >
+                            <Share2 className="w-4 h-4" />
+                          </motion.button>
+                        )}
+                        
+                        {/* Reminder - for admins only if status is pending */}
+                        {onReminder && user?.role === 'admin' && document.approvalStatus === 'pending' && (
+                          <motion.button
+                            onClick={(e) => onReminder(document, e)}
+                            className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            aria-label={`Send reminder for ${document.title}`}
+                            title="Send Reminder"
+                          >
+                            <Bell className="w-4 h-4" />
+                          </motion.button>
+                        )}
+                        
+                        {/* Delete - for admins only */}
+                        {onDelete && user?.role === 'admin' && (
+                          <motion.button
+                            onClick={(e) => onDelete(document, e)}
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            aria-label={`Delete ${document.title}`}
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </motion.button>
                         )}
                       </div>
                     )}

@@ -3,12 +3,8 @@ import { DocumentAcceptance } from '../types';
 import { Award, FileText, Shield, Users, Heart, TrendingUp } from 'lucide-react';
 
 // ISO Document Types
-export interface ISO9000Document {
-  id: string;
-  title: string;
-  type: string;
-  url: string;
-  securityLevel: 'Public' | 'Restricted' | 'Confidential' | 'Top Secret';
+export interface ISO9000Document extends Document {
+  sectionTitle?: string;
 }
 // ISO 2 Document Types
 export interface ISO2Document {
@@ -25,6 +21,12 @@ export interface EDCDocument {
   url: string;
   securityLevel: 'Public' | 'Restricted' | 'Confidential' | 'Top Secret';
 }
+
+// CE Document Types
+export interface CEDocument extends Document {
+  sectionTitle?: string;
+}
+
 // ISO 9000 Sections Data  
 export interface ISO9000Section {
   id: string;
@@ -47,6 +49,15 @@ export interface EDCSection {
   title: string;
   color: string;
   documents: EDCDocument[];
+}
+
+// CE Sections Data
+export interface CESection {
+  id: string;
+  title: string;
+  color: string;
+  icon: React.ComponentType<any>;
+  documents: CEDocument[];
 }
   
 // Users Data
@@ -1328,11 +1339,21 @@ export const mockISO9000Sections: ISO9000Section[] = [
         uploadedAt: new Date('2024-01-11 14:00:00'),
         lastModified: new Date('2024-01-11 14:00:00'),
         accessType: 'restricted',
-        approvalStatus: 'Pending for Approval',
+        approvalStatus: 'pending',
         tags: ['ISO9000', 'Management', 'Review'],
         description: 'Management review procedure for quality system assessment.',
         url: '/documents/iso9000/management-review.pdf',
-        securityLevel: 'Confidential'
+        securityLevel: 'Confidential',
+        assignedTo: '4',  // Assigned to ISO Administrator
+        assignedDate: new Date('2024-01-11 14:00:00'),
+        approver: {
+          id: '4',
+          name: 'ISO Administrator',
+          title: 'Quality Manager',
+          email: 'admini_iso@edaratgroup.com',
+          avatar: 'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1',
+          approved: false
+        }
       },
       {
         id: 'iso-4',
@@ -1362,7 +1383,7 @@ export const mockISO9000Sections: ISO9000Section[] = [
         uploadedAt: new Date('2024-01-13 09:30:00'),
         lastModified: new Date('2024-01-13 09:30:00'),
         accessType: 'department',
-        approvalStatus: 'approved',
+        approvalStatus: 'pending',
         tags: ['ISO9000', 'Process', 'Mapping'],
         description: 'Visual representation of key organizational processes.',
         url: '/documents/iso9000/process-mapping.pdf',
@@ -1410,14 +1431,57 @@ export const mockISO9000Sections: ISO9000Section[] = [
     color: '#03778d',
     icon: FileText,
     documents: [
-      { id: '8', title: 'Document Control Procedure', type: 'SOP', url: '#', securityLevel: 'Public' },
-      { id: '9', title: 'Document Approval Matrix', type: 'Matrix', url: '#', securityLevel: 'Restricted' },
-      { id: '10', title: 'Version Control', type: 'Guideline', url: '#', securityLevel: 'Public' },
-      { id: '11', title: 'Document Retention', type: 'Policy', url: '#', securityLevel: 'Confidential' },
-      { id: '12', title: 'Access Control', type: 'Procedure', url: '#', securityLevel: 'Top Secret' },
-      { id: '13', title: 'Document Templates', type: 'Template', url: '#', securityLevel: 'Public' },
-      { id: '14', title: 'Review Schedule', type: 'Calendar', url: '#', securityLevel: 'Restricted' },
-      { id: '15', title: 'Distribution List', type: 'List', url: '#', securityLevel: 'Confidential' }
+      {
+        id: 'iso-8',
+        title: 'Document Control Procedure',
+        type: 'SOP',
+        fileType: 'pdf',
+        fileSize: '2.1 MB',
+        department: 'Document Control',
+        uploadedBy: 'ISO Administrator',
+        uploadedAt: new Date('2024-01-16 09:00:00'),
+        lastModified: new Date('2024-01-16 09:00:00'),
+        accessType: 'public',
+        approvalStatus: 'pending',
+        tags: ['ISO9000', 'Document', 'Control'],
+        description: 'Standard operating procedure for document control.',
+        url: '/documents/iso9000/document-control-procedure.pdf',
+        securityLevel: 'Public'
+      },
+      {
+        id: 'iso-9',
+        title: 'Document Approval Matrix',
+        type: 'Matrix',
+        fileType: 'pdf',
+        fileSize: '950 KB',
+        department: 'Document Control',
+        uploadedBy: 'ISO Administrator',
+        uploadedAt: new Date('2024-01-17 10:30:00'),
+        lastModified: new Date('2024-01-17 10:30:00'),
+        accessType: 'department',
+        approvalStatus: 'pending',
+        tags: ['ISO9000', 'Approval', 'Matrix'],
+        description: 'Matrix defining document approval workflows.',
+        url: '/documents/iso9000/document-approval-matrix.pdf',
+        securityLevel: 'Restricted'
+      },
+      {
+        id: 'iso-10',
+        title: 'Version Control',
+        type: 'Guideline',
+        fileType: 'pdf',
+        fileSize: '1.3 MB',
+        department: 'Document Control',
+        uploadedBy: 'ISO Administrator',
+        uploadedAt: new Date('2024-01-18 14:00:00'),
+        lastModified: new Date('2024-01-18 14:00:00'),
+        accessType: 'public',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Version', 'Control'],
+        description: 'Guidelines for document version control.',
+        url: '/documents/iso9000/version-control.pdf',
+        securityLevel: 'Public'
+      }
     ]
   },
   {
@@ -1426,10 +1490,40 @@ export const mockISO9000Sections: ISO9000Section[] = [
     color: '#08bed5',
     icon: Shield,
     documents: [
-      { id: '16', title: 'Audit Program', type: 'Program', url: '#', securityLevel: 'Restricted' },
-      { id: '17', title: 'Audit Checklist', type: 'Checklist', url: '#', securityLevel: 'Public' },
-      { id: '18', title: 'Audit Schedule', type: 'Schedule', url: '#', securityLevel: 'Restricted' },
-      { id: '19', title: 'Non-conformity Report', type: 'Report', url: '#', securityLevel: 'Confidential' }
+      {
+        id: 'iso-16',
+        title: 'Audit Program',
+        type: 'Program',
+        fileType: 'pdf',
+        fileSize: '1.8 MB',
+        department: 'Internal Audits',
+        uploadedBy: 'ISO Administrator',
+        uploadedAt: new Date('2024-01-19 11:00:00'),
+        lastModified: new Date('2024-01-19 11:00:00'),
+        accessType: 'department',
+        approvalStatus: 'pending',
+        tags: ['ISO9000', 'Audit', 'Program'],
+        description: 'Annual internal audit program.',
+        url: '/documents/iso9000/audit-program.pdf',
+        securityLevel: 'Restricted'
+      },
+      {
+        id: 'iso-17',
+        title: 'Audit Checklist',
+        type: 'Checklist',
+        fileType: 'pdf',
+        fileSize: '750 KB',
+        department: 'Internal Audits',
+        uploadedBy: 'ISO Administrator',
+        uploadedAt: new Date('2024-01-20 09:30:00'),
+        lastModified: new Date('2024-01-20 09:30:00'),
+        accessType: 'public',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Audit', 'Checklist'],
+        description: 'Comprehensive audit checklist template.',
+        url: '/documents/iso9000/audit-checklist.pdf',
+        securityLevel: 'Public'
+      }
     ]
   },
   {
@@ -1438,15 +1532,57 @@ export const mockISO9000Sections: ISO9000Section[] = [
     color: '#03778d',
     icon: Users,
     documents: [
-      { id: '20', title: 'Training Matrix', type: 'Matrix', url: '#', securityLevel: 'Public' },
-      { id: '21', title: 'Competence Assessment', type: 'Assessment', url: '#', securityLevel: 'Restricted' },
-      { id: '22', title: 'Training Records', type: 'Record', url: '#', securityLevel: 'Confidential' },
-      { id: '23', title: 'Training Materials', type: 'Material', url: '#', securityLevel: 'Public' },
-      { id: '24', title: 'Certification Program', type: 'Program', url: '#', securityLevel: 'Restricted' },
-      { id: '25', title: 'Skills Development', type: 'Plan', url: '#', securityLevel: 'Confidential' },
-      { id: '26', title: 'Performance Evaluation', type: 'Evaluation', url: '#', securityLevel: 'Top Secret' },
-      { id: '27', title: 'Training Effectiveness', type: 'Report', url: '#', securityLevel: 'Restricted' },
-      { id: '28', title: 'Continuous Learning', type: 'Policy', url: '#', securityLevel: 'Public' }
+      {
+        id: 'iso-20',
+        title: 'Training Matrix',
+        type: 'Matrix',
+        fileType: 'xlsx',
+        fileSize: '650 KB',
+        department: 'Training & Competence',
+        uploadedBy: 'HR Manager',
+        uploadedAt: new Date('2024-01-21 10:00:00'),
+        lastModified: new Date('2024-01-21 10:00:00'),
+        accessType: 'public',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Training', 'Matrix'],
+        description: 'Comprehensive training requirements matrix.',
+        url: '/documents/iso9000/training-matrix.xlsx',
+        securityLevel: 'Public'
+      },
+      {
+        id: 'iso-21',
+        title: 'Competence Assessment',
+        type: 'Assessment',
+        fileType: 'pdf',
+        fileSize: '1.4 MB',
+        department: 'Training & Competence',
+        uploadedBy: 'HR Manager',
+        uploadedAt: new Date('2024-01-22 11:30:00'),
+        lastModified: new Date('2024-01-22 11:30:00'),
+        accessType: 'department',
+        approvalStatus: 'pending',
+        tags: ['ISO9000', 'Competence', 'Assessment'],
+        description: 'Employee competence assessment framework.',
+        url: '/documents/iso9000/competence-assessment.pdf',
+        securityLevel: 'Restricted'
+      },
+      {
+        id: 'iso-22',
+        title: 'Training Records',
+        type: 'Manual',
+        fileType: 'pdf',
+        fileSize: '2.8 MB',
+        department: 'Training & Competence',
+        uploadedBy: 'HR Manager',
+        uploadedAt: new Date('2024-01-23 14:00:00'),
+        lastModified: new Date('2024-01-23 14:00:00'),
+        accessType: 'restricted',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Training', 'Records'],
+        description: 'Historical training records database.',
+        url: '/documents/iso9000/training-records.pdf',
+        securityLevel: 'Confidential'
+      }
     ]
   },
   {
@@ -1455,9 +1591,57 @@ export const mockISO9000Sections: ISO9000Section[] = [
     color: '#08bed5',
     icon: Heart,
     documents: [
-      { id: '29', title: 'Customer Feedback', type: 'Survey', url: '#', securityLevel: 'Public' },
-      { id: '30', title: 'Complaint Handling', type: 'Procedure', url: '#', securityLevel: 'Restricted' },
-      { id: '31', title: 'Service Level Agreement', type: 'SLA', url: '#', securityLevel: 'Confidential' }
+      {
+        id: 'iso-29',
+        title: 'Customer Feedback',
+        type: 'Guide',
+        fileType: 'pdf',
+        fileSize: '1.1 MB',
+        department: 'Customer Satisfaction',
+        uploadedBy: 'Quality Manager',
+        uploadedAt: new Date('2024-01-24 09:00:00'),
+        lastModified: new Date('2024-01-24 09:00:00'),
+        accessType: 'public',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Customer', 'Feedback'],
+        description: 'Customer feedback collection and analysis procedures.',
+        url: '/documents/iso9000/customer-feedback.pdf',
+        securityLevel: 'Public'
+      },
+      {
+        id: 'iso-30',
+        title: 'Complaint Handling',
+        type: 'SOP',
+        fileType: 'pdf',
+        fileSize: '1.6 MB',
+        department: 'Customer Satisfaction',
+        uploadedBy: 'Quality Manager',
+        uploadedAt: new Date('2024-01-25 10:30:00'),
+        lastModified: new Date('2024-01-25 10:30:00'),
+        accessType: 'department',
+        approvalStatus: 'pending',
+        tags: ['ISO9000', 'Complaint', 'Handling'],
+        description: 'Standard procedure for handling customer complaints.',
+        url: '/documents/iso9000/complaint-handling.pdf',
+        securityLevel: 'Restricted'
+      },
+      {
+        id: 'iso-31',
+        title: 'Service Level Agreement',
+        type: 'Policy',
+        fileType: 'pdf',
+        fileSize: '980 KB',
+        department: 'Customer Satisfaction',
+        uploadedBy: 'Quality Manager',
+        uploadedAt: new Date('2024-01-26 14:00:00'),
+        lastModified: new Date('2024-01-26 14:00:00'),
+        accessType: 'restricted',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'SLA', 'Service'],
+        description: 'Service level agreements with customers.',
+        url: '/documents/iso9000/service-level-agreement.pdf',
+        securityLevel: 'Confidential'
+      }
     ]
   },
   {
@@ -1466,12 +1650,57 @@ export const mockISO9000Sections: ISO9000Section[] = [
     color: '#03778d',
     icon: TrendingUp,
     documents: [
-      { id: '32', title: 'Improvement Projects', type: 'Project', url: '#', securityLevel: 'Public' },
-      { id: '33', title: 'KPI Dashboard', type: 'Dashboard', url: '#', securityLevel: 'Restricted' },
-      { id: '34', title: 'Performance Metrics', type: 'Metrics', url: '#', securityLevel: 'Confidential' },
-      { id: '35', title: 'Benchmarking', type: 'Study', url: '#', securityLevel: 'Top Secret' },
-      { id: '36', title: 'Innovation Process', type: 'Process', url: '#', securityLevel: 'Restricted' },
-      { id: '37', title: 'Best Practices', type: 'Guide', url: '#', securityLevel: 'Public' }
+      {
+        id: 'iso-32',
+        title: 'Improvement Projects',
+        type: 'Manual',
+        fileType: 'pdf',
+        fileSize: '1.9 MB',
+        department: 'Continuous Improvement',
+        uploadedBy: 'Process Manager',
+        uploadedAt: new Date('2024-01-27 09:00:00'),
+        lastModified: new Date('2024-01-27 09:00:00'),
+        accessType: 'public',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Improvement', 'Projects'],
+        description: 'Active continuous improvement project portfolio.',
+        url: '/documents/iso9000/improvement-projects.pdf',
+        securityLevel: 'Public'
+      },
+      {
+        id: 'iso-33',
+        title: 'KPI Dashboard',
+        type: 'Guide',
+        fileType: 'pdf',
+        fileSize: '2.3 MB',
+        department: 'Continuous Improvement',
+        uploadedBy: 'Process Manager',
+        uploadedAt: new Date('2024-01-28 10:30:00'),
+        lastModified: new Date('2024-01-28 10:30:00'),
+        accessType: 'department',
+        approvalStatus: 'pending',
+        tags: ['ISO9000', 'KPI', 'Dashboard'],
+        description: 'Key performance indicators dashboard and metrics.',
+        url: '/documents/iso9000/kpi-dashboard.pdf',
+        securityLevel: 'Restricted'
+      },
+      {
+        id: 'iso-34',
+        title: 'Performance Metrics',
+        type: 'Manual',
+        fileType: 'pdf',
+        fileSize: '1.7 MB',
+        department: 'Continuous Improvement',
+        uploadedBy: 'Process Manager',
+        uploadedAt: new Date('2024-01-29 11:00:00'),
+        lastModified: new Date('2024-01-29 11:00:00'),
+        accessType: 'restricted',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Performance', 'Metrics'],
+        description: 'Organizational performance metrics framework.',
+        url: '/documents/iso9000/performance-metrics.pdf',
+        securityLevel: 'Confidential'
+      }
     ]
   },
   {
@@ -1480,11 +1709,57 @@ export const mockISO9000Sections: ISO9000Section[] = [
     color: '#08bed5',
     icon: Shield,
     documents: [
-      { id: '38', title: 'Risk Assessment Matrix', type: 'Matrix', url: '#', securityLevel: 'Confidential' },
-      { id: '39', title: 'Risk Mitigation Plan', type: 'Plan', url: '#', securityLevel: 'Restricted' },
-      { id: '40', title: 'Business Continuity', type: 'Procedure', url: '#', securityLevel: 'Top Secret' },
-      { id: '41', title: 'Emergency Response', type: 'Protocol', url: '#', securityLevel: 'Confidential' },
-      { id: '42', title: 'Risk Register', type: 'Register', url: '#', securityLevel: 'Restricted' }
+      {
+        id: 'iso-38',
+        title: 'Risk Assessment Matrix',
+        type: 'Manual',
+        fileType: 'xlsx',
+        fileSize: '850 KB',
+        department: 'Risk Management',
+        uploadedBy: 'Risk Manager',
+        uploadedAt: new Date('2024-01-30 09:00:00'),
+        lastModified: new Date('2024-01-30 09:00:00'),
+        accessType: 'restricted',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Risk', 'Assessment'],
+        description: 'Comprehensive risk assessment matrix.',
+        url: '/documents/iso9000/risk-assessment-matrix.xlsx',
+        securityLevel: 'Confidential'
+      },
+      {
+        id: 'iso-39',
+        title: 'Risk Mitigation Plan',
+        type: 'Policy',
+        fileType: 'pdf',
+        fileSize: '1.5 MB',
+        department: 'Risk Management',
+        uploadedBy: 'Risk Manager',
+        uploadedAt: new Date('2024-01-31 10:30:00'),
+        lastModified: new Date('2024-01-31 10:30:00'),
+        accessType: 'department',
+        approvalStatus: 'pending',
+        tags: ['ISO9000', 'Risk', 'Mitigation'],
+        description: 'Strategic risk mitigation planning document.',
+        url: '/documents/iso9000/risk-mitigation-plan.pdf',
+        securityLevel: 'Restricted'
+      },
+      {
+        id: 'iso-40',
+        title: 'Business Continuity',
+        type: 'SOP',
+        fileType: 'pdf',
+        fileSize: '2.2 MB',
+        department: 'Risk Management',
+        uploadedBy: 'Risk Manager',
+        uploadedAt: new Date('2024-02-01 11:00:00'),
+        lastModified: new Date('2024-02-01 11:00:00'),
+        accessType: 'restricted',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Business', 'Continuity'],
+        description: 'Business continuity and disaster recovery procedures.',
+        url: '/documents/iso9000/business-continuity.pdf',
+        securityLevel: 'Top Secret'
+      }
     ]
   },
   {
@@ -1493,13 +1768,57 @@ export const mockISO9000Sections: ISO9000Section[] = [
     color: '#03778d',
     icon: FileText,
     documents: [
-      { id: '43', title: 'Process Documentation', type: 'SOP', url: '#', securityLevel: 'Public' },
-      { id: '44', title: 'Process Flow Charts', type: 'Diagram', url: '#', securityLevel: 'Public' },
-      { id: '45', title: 'Process Optimization', type: 'Report', url: '#', securityLevel: 'Restricted' },
-      { id: '46', title: 'Process KPIs', type: 'Metrics', url: '#', securityLevel: 'Confidential' },
-      { id: '47', title: 'Process Ownership', type: 'Matrix', url: '#', securityLevel: 'Restricted' },
-      { id: '48', title: 'Process Review', type: 'Procedure', url: '#', securityLevel: 'Public' },
-      { id: '49', title: 'Standard Operating Procedures', type: 'SOP', url: '#', securityLevel: 'Public' }
+      {
+        id: 'iso-43',
+        title: 'Process Documentation',
+        type: 'SOP',
+        fileType: 'pdf',
+        fileSize: '1.8 MB',
+        department: 'Process Management',
+        uploadedBy: 'Process Owner',
+        uploadedAt: new Date('2024-02-02 09:00:00'),
+        lastModified: new Date('2024-02-02 09:00:00'),
+        accessType: 'public',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Process', 'Documentation'],
+        description: 'Comprehensive process documentation library.',
+        url: '/documents/iso9000/process-documentation.pdf',
+        securityLevel: 'Public'
+      },
+      {
+        id: 'iso-44',
+        title: 'Process Flow Charts',
+        type: 'Guide',
+        fileType: 'pdf',
+        fileSize: '3.1 MB',
+        department: 'Process Management',
+        uploadedBy: 'Process Owner',
+        uploadedAt: new Date('2024-02-03 10:30:00'),
+        lastModified: new Date('2024-02-03 10:30:00'),
+        accessType: 'public',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Process', 'Flow'],
+        description: 'Visual process flow charts and diagrams.',
+        url: '/documents/iso9000/process-flow-charts.pdf',
+        securityLevel: 'Public'
+      },
+      {
+        id: 'iso-45',
+        title: 'Process Optimization',
+        type: 'Manual',
+        fileType: 'pdf',
+        fileSize: '1.9 MB',
+        department: 'Process Management',
+        uploadedBy: 'Process Owner',
+        uploadedAt: new Date('2024-02-04 11:00:00'),
+        lastModified: new Date('2024-02-04 11:00:00'),
+        accessType: 'department',
+        approvalStatus: 'pending',
+        tags: ['ISO9000', 'Process', 'Optimization'],
+        description: 'Process optimization strategies and guidelines.',
+        url: '/documents/iso9000/process-optimization.pdf',
+        securityLevel: 'Restricted'
+      }
     ]
   }
 ];
@@ -1664,4 +1983,9 @@ export const mockEDCSections: EDCSection[] = [
       { id: '40', title: 'Maintenance Logs', type: 'Record', url: '#', securityLevel: 'Restricted' }
     ]
   }
+];
+
+// CE (Cyber Security) Sections Data
+export const mockCESections: CESection[] = [
+  // Start with empty array - user will create subjects
 ];

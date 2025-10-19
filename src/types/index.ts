@@ -17,22 +17,22 @@ export interface User {
 export interface Document {
   id: string;
   title: string;
-  type: 'SOP' | 'Policy' | 'Manual' | 'Guide' | 'Form';
-  fileType: 'pdf' | 'doc' | 'docx' | 'xls' | 'xlsx' | 'image';
+  type: string;
+  fileType: string;
   fileSize: string;
   department: string;
   uploadedBy: string;
   uploadedAt: Date;
   lastModified: Date;
   accessType: 'public' | 'department' | 'restricted';
-  approvalStatus: 'pending' | 'approved' | 'rejected';
+  approvalStatus: 'pending' | 'approved' | 'rejected' | 'revision';
   approvedBy?: string;
   approvedAt?: Date;
   publishStatus?: 'draft' | 'published';
   publishedBy?: string;
   publishedAt?: Date;
   tags: string[];
-  description: string;
+  description?: string;
   url: string;
   thumbnail?: string;
   htmlPreviewUrl?: string;
@@ -47,7 +47,15 @@ export interface Document {
     title: string;
     email: string;
     avatar?: string;
+    approved?: boolean;
   };
+  submittedForApproval?: string;
+  assignedTo?: string;  // User ID who is assigned to review/approve
+  assignedDate?: Date;  // When document was assigned
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
+  isDeleted?: boolean;  // Soft delete flag
+  deletedAt?: Date;
+  deletedBy?: string;
 }
 
 export interface DocumentAcceptance {

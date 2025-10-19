@@ -263,7 +263,93 @@ export const folderViewColumns: ColumnConfig[] = [
   },
 ];
 
-// ISO9000/ISO2/EDC Pages Configuration - When clicking on cards
+// ISO9000/ISO2/EDC Pages Configuration - When clicking on cards (with Subject)
+export const isoCardDocumentsColumnsWithSubject: ColumnConfig[] = [
+  {
+    id: 'title',
+    label: 'Document',
+    sortable: true,
+    render: (document, helpers) => (
+      <div className="flex items-center space-x-3">
+        {helpers.getFileIcon(document.fileType)}
+        <div>
+          <div className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline transition-colors duration-200 text-left">
+            {document.title}
+          </div>
+          <div className="flex items-center space-x-2 mt-1">
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {document.fileSize}
+            </span>
+            <span className="text-xs text-gray-400 dark:text-gray-500">•</span>
+            <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+              {document.fileType.toUpperCase()}
+            </span>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'department',
+    label: 'Subject',
+    sortable: true,
+    render: (document) => (
+      <span className="text-sm text-gray-900 dark:text-white">
+        {document.department}
+      </span>
+    ),
+  },
+  {
+    id: 'uploadedAt',
+    label: 'Date',
+    sortable: true,
+    render: (document, helpers) => (
+      <span className="text-sm text-gray-900 dark:text-white">
+        {helpers.formatDateTime(document.uploadedAt.toISOString())}
+      </span>
+    ),
+  },
+  {
+    id: 'status',
+    label: 'Status',
+    sortable: true,
+    render: (document, helpers) => (
+      <span 
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${helpers.getStatusColor(document.approvalStatus)}`}
+        style={helpers.getStatusBackgroundColor(document.approvalStatus)}
+      >
+        {helpers.getStatusIcon(document.approvalStatus)}
+        <span className="ml-1 capitalize">{document.approvalStatus}</span>
+      </span>
+    ),
+  },
+  {
+    id: 'securityLevel',
+    label: 'Security',
+    sortable: true,
+    render: (document, helpers) => (
+      <span 
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${helpers.getSecurityLevelColor(document.securityLevel)}`}
+        style={document.securityLevel === 'Confidential' ? { backgroundColor: '#ffedec', color: '#d22927' } : {}}
+      >
+        <Shield className="w-3 h-3 mr-1" />
+        <span className="capitalize">{document.securityLevel || 'Public'}</span>
+      </span>
+    ),
+  },
+  {
+    id: 'uploadedBy',
+    label: 'Uploaded By',
+    sortable: true,
+    render: (document) => (
+      <span className="text-sm text-gray-900 dark:text-white">
+        {document.uploadedBy}
+      </span>
+    ),
+  },
+];
+
+// ISO9000/ISO2/EDC Pages Configuration - When clicking on cards (without Subject)
 export const isoCardDocumentsColumns: ColumnConfig[] = [
   {
     id: 'title',

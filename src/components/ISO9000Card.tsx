@@ -1,21 +1,6 @@
 import { motion } from 'framer-motion';
 import { Upload, Trash2 } from 'lucide-react';
-
-interface ISO9000Document {
-  id: string;
-  title: string;
-  type: string;
-  url: string;
-  securityLevel: 'Public' | 'Restricted' | 'Confidential' | 'Top Secret';
-}
-
-interface ISO9000Section {
-  id: string;
-  title: string;
-  color: string;
-  icon: React.ComponentType<any>;
-  documents: ISO9000Document[];
-}
+import { ISO9000Section, ISO9000Document } from '../data/mockData';
 
 interface ISO9000CardProps {
   section: ISO9000Section;
@@ -128,8 +113,8 @@ export default function ISO9000Card({ section, onShowAll, onDocumentClick, onUpl
               handleDocumentClick(document);
             }}
           >
-            <div className="p-2 mb-2 rounded-lg border transition-all duration-200 hover:bg-white/60 dark:hover:bg-black/60 border-primary-200/30 dark:border-primary-700/30">
-              <p className="text-sm font-medium text-gray-800 truncate transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 dark:text-white group-hover:underline">
+            <div className="p-2 mb-2 rounded-lg transition-all duration-200 hover:bg-white/60 dark:hover:bg-black/60">
+              <p className="text-sm font-medium text-gray-800 truncate transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 dark:text-white">
                 {document.title}
               </p>
             </div>

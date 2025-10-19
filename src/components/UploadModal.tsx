@@ -34,6 +34,7 @@ interface UploadModalProps {
   iso9000Sections?: ISO9000Section[];
   iso2Sections?: ISO2Section[];
   edcSections?: EDCSection[];
+  ceSections?: any[];  // CE sections
 }
 
 export default function UploadModal({ 
@@ -44,7 +45,8 @@ export default function UploadModal({
   initialSubject,
   iso9000Sections = [],
   iso2Sections = [],
-  edcSections = []
+  edcSections = [],
+  ceSections = []
 }: UploadModalProps) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -72,10 +74,13 @@ export default function UploadModal({
     if (edcSections.length > 0) {
       return edcSections.map(section => section.title);
     }
+    if (ceSections.length > 0) {
+      return ceSections.map(section => section.title);
+    }
     
     // Fallback: Use department paths if no page-specific sections
     return getAllDepartmentPaths();
-  }, [iso9000Sections, iso2Sections, edcSections]);
+  }, [iso9000Sections, iso2Sections, edcSections, ceSections]);
 
   const acceptedFileTypes = {
     images: ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg'],

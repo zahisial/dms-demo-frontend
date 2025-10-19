@@ -459,6 +459,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
   );
 
   return (
+    
     <AnimatePresence>
       {isOpen && (
         <div className="overflow-y-auto fixed inset-0 z-50">
