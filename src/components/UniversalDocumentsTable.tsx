@@ -283,7 +283,7 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     {customActions ? (
                       customActions(document)
-                    ) : hoveredRow === document.id ? (
+                    ) : (
                       <div className="flex items-center space-x-2">
                         {onView && (
                           <motion.button
@@ -318,7 +318,7 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
                           </div>
                         )}
                       </div>
-                    ) : null}
+                    )}
                   </td>
                 )}
               </motion.tr>

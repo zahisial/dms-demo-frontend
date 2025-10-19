@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { mockISO9000Sections, type ISO9000Section, type ISO9000Document } from '../data/mockData';
 import { 
@@ -48,7 +48,8 @@ import {
   MessageCircle,
   Bell,
   User,
-  Users2
+  Users2,
+  ArrowLeft
 } from 'lucide-react';
 import ISO9000Card from './ISO9000Card';
 import NewCardModal from './NewCardModal';
@@ -60,7 +61,6 @@ import SearchBar from './SearchBar';
 import UniversalDocumentsTable from './UniversalDocumentsTable';
 import { isoCardDocumentsColumns } from './tableConfigs';
 import { mockDocuments } from '../data/mockData';
-import { ArrowLeft } from 'lucide-react';
 
 interface Document {
   id: string;
@@ -105,6 +105,9 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
   const [uploadSubject, setUploadSubject] = useState<string>('');
   const [selectedSection, setSelectedSection] = useState<ISO9000Section | null>(null);
   const [showTableView, setShowTableView] = useState(false);
+  const [sortBy, setSortBy] = useState('title');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
   const { toasts, removeToast, showSuccess } = useToaster();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -197,34 +200,65 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
     setIso9000Sections(prev => [...prev, newSection]);
   };
 
-  // Convert ISO9000Document to Document format
-  const convertToDocument = (isoDoc: ISO9000Document, sectionTitle: string): Document => {
-    return {
-      id: isoDoc.id,
-      title: isoDoc.title,
-      type: isoDoc.type as any,
-      fileType: 'pdf' as any,
-      fileSize: '1.2 MB',
-      department: sectionTitle,
-      uploadedBy: isoDoc.uploadedBy || 'System Admin',
-      uploadedAt: isoDoc.uploadedAt ? new Date(isoDoc.uploadedAt) : new Date(),
-      lastModified: new Date(),
-      accessType: 'public',
-      approvalStatus: 'approved',
-      tags: ['ISO9000', 'Quality', sectionTitle],
-      description: `${isoDoc.title} - ISO9000 quality management document`,
-      url: isoDoc.url || '#',
-      securityLevel: isoDoc.securityLevel || 'Public'
-    };
+  const handleDocumentClick = (document: ISO9000Document | Document) => {
+    console.log('ISO9000Page: Document clicked:', document.title);
+    // Documents now have full structure, use directly
+    setSelectedDocument(document as Document);
+    setPreviewModalOpen(true);
   };
 
-  const handleDocumentClick = (document: ISO9000Document) => {
-    console.log('ISO9000Page: Document clicked:', document.title);
-    const viewDocument = convertToDocument(document, selectedSection?.title || 'ISO9000 Management');
-    
-    console.log('ISO9000Page: Opening DocumentPreviewModal for:', viewDocument.title);
-    setSelectedDocument(viewDocument);
+  const handleEdit = (document: Document, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingDocument(document);
+    setEditModalOpen(true);
+  };
+
+  const handleView = (document: Document, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedDocument(document);
     setPreviewModalOpen(true);
+  };
+
+  // Generate dropdown items for document actions
+  const getDropdownItems = (document: Document) => {
+    return [
+      {
+        id: 'view',
+        label: 'View Details',
+        icon: Eye,
+        onClick: () => {
+          setSelectedDocument(document);
+          setPreviewModalOpen(true);
+        }
+      },
+      {
+        id: 'edit',
+        label: 'Edit Document',
+        icon: Edit3,
+        onClick: () => {
+          setEditingDocument(document);
+          setEditModalOpen(true);
+        }
+      },
+      {
+        id: 'download',
+        label: 'Download',
+        icon: Download,
+        onClick: () => {
+          console.log('Downloading document:', document.title);
+          alert(`Downloading "${document.title}"`);
+        }
+      },
+      {
+        id: 'share',
+        label: 'Share',
+        icon: Share2,
+        onClick: () => {
+          console.log('Sharing document:', document.title);
+          alert(`Sharing "${document.title}"`);
+        }
+      }
+    ];
   };
 
   // Handle card click to show table view
@@ -238,6 +272,52 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
     setShowTableView(false);
     setSelectedSection(null);
   };
+
+  // Handle sorting
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      // Toggle sort order if same field
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Set new field and default to ascending
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+  };
+
+  // Sort documents with memoization
+  const sortedDocuments = useMemo(() => {
+    if (!selectedSection?.documents) return [];
+    
+    return [...selectedSection.documents].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortBy) {
+        case 'title':
+          comparison = a.title.localeCompare(b.title);
+          break;
+        case 'uploadedAt':
+          comparison = new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime();
+          break;
+        case 'status':
+          comparison = a.approvalStatus.localeCompare(b.approvalStatus);
+          break;
+        case 'securityLevel':
+          const securityOrder = { 'Public': 1, 'Restricted': 2, 'Confidential': 3, 'Top Secret': 4 };
+          const aSecurity = a.securityLevel || 'Public';
+          const bSecurity = b.securityLevel || 'Public';
+          comparison = (securityOrder[aSecurity as keyof typeof securityOrder] || 1) - (securityOrder[bSecurity as keyof typeof securityOrder] || 1);
+          break;
+        case 'uploadedBy':
+          comparison = a.uploadedBy.localeCompare(b.uploadedBy);
+          break;
+        default:
+          comparison = 0;
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+  }, [selectedSection?.documents, sortBy, sortOrder]);
 
   const handleUploadComplete = (files: File[], subject: string) => {
     // Find the section that matches the subject
@@ -528,16 +608,19 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
 
             {/* Universal Table */}
             <UniversalDocumentsTable
-              documents={selectedSection?.documents.map(doc => convertToDocument(doc, selectedSection.title)) || []}
+              documents={sortedDocuments as Document[]}
               columns={isoCardDocumentsColumns}
               showCheckbox={false}
               showActions={true}
-              onDocumentClick={(doc) => handleDocumentClick(doc as any)}
-              onView={(doc) => {
-                const viewDocument = convertToDocument(doc as any, selectedSection?.title || '');
-                setSelectedDocument(viewDocument);
-                setPreviewModalOpen(true);
-              }}
+              hoveredRow={hoveredRow}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSort={handleSort}
+              onHoverChange={setHoveredRow}
+              onDocumentClick={(doc) => handleDocumentClick(doc)}
+              onView={handleView}
+              onEdit={handleEdit}
+              getDropdownItems={getDropdownItems}
             />
           </motion.div>
         </>

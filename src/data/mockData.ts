@@ -700,7 +700,7 @@ export const mockDocumentAcceptances: DocumentAcceptance[] = [
     acceptanceType: 'signed'
   }
 ];
-
+// universal departments
 export const mockDepartments: Department[] = [
   {
     id: '1',
@@ -1004,7 +1004,7 @@ export const mockDepartments: Department[] = [
     ]
   }
 ];
-// 
+// universal audit logs
 export const mockAuditLogs: AuditLog[] = [
   {
     id: '1',
@@ -1283,13 +1283,125 @@ export const mockISO9000Sections: ISO9000Section[] = [
     color: '#08bed5',
     icon: Award,
     documents: [
-      { id: '1', title: 'Quality Policy', type: 'Policy', url: '#', securityLevel: 'Public' },
-      { id: '2', title: 'Quality Objectives', type: 'Document', url: '#', securityLevel: 'Restricted' },
-      { id: '3', title: 'Management Review', type: 'Procedure', url: '#', securityLevel: 'Confidential' },
-      { id: '4', title: 'Quality Manual', type: 'Manual', url: '#', securityLevel: 'Public' },
-      { id: '5', title: 'Process Mapping', type: 'Diagram', url: '#', securityLevel: 'Restricted' },
-      { id: '6', title: 'Risk Assessment', type: 'Assessment', url: '#', securityLevel: 'Confidential' },
-      { id: '7', title: 'Corrective Actions', type: 'Procedure', url: '#', securityLevel: 'Public' }
+      {
+        id: 'iso-1',
+        title: 'Quality Policy',
+        type: 'Policy',
+        fileType: 'pdf',
+        fileSize: '1.2 MB',
+        department: 'Quality Management System',
+        uploadedBy: 'ISO Administrator',
+        uploadedAt: new Date('2024-01-10 09:00:00'),
+        lastModified: new Date('2024-01-10 09:00:00'),
+        accessType: 'public',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Quality', 'Policy'],
+        description: 'Comprehensive quality policy statement for the organization.',
+        url: '/documents/iso9000/quality-policy.pdf',
+        securityLevel: 'Public'
+      },
+      {
+        id: 'iso-2',
+        title: 'Quality Objectives',
+        type: 'Document',
+        fileType: 'pdf',
+        fileSize: '850 KB',
+        department: 'Quality Management System',
+        uploadedBy: 'ISO Administrator',
+        uploadedAt: new Date('2024-01-10 10:30:00'),
+        lastModified: new Date('2024-01-10 10:30:00'),
+        accessType: 'department',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Quality', 'Objectives'],
+        description: 'Measurable quality objectives aligned with company strategy.',
+        url: '/documents/iso9000/quality-objectives.pdf',
+        securityLevel: 'Restricted'
+      },
+      {
+        id: 'iso-3',
+        title: 'Management Review',
+        type: 'Procedure',
+        fileType: 'pdf',
+        fileSize: '1.5 MB',
+        department: 'Quality Management System',
+        uploadedBy: 'ISO Administrator',
+        uploadedAt: new Date('2024-01-11 14:00:00'),
+        lastModified: new Date('2024-01-11 14:00:00'),
+        accessType: 'restricted',
+        approvalStatus: 'Pending for Approval',
+        tags: ['ISO9000', 'Management', 'Review'],
+        description: 'Management review procedure for quality system assessment.',
+        url: '/documents/iso9000/management-review.pdf',
+        securityLevel: 'Confidential'
+      },
+      {
+        id: 'iso-4',
+        title: 'Quality Manual',
+        type: 'Manual',
+        fileType: 'pdf',
+        fileSize: '3.2 MB',
+        department: 'Quality Management System',
+        uploadedBy: 'ISO Administrator',
+        uploadedAt: new Date('2024-01-12 11:00:00'),
+        lastModified: new Date('2024-01-12 11:00:00'),
+        accessType: 'public',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Quality', 'Manual'],
+        description: 'Complete quality management system manual.',
+        url: '/documents/iso9000/quality-manual.pdf',
+        securityLevel: 'Public'
+      },
+      {
+        id: 'iso-5',
+        title: 'Process Mapping',
+        type: 'Diagram',
+        fileType: 'pdf',
+        fileSize: '2.1 MB',
+        department: 'Quality Management System',
+        uploadedBy: 'ISO Administrator',
+        uploadedAt: new Date('2024-01-13 09:30:00'),
+        lastModified: new Date('2024-01-13 09:30:00'),
+        accessType: 'department',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Process', 'Mapping'],
+        description: 'Visual representation of key organizational processes.',
+        url: '/documents/iso9000/process-mapping.pdf',
+        securityLevel: 'Restricted'
+      },
+      {
+        id: 'iso-6',
+        title: 'Risk Assessment',
+        type: 'Assessment',
+        fileType: 'pdf',
+        fileSize: '1.8 MB',
+        department: 'Quality Management System',
+        uploadedBy: 'ISO Administrator',
+        uploadedAt: new Date('2024-01-14 13:00:00'),
+        lastModified: new Date('2024-01-14 13:00:00'),
+        accessType: 'restricted',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Risk', 'Assessment'],
+        description: 'Comprehensive risk assessment for quality management.',
+        url: '/documents/iso9000/risk-assessment.pdf',
+        securityLevel: 'Confidential'
+      },
+      {
+        id: 'iso-7',
+        title: 'Corrective Actions',
+        type: 'Procedure',
+        fileType: 'pdf',
+        fileSize: '1.3 MB',
+        department: 'Quality Management System',
+        uploadedBy: 'ISO Administrator',
+        uploadedAt: new Date('2024-01-15 10:00:00'),
+        lastModified: new Date('2024-01-15 10:00:00'),
+        accessType: 'public',
+        approvalStatus: 'approved',
+        tags: ['ISO9000', 'Corrective', 'Actions'],
+        description: 'Procedure for handling non-conformities and corrective actions.',
+        url: '/documents/iso9000/corrective-actions.pdf',
+        securityLevel: 'Public'
+      }
     ]
   },
   {
