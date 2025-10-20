@@ -28,7 +28,7 @@ import SearchBar from './SearchBar';
 import UniversalDocumentsTable from './UniversalDocumentsTable';
 import { isoCardDocumentsColumns, isoCardDocumentsColumnsWithSubject } from './tableConfigs';
 import { mockDocuments } from '../data/mockData';
-import { Document } from '../types';
+import { Document, User } from '../types';
 import ISO9000Card from './ISO9000Card';
 
 interface CEPageProps {
@@ -37,9 +37,10 @@ interface CEPageProps {
   onDocumentClick?: (document: Document) => void;
   sections?: CESection[];
   onUpdateSections?: (sections: CESection[]) => void;
+  user?: User;
 }
 
-export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumentClick, sections: propSections, onUpdateSections }: CEPageProps) {
+export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumentClick, sections: propSections, onUpdateSections, user }: CEPageProps) {
   const [newCardModalOpen, setNewCardModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -459,28 +460,32 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
                 </AnimatePresence>
               </div>
               
-              <motion.button
-                onClick={() => {
-                  setUploadSubject('');
-                  setUploadModalOpen(true);
-                }}
-                className="glass-button-secondary"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Upload className="w-4 h-4" />
-                <span>Upload New</span>
-              </motion.button>
-              
-              <motion.button
-                onClick={() => setNewCardModalOpen(true)}
-                className="glass-button-primary"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Plus className="w-4 h-4" />
-                <span>New Subject</span>
-              </motion.button>
+              {user?.role === 'admin' && (
+                <>
+                  <motion.button
+                    onClick={() => {
+                      setUploadSubject('');
+                      setUploadModalOpen(true);
+                    }}
+                    className="glass-button-secondary"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>Upload New</span>
+                  </motion.button>
+                  
+                  <motion.button
+                    onClick={() => setNewCardModalOpen(true)}
+                    className="glass-button-primary"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>New Subject</span>
+                  </motion.button>
+                </>
+              )}
               
               {/* Search Bar */}
               <div className="w-96">
