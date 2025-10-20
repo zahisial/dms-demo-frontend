@@ -19,7 +19,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import NewCardModal from './NewCardModal';
-import DocumentEditModal from './DocumentEditModal';
+import DocumentEditDetail from './DocumentEditDetail';
 import UploadModal from './UploadModal';
 import Toaster, { useToaster } from './Toaster';
 import PermissionDeniedModal from './PermissionDeniedModal';
@@ -741,15 +741,17 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
       />
 
 
-      <DocumentEditModal
-        isOpen={editModalOpen}
-        onClose={() => {
-          setEditModalOpen(false);
-          setEditingDocument(null);
-        }}
-        document={editingDocument as any}
-        onSave={handleSaveDocument as any}
-      />
+      {editModalOpen && editingDocument && (
+        <DocumentEditDetail
+          document={editingDocument as any}
+          onSave={handleSaveDocument as any}
+          onBack={() => {
+            setEditModalOpen(false);
+            setEditingDocument(null);
+          }}
+          hideApproveActions={false}
+        />
+      )}
 
       <UploadModal
         isOpen={uploadModalOpen}

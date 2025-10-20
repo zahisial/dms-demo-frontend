@@ -769,7 +769,7 @@ function App() {
             onEdit={(document) => {
               // Handle edit logic here
               console.log('Edit document:', document.title);
-              // Could open DocumentEditModal or navigate to edit page
+              // Could open DocumentEditDetail or navigate to edit page
             }}
             onDelete={(document) => {
               // Handle delete logic here

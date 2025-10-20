@@ -53,7 +53,7 @@ import {
 } from 'lucide-react';
 import ISO9000Card from './ISO9000Card';
 import NewCardModal from './NewCardModal';
-import DocumentEditModal from './DocumentEditModal';
+import DocumentEditDetail from './DocumentEditDetail';
 import UploadModal from './UploadModal';
 import Toaster, { useToaster } from './Toaster';
 import PermissionDeniedModal from './PermissionDeniedModal';
@@ -840,15 +840,17 @@ export default function ISO9000Page({ onDocumentClick, sections: propSections, o
       />
 
 
-      <DocumentEditModal
-        isOpen={editModalOpen}
-        onClose={() => {
-          setEditModalOpen(false);
-          setEditingDocument(null);
-        }}
-        document={editingDocument}
-        onSave={handleSaveDocument}
-      />
+      {editModalOpen && editingDocument && (
+        <DocumentEditDetail
+          document={editingDocument}
+          onSave={handleSaveDocument}
+          onBack={() => {
+            setEditModalOpen(false);
+            setEditingDocument(null);
+          }}
+          hideApproveActions={false}
+        />
+      )}
 
       <UploadModal
         isOpen={uploadModalOpen}
