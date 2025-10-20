@@ -9,6 +9,7 @@ import UploadModal from './UploadModal';
 import Toaster, { useToaster } from './Toaster';
 import SearchBar from './SearchBar';
 import { mockDocuments } from '../data/mockData';
+import { User } from '../types';
 
 interface Document {
   id: string;
@@ -39,9 +40,10 @@ interface EDCPageProps {
   onDocumentClick?: (document: Document) => void;
   sections?: EDCSection[];
   onUpdateSections?: (sections: EDCSection[]) => void;
+  user?: User | null;
 }
 
-export default function EDCPage({ onNavigateToDocsDB, onShowAllResults, onDocumentClick, sections: propSections, onUpdateSections }: EDCPageProps) {
+export default function EDCPage({ onNavigateToDocsDB, onShowAllResults, onDocumentClick, sections: propSections, onUpdateSections, user }: EDCPageProps) {
   const [newCardModalOpen, setNewCardModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -315,28 +317,32 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults, onDocume
               />
             </div>
             
-            <motion.button
-              onClick={() => {
-                setUploadSubject('');
-                setUploadModalOpen(true);
-              }}
-              className="glass-button-secondary"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Upload className="w-4 h-4" />
-              <span>Upload New</span>
-            </motion.button>
-            
-            <motion.button
-              onClick={() => setNewCardModalOpen(true)}
-              className="glass-button-primary"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Plus className="w-4 h-4" />
-              <span>New Subject</span>
-            </motion.button>
+            {user?.role === 'admin' && (
+              <>
+                <motion.button
+                  onClick={() => {
+                    setUploadSubject('');
+                    setUploadModalOpen(true);
+                  }}
+                  className="glass-button-secondary"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>Upload New</span>
+                </motion.button>
+                
+                <motion.button
+                  onClick={() => setNewCardModalOpen(true)}
+                  className="glass-button-primary"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>New Subject</span>
+                </motion.button>
+              </>
+            )}
           </div>
         </div>
 

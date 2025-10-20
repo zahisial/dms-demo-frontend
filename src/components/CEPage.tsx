@@ -28,7 +28,7 @@ import SearchBar from './SearchBar';
 import UniversalDocumentsTable from './UniversalDocumentsTable';
 import { isoCardDocumentsColumns, isoCardDocumentsColumnsWithSubject } from './tableConfigs';
 import { mockDocuments } from '../data/mockData';
-import { Document } from '../types';
+import { Document, User } from '../types';
 import ISO9000Card from './ISO9000Card';
 
 interface CEPageProps {
@@ -37,9 +37,10 @@ interface CEPageProps {
   onDocumentClick?: (document: Document) => void;
   sections?: CESection[];
   onUpdateSections?: (sections: CESection[]) => void;
+  user?: User | null;
 }
 
-export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumentClick, sections: propSections, onUpdateSections }: CEPageProps) {
+export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumentClick, sections: propSections, onUpdateSections, user }: CEPageProps) {
   const [newCardModalOpen, setNewCardModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -459,28 +460,32 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
                 </AnimatePresence>
               </div>
               
-              <motion.button
-                onClick={() => {
-                  setUploadSubject('');
-                  setUploadModalOpen(true);
-                }}
-                className="glass-button-secondary"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Upload className="w-4 h-4" />
-                <span>Upload New</span>
-              </motion.button>
-              
-              <motion.button
-                onClick={() => setNewCardModalOpen(true)}
-                className="glass-button-primary"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Plus className="w-4 h-4" />
-                <span>New Subject</span>
-              </motion.button>
+              {user?.role === 'admin' && (
+                <>
+                  <motion.button
+                    onClick={() => {
+                      setUploadSubject('');
+                      setUploadModalOpen(true);
+                    }}
+                    className="glass-button-secondary"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>Upload New</span>
+                  </motion.button>
+                  
+                  <motion.button
+                    onClick={() => setNewCardModalOpen(true)}
+                    className="glass-button-primary"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>New Subject</span>
+                  </motion.button>
+                </>
+              )}
               
               {/* Search Bar */}
               <div className="w-96">
@@ -538,27 +543,29 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
                   {/* Upload Card */}
                  
 
-                  {/* Create Subject Card */}
-                  <motion.div
-                    className="justify-center p-8 text-center rounded-2xl transition-all duration-300 cursor-pointer glass-panel hover:shadow-lg group"
-                    whileHover={{ scale: 1.02, y: -4, justifyContent: 'center' }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setNewCardModalOpen(true)}
-                  >
-                    <div className="flex justify-center items-center mx-auto mb-4 w-16 h-16 bg-gradient-to-br rounded-full transition-transform duration-300 from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/20 group-hover:scale-110">
-                      <Plus className="w-8 h-8 text-primary-600 dark:text-primary-400" />
-                    </div>
-                    <h3 className="mb-2 text-xl font-semibold text-gray-800 dark:text-white">
-                      Create New Subject
-                    </h3>
-                    <p className="mb-4 text-gray-600 dark:text-gray-400">
-                      Organize your security documents into structured topics
-                    </p>
-                    <div className="flex justify-center items-center transition-colors text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300">
-                      <span className="text-sm font-medium">Create Subject</span>
-                      <ArrowRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                    </div>
-                  </motion.div>
+                  {/* Create Subject Card - Only for Admin */}
+                  {user?.role === 'admin' && (
+                    <motion.div
+                      className="justify-center p-8 text-center rounded-2xl transition-all duration-300 cursor-pointer glass-panel hover:shadow-lg group"
+                      whileHover={{ scale: 1.02, y: -4, justifyContent: 'center' }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setNewCardModalOpen(true)}
+                    >
+                      <div className="flex justify-center items-center mx-auto mb-4 w-16 h-16 bg-gradient-to-br rounded-full transition-transform duration-300 from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/20 group-hover:scale-110">
+                        <Plus className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+                      </div>
+                      <h3 className="mb-2 text-xl font-semibold text-gray-800 dark:text-white">
+                        Create New Subject
+                      </h3>
+                      <p className="mb-4 text-gray-600 dark:text-gray-400">
+                        Organize your security documents into structured topics
+                      </p>
+                      <div className="flex justify-center items-center transition-colors text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300">
+                        <span className="text-sm font-medium">Create Subject</span>
+                        <ArrowRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
               </motion.div>
             </>
@@ -703,13 +710,7 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
             <UniversalDocumentsTable
               documents={sortedDocuments as Document[]}
               columns={selectedSection ? isoCardDocumentsColumns : isoCardDocumentsColumnsWithSubject}
-              user={{
-                id: '1',
-                name: 'Sarah Johnson',
-                email: 'fms-admin@edaratgroup.com',
-                role: 'admin',
-                department: 'Information Technology'
-              }}
+              user={user}
               showCheckbox={true}
               showActions={true}
               selectedDocuments={selectedDocuments}

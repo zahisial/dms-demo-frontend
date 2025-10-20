@@ -62,16 +62,17 @@ import DeleteConfirmationModal from './DeleteConfirmationModal';
 import UniversalDocumentsTable from './UniversalDocumentsTable';
 import { isoCardDocumentsColumns, isoCardDocumentsColumnsWithSubject } from './tableConfigs';
 import { mockUsers } from '../data/mockData';
-import { Document } from '../types';
+import { Document, User } from '../types';
 
 
 interface ISO9000PageProps {
   onDocumentClick?: (document: Document) => void;
   sections?: ISO9000Section[];
   onUpdateSections?: (sections: ISO9000Section[]) => void;
+  user?: User | null;
 }
 
-export default function ISO9000Page({ onDocumentClick, sections: propSections, onUpdateSections }: ISO9000PageProps) {
+export default function ISO9000Page({ onDocumentClick, sections: propSections, onUpdateSections, user }: ISO9000PageProps) {
   const [newCardModalOpen, setNewCardModalOpen] = useState(false);
   const [searchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -627,28 +628,32 @@ export default function ISO9000Page({ onDocumentClick, sections: propSections, o
               </AnimatePresence>
             </div>
             
-            <motion.button
-              onClick={() => {
-                setUploadSubject('');
-                setUploadModalOpen(true);
-              }}
-              className="glass-button-secondary"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Upload className="w-4 h-4" />
-              <span>Upload New</span>
-            </motion.button>
-            
-            <motion.button
-              onClick={() => setNewCardModalOpen(true)}
-              className="glass-button-primary"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Plus className="w-4 h-4" />
-              <span>New Subject</span>
-            </motion.button>
+            {user?.role === 'admin' && (
+              <>
+                <motion.button
+                  onClick={() => {
+                    setUploadSubject('');
+                    setUploadModalOpen(true);
+                  }}
+                  className="glass-button-secondary"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>Upload New</span>
+                </motion.button>
+                
+                <motion.button
+                  onClick={() => setNewCardModalOpen(true)}
+                  className="glass-button-primary"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>New Subject</span>
+                </motion.button>
+              </>
+            )}
             
             {/* Search Bar */}
             
@@ -801,13 +806,7 @@ export default function ISO9000Page({ onDocumentClick, sections: propSections, o
             <UniversalDocumentsTable
               documents={sortedDocuments as Document[]}
               columns={selectedSection ? isoCardDocumentsColumns : isoCardDocumentsColumnsWithSubject}
-              user={{
-                id: '4',
-                name: 'ISO Administrator',
-                email: 'admini_iso@edaratgroup.com',
-                role: 'admin',
-                department: 'Quality Management'
-              }}
+              user={user}
               users={mockUsers as any}
               showCheckbox={true}
               showActions={true}
