@@ -211,13 +211,13 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
   const visibleColumns = columns.filter(col => col.visible !== false);
 
   return (
-    <div className="glass-panel rounded-lg">
+    <div className="rounded-lg glass-panel">
       <div className="overflow-x-auto lg:overflow-x-visible">
         <table className="w-full">
           <thead className="bg-gray-50 dark:bg-gray-700/50">
             <tr>
               {showCheckbox && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                   <input
                     type="checkbox"
                     checked={selectedDocuments.size === documents.length && documents.length > 0}
@@ -228,7 +228,7 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
                         onDeselectAll?.();
                       }
                     }}
-                    className="rounded border-gray-300 dark:border-gray-600 text-primary-600 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
+                    className="rounded border-gray-300 shadow-sm dark:border-gray-600 text-primary-600 focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
                     aria-label="Select all documents"
                   />
                 </th>
@@ -242,7 +242,7 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
                   {column.sortable !== false && onSort ? (
                     <button
                       onClick={() => onSort(column.id)}
-                      className="flex items-center space-x-1 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                      className="flex items-center space-x-1 transition-colors hover:text-gray-700 dark:hover:text-gray-300"
                       aria-label={`Sort by ${column.label}`}
                     >
                       <span>{column.label}</span>
@@ -254,7 +254,7 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
                 </th>
               ))}
               {showActions && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">
                   Actions
                 </th>
               )}
@@ -266,7 +266,7 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
                 key={document.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30"
                 onMouseEnter={() => onHoverChange?.(document.id)}
                 onMouseLeave={() => onHoverChange?.(null)}
               >
@@ -279,7 +279,7 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
                         e.stopPropagation();
                         onDocumentSelect?.(document.id, e.target.checked);
                       }}
-                      className="rounded border-gray-300 dark:border-gray-600 text-primary-600 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
+                      className="rounded border-gray-300 shadow-sm dark:border-gray-600 text-primary-600 focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50"
                       aria-label={`Select ${document.title}`}
                     />
                   </td>
@@ -293,7 +293,7 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
                   </td>
                 ))}
                 {showActions && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                     {customActions ? (
                       customActions(document)
                     ) : (

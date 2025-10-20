@@ -144,7 +144,9 @@ export const mockDocuments: Document[] = [
       title: 'HR Manager',
       email: 'fms-hr@edaratgroup.com',
       avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1'
-    }
+    },
+    username: 'handbook2024',
+    password: 'Emp@Hdbk#2024'
   },
   {
     id: '2',
@@ -172,7 +174,9 @@ export const mockDocuments: Document[] = [
       title: 'IT Director',
       email: 'fms-admin@edaratgroup.com',
       avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1'
-    }
+    },
+    username: 'itsecurity',
+    password: 'Sec@IT#2024'
   },
   {
     id: '3',

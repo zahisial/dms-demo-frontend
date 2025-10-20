@@ -8,6 +8,7 @@ interface ISO9000CardProps {
   onDocumentClick: (document: ISO9000Document) => void;
   onUpload?: (sectionTitle: string) => void;
   onCardClick?: (sectionTitle: string) => void;
+  onDelete?: (document: Document, e: React.MouseEvent) => void;
 }
 
 export default function ISO9000Card({ section, onShowAll, onDocumentClick, onUpload, onCardClick }: ISO9000CardProps) {
@@ -69,6 +70,7 @@ export default function ISO9000Card({ section, onShowAll, onDocumentClick, onUpl
           >
             <section.icon className="w-5 h-5 text-white" />
           </div>
+          
           <div>
             <h3 className="text-lg font-bold text-gray-800">
               {section.title}
@@ -97,6 +99,7 @@ export default function ISO9000Card({ section, onShowAll, onDocumentClick, onUpl
             <Upload className="w-4 h-4 text-gray-600 dark:text-gray-400" />
           </motion.button>
         )}
+        
       </div>
 
       {/* Documents List */}

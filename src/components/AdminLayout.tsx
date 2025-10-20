@@ -106,7 +106,7 @@ export default function AdminLayout({
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Compact Sidebar - Only for admin users */}
       <AnimatePresence>
-        {user.role === 'admin' && showSidebar && (
+        { showSidebar && (
           <motion.div 
             className="flex flex-col w-16 bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700"
             initial={{ x: -64 }}

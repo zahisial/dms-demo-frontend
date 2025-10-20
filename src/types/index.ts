@@ -56,6 +56,8 @@ export interface Document {
   isDeleted?: boolean;  // Soft delete flag
   deletedAt?: Date;
   deletedBy?: string;
+  username?: string;    // Username for document access
+  password?: string;    // Password for document access
 }
 
 export interface DocumentAcceptance {
