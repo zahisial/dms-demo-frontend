@@ -51,7 +51,7 @@ export default function PendingApprovalsPage({
   const [deleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
 
-  // Get all pending documents from all sections
+  // Get all pending documents from all sections, filtered by manager assignment
   const pendingDocuments = useMemo(() => {
     const allDocs: Document[] = [];
     
@@ -91,8 +91,14 @@ export default function PendingApprovalsPage({
       });
     });
     
+    // Filter to show only documents assigned to the current manager
+    if (user && user.role === 'manager') {
+      return allDocs.filter(doc => doc.assignedTo === user.id);
+    }
+    
+    // For non-managers or when no user is logged in, return all documents
     return allDocs;
-  }, [iso9000Sections, ceSections, edcSections, iso2Sections]);
+  }, [iso9000Sections, ceSections, edcSections, iso2Sections, user]);
 
   // OLD Mock data - Now replaced with real data from sections
   const oldPendingDocuments: Document[] = [
@@ -489,6 +495,11 @@ export default function PendingApprovalsPage({
               <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
                 Pending Approvals
               </h1>
+              {user && user.role === 'manager' && (
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Documents assigned to you for review
+                </p>
+              )}
             </div>
           </div>
           
@@ -608,10 +619,13 @@ export default function PendingApprovalsPage({
         >
           <FileCheck className="mx-auto mb-4 w-16 h-16 text-gray-400" />
           <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
-            No pending approvals
+            {user && user.role === 'manager' ? 'No documents assigned to you' : 'No pending approvals'}
           </h3>
           <p className="text-gray-500 dark:text-gray-400">
-            All documents have been reviewed and approved.
+            {user && user.role === 'manager' 
+              ? 'You have no documents assigned for review at the moment.'
+              : 'All documents have been reviewed and approved.'
+            }
           </p>
         </motion.div>
       )}
