@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { mockISO9000Sections, type ISO9000Section, type ISO9000Document } from '../data/mockData';
 import { 
   Plus, 
-  MoreHorizontal, 
   Search, 
   Clock, 
   CheckCircle, 
@@ -13,7 +12,6 @@ import {
   Users, 
   Shield, 
   Heart, 
-  TrendingUp,
   Check,
   Bell,
   Trash2,
@@ -64,19 +62,15 @@ import { mockDocuments } from '../data/mockData';
 import { Document } from '../types';
 
 interface ISO9000PageProps {
-  onNavigateToDocsDB: (subjectTitle?: string) => void;
-  onNavigateToPendingApprovals?: () => void;
-  onShowAllResults?: (query: string) => void;
   onDocumentClick?: (document: Document) => void;
   sections?: ISO9000Section[];
   onUpdateSections?: (sections: ISO9000Section[]) => void;
 }
 
-export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApprovals, onShowAllResults, onDocumentClick, sections: propSections, onUpdateSections }: ISO9000PageProps) {
+export default function ISO9000Page({ onDocumentClick, sections: propSections, onUpdateSections }: ISO9000PageProps) {
   const [newCardModalOpen, setNewCardModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
@@ -114,7 +108,7 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
   const iso9000Sections = propSections || localSections;
   const setIso9000Sections = onUpdateSections || ((sections: ISO9000Section[] | ((prev: ISO9000Section[]) => ISO9000Section[])) => {
     if (typeof sections === 'function') {
-      setLocalSections(sections);
+      setLocalSections(sections as ISO9000Section[]);
     } else {
       setLocalSections(sections);
     }
@@ -123,7 +117,7 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
   const handleAddNewCard = (card: { title: string; color: string; icon: string }) => {
     // Import the icon component dynamically based on the icon name
     const getIconComponent = (iconName: string) => {
-      const iconMap: { [key: string]: any } = {
+      const iconMap: { [key: string]: React.ComponentType<{ className?: string; size?: number }> } = {
         'FileText': FileText,
         'Folder': Folder,
         'Users': Users,
@@ -178,7 +172,7 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
       icon: getIconComponent(card.icon),
       documents: []
     };
-    setIso9000Sections(prev => [...prev, newSection]);
+    setIso9000Sections((prev: ISO9000Section[]) => [...prev, newSection]);
   };
 
   const handleDocumentClick = (document: ISO9000Document | Document) => {
@@ -337,7 +331,7 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
   };
 
   // Get recently viewed documents (last day)
-  const getRecentlyViewedDocuments = () => {
+  const getRecentlyViewedDocuments = useCallback(() => {
     // If viewing from a specific section, only show that section's recent docs
     if (selectedSection && tableViewType === 'section') {
       return selectedSection.documents.filter(doc => recentlyViewedDocs.has(doc.id));
@@ -345,10 +339,10 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
     // Otherwise show all recent docs
     const allDocs = getAllDocuments();
     return allDocs.filter(doc => recentlyViewedDocs.has(doc.id));
-  };
+  }, [selectedSection, tableViewType, recentlyViewedDocs, iso9000Sections]);
 
   // Get pending documents
-  const getPendingDocuments = () => {
+  const getPendingDocuments = useCallback(() => {
     // If viewing from a specific section, only show that section's pending docs
     if (selectedSection && tableViewType === 'section') {
       return selectedSection.documents.filter(doc => doc.approvalStatus === 'pending');
@@ -356,7 +350,7 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
     // Otherwise show all pending docs
     const allDocs = getAllDocuments();
     return allDocs.filter(doc => doc.approvalStatus === 'pending');
-  };
+  }, [selectedSection, tableViewType, iso9000Sections]);
 
   // Handle sorting
   const handleSort = (field: string) => {
@@ -372,7 +366,7 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
 
   // Sort documents with memoization
   const sortedDocuments = useMemo(() => {
-    let docsToSort: any[] = [];
+    let docsToSort: (ISO9000Document | Document)[] = [];
     
     // Determine which documents to show based on view type
     if (tableViewType === 'recent') {
@@ -387,31 +381,37 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
       let comparison = 0;
       
       switch (sortBy) {
-        case 'title':
+        case 'title': {
           comparison = a.title.localeCompare(b.title);
           break;
-        case 'uploadedAt':
+        }
+        case 'uploadedAt': {
           comparison = new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime();
           break;
-        case 'status':
+        }
+        case 'status': {
           comparison = a.approvalStatus.localeCompare(b.approvalStatus);
           break;
-        case 'securityLevel':
+        }
+        case 'securityLevel': {
           const securityOrder = { 'Public': 1, 'Restricted': 2, 'Confidential': 3, 'Top Secret': 4 };
           const aSecurity = a.securityLevel || 'Public';
           const bSecurity = b.securityLevel || 'Public';
           comparison = (securityOrder[aSecurity as keyof typeof securityOrder] || 1) - (securityOrder[bSecurity as keyof typeof securityOrder] || 1);
           break;
-        case 'uploadedBy':
+        }
+        case 'uploadedBy': {
           comparison = a.uploadedBy.localeCompare(b.uploadedBy);
           break;
-        default:
+        }
+        default: {
           comparison = 0;
+        }
       }
       
       return sortOrder === 'asc' ? comparison : -comparison;
     });
-  }, [selectedSection?.documents, sortBy, sortOrder, tableViewType, recentlyViewedDocs, iso9000Sections]);
+  }, [selectedSection?.documents, sortBy, sortOrder, tableViewType, recentlyViewedDocs, iso9000Sections, getRecentlyViewedDocuments, getPendingDocuments]);
 
   const handleUploadComplete = (files: File[], subject: string) => {
     // Find the section that matches the subject
@@ -448,7 +448,7 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
       }));
 
       // Update the section with new documents
-      const updatedSections = iso9000Sections.map(section => 
+      const updatedSections = iso9000Sections.map((section: ISO9000Section) => 
         section.id === targetSection.id 
           ? { ...section, documents: [...section.documents, ...newDocuments] }
           : section
@@ -483,7 +483,7 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
       type: file.type || 'Unknown',
       department: 'ISO9000 Management',
       uploadedBy: 'Current User',
-      uploadedAt: new Date().toISOString(),
+      uploadedAt: new Date(),
       fileSize: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
       status: 'pending',
       tags: [],
@@ -492,7 +492,7 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
       description: `Uploaded file: ${file.name}`,
       isLocked: false,
       isPublic: false,
-      securityLevel: 'internal'
+      securityLevel: 'Public'
     };
     
     setEditingDocument(uploadedDocument);
@@ -507,15 +507,6 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
     setEditingDocument(null);
   };
 
-  const handleAcknowledge = (documentId: string) => {
-    console.log('Document acknowledged:', documentId);
-    alert(`Document "${selectedDocument?.title}" has been acknowledged`);
-  };
-
-  const handleApprove = (documentId: string) => {
-    console.log('Document approved:', documentId);
-    alert(`Document "${selectedDocument?.title}" has been approved`);
-  };
 
   const handleCardUpload = (sectionTitle: string) => {
     setUploadSubject(sectionTitle);
@@ -814,8 +805,8 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
           setEditModalOpen(false);
           setEditingDocument(null);
         }}
-        document={editingDocument as any}
-        onSave={handleSaveDocument as any}
+        document={editingDocument}
+        onSave={handleSaveDocument}
       />
 
       <UploadModal
