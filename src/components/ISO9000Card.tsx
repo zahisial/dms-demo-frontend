@@ -8,9 +8,10 @@ interface ISO9000CardProps {
   onDocumentClick: (document: ISO9000Document) => void;
   onUpload?: (sectionTitle: string) => void;
   onCardClick?: (sectionTitle: string) => void;
+  onDelete?: (sectionTitle: string) => void;
 }
 
-export default function ISO9000Card({ section, onShowAll, onDocumentClick, onUpload, onCardClick }: ISO9000CardProps) {
+export default function ISO9000Card({ section, onShowAll, onDocumentClick, onUpload, onCardClick, onDelete }: ISO9000CardProps) {
   // Show all documents if 5 or fewer, otherwise show first 5
   const displayedDocuments = section.documents.length <= 5 
     ? section.documents 
@@ -24,6 +25,13 @@ export default function ISO9000Card({ section, onShowAll, onDocumentClick, onUpl
   const handleCardClick = () => {
     if (onCardClick) {
       onCardClick(section.title);
+    }
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) {
+      onDelete(section.title);
     }
   };
 
@@ -82,21 +90,41 @@ export default function ISO9000Card({ section, onShowAll, onDocumentClick, onUpl
           </div>
         </div>
 
-        {/* Upload Button */}
-        {onUpload && (
-          <motion.button
-            onClick={(e) => {
-              e.stopPropagation();
-              onUpload(section.title);
-            }}
-            className="opacity-0 transition-opacity duration-200 glass-button-icon group-hover:opacity-100"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            title="Upload to this subject"
-          >
-            <Upload className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-          </motion.button>
-        )}
+        {/* Action Buttons */}
+        <div className="flex items-center space-x-2">
+          {/* Upload Button */}
+          {onUpload && (
+            <motion.button
+              onClick={(e) => {
+                e.stopPropagation();
+                onUpload(section.title);
+              }}
+              className="opacity-0 transition-opacity duration-200 glass-button-icon group-hover:opacity-100"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              title="Upload to this subject"
+              tabIndex={0}
+              aria-label="Upload to this subject"
+            >
+              <Upload className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            </motion.button>
+          )}
+
+          {/* Delete Button */}
+          {onDelete && (
+            <motion.button
+              onClick={handleDelete}
+              className="opacity-0 transition-opacity duration-200 glass-button-icon group-hover:opacity-100"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              title="Delete this subject"
+              tabIndex={0}
+              aria-label="Delete this subject"
+            >
+              <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+            </motion.button>
+          )}
+        </div>
       </div>
 
       {/* Documents List */}
