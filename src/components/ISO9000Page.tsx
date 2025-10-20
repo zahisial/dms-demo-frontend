@@ -119,7 +119,7 @@ export default function ISO9000Page({ onDocumentClick, sections: propSections, o
   const iso9000Sections = propSections || localSections;
   const setIso9000Sections = onUpdateSections || ((sections: ISO9000Section[] | ((prev: ISO9000Section[]) => ISO9000Section[])) => {
     if (typeof sections === 'function') {
-      setLocalSections(sections as ISO9000Section[]);
+      setLocalSections((prev: ISO9000Section[]) => sections(prev));
     } else {
       setLocalSections(sections);
     }
@@ -128,7 +128,7 @@ export default function ISO9000Page({ onDocumentClick, sections: propSections, o
   const handleAddNewCard = (card: { title: string; color: string; icon: string }) => {
     // Import the icon component dynamically based on the icon name
     const getIconComponent = (iconName: string) => {
-      const iconMap: { [key: string]: React.ComponentType<{ className?: string; size?: number }> } = {
+      const iconMap: { [key: string]: React.ComponentType<any> } = {
         'FileText': FileText,
         'Folder': Folder,
         'Users': Users,
@@ -183,7 +183,7 @@ export default function ISO9000Page({ onDocumentClick, sections: propSections, o
       icon: getIconComponent(card.icon),
       documents: []
     };
-    setIso9000Sections((prev: ISO9000Section[]) => [...prev, newSection]);
+    setIso9000Sections(prev => [...prev, newSection]);
   };
 
   const handleDocumentClick = (document: ISO9000Document | Document) => {
