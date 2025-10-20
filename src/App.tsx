@@ -602,6 +602,7 @@ function App() {
             onDocumentClick={handleDocumentClick}
             sections={iso2Sections}
             onUpdateSections={setIso2Sections}
+            user={user}
           />
         </LayoutComponent>
         <ThemeToggle />
@@ -627,6 +628,7 @@ function App() {
             onDocumentClick={handleDocumentClick}
             sections={edcSections}
             onUpdateSections={setEdcSections}
+            user={user}
           />
         </LayoutComponent>
         <ThemeToggle />
@@ -659,6 +661,7 @@ function App() {
             onDocumentClick={handleDocumentClick}
             sections={ceSections}
             onUpdateSections={setCESections}
+            user={user}
           />
         </LayoutComponent>
         <ThemeToggle />
@@ -688,6 +691,7 @@ function App() {
             onDocumentClick={handleDocumentClick}
             sections={iso9000Sections}
             onUpdateSections={setIso9000Sections}
+            user={user}
           />
         </LayoutComponent>
         <ThemeToggle />
