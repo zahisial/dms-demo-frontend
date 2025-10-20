@@ -19,7 +19,6 @@ import {
   ArrowRight
 } from 'lucide-react';
 import NewCardModal from './NewCardModal';
-import DocumentPreviewModal from './DocumentPreviewModal';
 import DocumentEditModal from './DocumentEditModal';
 import UploadModal from './UploadModal';
 import Toaster, { useToaster } from './Toaster';
@@ -33,15 +32,15 @@ import ISO9000Card from './ISO9000Card';
 interface CEPageProps {
   onNavigateToDocsDB?: (subjectTitle?: string) => void;
   onShowAllResults?: (query: string) => void;
+  onDocumentClick?: (document: Document) => void;
   sections?: CESection[];
   onUpdateSections?: (sections: CESection[]) => void;
 }
 
-export default function CEPage({ onNavigateToDocsDB, onShowAllResults, sections: propSections, onUpdateSections }: CEPageProps) {
+export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumentClick, sections: propSections, onUpdateSections }: CEPageProps) {
   const [newCardModalOpen, setNewCardModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
@@ -101,9 +100,10 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, sections:
     console.log('CEPage: Document clicked:', document.title);
     // Track as recently viewed
     setRecentlyViewedDocs(prev => new Set([...prev, document.id]));
-    // Documents now have full structure, use directly
-    setSelectedDocument(document as Document);
-    setPreviewModalOpen(true);
+    // Navigate to document detail page
+    if (onDocumentClick) {
+      onDocumentClick(document as Document);
+    }
   };
 
   const handleEdit = (document: Document, e: React.MouseEvent) => {
@@ -116,8 +116,10 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, sections:
     e.stopPropagation();
     // Track as recently viewed
     setRecentlyViewedDocs(prev => new Set([...prev, document.id]));
-    setSelectedDocument(document);
-    setPreviewModalOpen(true);
+    // Navigate to document detail page
+    if (onDocumentClick) {
+      onDocumentClick(document);
+    }
   };
 
   const handleDownload = (document: Document, e: React.MouseEvent) => {
@@ -700,29 +702,6 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, sections:
         onAdd={handleAddNewCard}
       />
 
-      <DocumentPreviewModal
-        isOpen={previewModalOpen}
-        onClose={() => {
-          setPreviewModalOpen(false);
-          setSelectedDocument(null);
-        }}
-        document={selectedDocument as any}
-        onEdit={(document) => {
-          setPreviewModalOpen(false);
-          setSelectedDocument(null);
-          setEditingDocument(document);
-          setEditModalOpen(true);
-        }}
-        user={{
-          id: '1',
-          name: 'Current User',
-          email: 'user@example.com',
-          role: 'admin',
-          department: 'Cyber Security'
-        }}
-        onAcknowledge={handleAcknowledge}
-        onApprove={handleApprove}
-      />
 
       <DocumentEditModal
         isOpen={editModalOpen}

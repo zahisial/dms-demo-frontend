@@ -39,12 +39,14 @@ interface RenderHelpers {
   getSecurityLevelColor: (level?: string) => string;
   formatDateTime: (dateString: string) => string;
   user?: UserType | null;
+  users?: UserType[];
 }
 
 interface UniversalDocumentsTableProps {
   documents: Document[];
   columns: ColumnConfig[];
   user?: UserType | null;
+  users?: UserType[];
   selectedDocuments?: Set<string>;
   hoveredRow?: string | null;
   sortBy?: string;
@@ -166,6 +168,7 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
   documents,
   columns,
   user,
+  users,
   selectedDocuments = new Set(),
   hoveredRow = null,
   sortBy = '',
@@ -202,6 +205,7 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
     getSecurityLevelColor,
     formatDateTime,
     user,
+    users,
   };
 
   const visibleColumns = columns.filter(col => col.visible !== false);

@@ -4,7 +4,6 @@ import { Plus, MoreHorizontal, Search, Clock, CheckCircle, Upload } from 'lucide
 import { mockISO2Sections, type ISO2Section, type ISO2Document } from '../data/mockData';
 import ISO2Card from './ISO2Card';
 import NewCardModal from './NewCardModal';
-import DocumentPreviewModal from './DocumentPreviewModal';
 import DocumentEditModal from './DocumentEditModal';
 import UploadModal from './UploadModal';
 import Toaster, { useToaster } from './Toaster';
@@ -37,15 +36,15 @@ interface Document {
 interface ISO2PageProps {
   onNavigateToDocsDB: (subjectTitle?: string) => void;
   onShowAllResults?: (query: string) => void;
+  onDocumentClick?: (document: Document) => void;
   sections?: ISO2Section[];
   onUpdateSections?: (sections: ISO2Section[]) => void;
 }
 
-export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults, sections: propSections, onUpdateSections }: ISO2PageProps) {
+export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults, onDocumentClick, sections: propSections, onUpdateSections }: ISO2PageProps) {
   const [newCardModalOpen, setNewCardModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
@@ -112,9 +111,10 @@ export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults, section
       url: '#'
     };
     
-    console.log('ISO2Page: Opening DocumentPreviewModal for:', viewDocument.title);
-    setSelectedDocument(viewDocument);
-    setPreviewModalOpen(true);
+    console.log('ISO2Page: Navigating to DocumentDetailPage for:', viewDocument.title);
+    if (onDocumentClick) {
+      onDocumentClick(viewDocument);
+    }
   };
 
   const handleUploadComplete = (files: File[], subject: string) => {
@@ -375,28 +375,6 @@ export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults, section
         onAdd={handleAddNewCard}
       />
 
-      <DocumentPreviewModal
-        isOpen={previewModalOpen}
-        onClose={() => {
-          setPreviewModalOpen(false);
-          setSelectedDocument(null);
-        }}
-        document={selectedDocument}
-        onEdit={(document) => {
-          setPreviewModalOpen(false);
-          setSelectedDocument(null);
-          setEditingDocument(document);
-          setEditModalOpen(true);
-        }}
-        user={{
-          id: '1',
-          name: 'Current User',
-          email: 'user@example.com',
-          role: 'admin'
-        }}
-        onAcknowledge={handleAcknowledge}
-        onApprove={handleApprove}
-      />
 
       <DocumentEditModal
         isOpen={editModalOpen}

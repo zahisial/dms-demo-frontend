@@ -9,7 +9,6 @@ import ThemeToggle from './components/ThemeToggle';
 import { SearchFilters } from './components/SearchBar';
 import SearchResultsPage from './components/SearchResultsPage';
 import DocumentDetailPage from './components/DocumentDetailPage';
-import DocumentPreviewModal from './components/DocumentPreviewModal';
 import UploadModal from './components/UploadModal';
 import FeedbackModal from './components/FeedbackModal';
 import AddDepartmentModal from './components/AddDepartmentModal';
@@ -42,7 +41,6 @@ function App() {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [documents, setDocuments] = useState<Document[]>(mockDocuments);
   const [dragOverlay] = useState(false);
-  const [documentPreviewOpen, setDocumentPreviewOpen] = useState(false);
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
   const [bulkMode, setBulkMode] = useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
@@ -236,9 +234,9 @@ function App() {
     console.log('handleDocumentClick called with document:', document.title);
     console.log('Current user:', user?.name, 'Role:', user?.role);
     setSelectedDocument(document);
-    setDocumentPreviewOpen(true);
+    setCurrentPage('document');
     console.log(`User ${user?.name} viewed document: ${document.title}`);
-    console.log('Opening DocumentPreviewModal');
+    console.log('Navigating to DocumentDetailPage');
   };
 
   const handleNavigateToISO2 = () => {
@@ -532,8 +530,13 @@ function App() {
   };
 
   const handleBackFromDocument = () => {
-    setCurrentPage('search-results');
-    setSelectedDocument(null);
+    // Determine which page to go back to based on the current context
+    if (currentPage === 'document') {
+      // Go back to the previous page (could be iso9000, ce, edc, iso2, pending-approvals, docsdb, or search-results)
+      // For now, default to iso9000, but this could be enhanced to remember the previous page
+      setCurrentPage('iso9000');
+      setSelectedDocument(null);
+    }
   };
 
   const handleDocumentSelection = (documentId: string, selected: boolean) => {
@@ -596,6 +599,7 @@ function App() {
           <ISO2Page 
             onNavigateToDocsDB={handleNavigateToDocsDB}
             onShowAllResults={handleShowAllResults}
+            onDocumentClick={handleDocumentClick}
             sections={iso2Sections}
             onUpdateSections={setIso2Sections}
           />
@@ -620,6 +624,7 @@ function App() {
           <EDCPage 
             onNavigateToDocsDB={handleNavigateToDocsDB}
             onShowAllResults={handleShowAllResults}
+            onDocumentClick={handleDocumentClick}
             sections={edcSections}
             onUpdateSections={setEdcSections}
           />
@@ -651,6 +656,7 @@ function App() {
               setCurrentPage('search-results');
               setSearchResultsQuery(query);
             }}
+            onDocumentClick={handleDocumentClick}
             sections={ceSections}
             onUpdateSections={setCESections}
           />
@@ -679,6 +685,7 @@ function App() {
             onNavigateToDocsDB={handleNavigateToDocsDB} 
             onNavigateToPendingApprovals={handleNavigateToPendingApprovals}
             onShowAllResults={handleShowAllResults}
+            onDocumentClick={handleDocumentClick}
             sections={iso9000Sections}
             onUpdateSections={setIso9000Sections}
           />
@@ -702,6 +709,7 @@ function App() {
         <LayoutComponent {...layoutProps}>
           <PendingApprovalsPage 
             onBack={() => setCurrentPage('iso9000')} 
+            onDocumentClick={handleDocumentClick}
             user={user}
             iso9000Sections={iso9000Sections}
             ceSections={ceSections}
@@ -723,6 +731,7 @@ function App() {
             onBack={handleBackToMain} 
             user={user!}
             onShowAllResults={handleShowAllResults}
+            onDocumentClick={handleDocumentClick}
             subjectTitle={selectedSubjectTitle}
           />
         </LayoutComponent>
@@ -758,23 +767,22 @@ function App() {
             user={user}
             onBack={handleBackFromDocument}
             onEdit={(document) => {
-              setCurrentPage('search-results');
               // Handle edit logic here
               console.log('Edit document:', document.title);
+              // Could open DocumentEditModal or navigate to edit page
             }}
             onDelete={(document) => {
-              setCurrentPage('search-results');
               // Handle delete logic here
               console.log('Delete document:', document.title);
+              // Could show confirmation and delete the document
             }}
             onDownload={(document) => {
               console.log('Download document:', document.title);
+              // Handle download logic
             }}
             onShare={(document) => {
               console.log('Share document:', document.title);
-            }}
-            onReminder={(document) => {
-              console.log('Send reminder for document:', document.title);
+              // Handle share logic
             }}
           />
         </LayoutComponent>
@@ -856,15 +864,6 @@ function App() {
         onDocumentSelect={handleDocumentSelection}
       />
 
-      <DocumentPreviewModal
-        document={selectedDocument}
-        isOpen={documentPreviewOpen}
-        onClose={() => setDocumentPreviewOpen(false)}
-        onApprove={handleApprove}
-        onReject={handleReject}
-        user={user}
-        onAcknowledge={handleAcknowledge}
-      />
 
       {/* Drag Overlay */}
       <AnimatePresence>

@@ -18,15 +18,19 @@ import {
   Copy,
   Share,
   Flag,
-  MessageCircle
+  MessageCircle,
+  RotateCcw
 } from 'lucide-react';
-import DocumentPreviewModal from './DocumentPreviewModal';
 import DocumentEditModal from './DocumentEditModal';
 import SearchBar from './SearchBar';
 import FeedbackModal from './FeedbackModal';
 import UniversalDocumentsTable from './UniversalDocumentsTable';
+import PermissionDeniedModal from './PermissionDeniedModal';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { docsDBColumns, filterColumnsByRole } from './tableConfigs';
 import { Document, User as UserType } from '../types';
+import { mockUsers } from '../data/mockData';
+import { canEditDocument, canDeleteDocument, canChangeStatus, canRestoreDocument } from '../utils/documentPermissions';
 
 interface DocsDBPageProps {
   onBack: () => void;
@@ -48,7 +52,6 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
   const [expandedFilters, setExpandedFilters] = useState(false);
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
@@ -56,6 +59,14 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
   const [feedbackDocument, setFeedbackDocument] = useState<Document | null>(null);
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [bulkActionType, setBulkActionType] = useState<'approve' | 'reject' | 'delete' | 'security' | null>(null);
+  const [permissionDeniedModalOpen, setPermissionDeniedModalOpen] = useState(false);
+  const [permissionDeniedInfo, setPermissionDeniedInfo] = useState<{
+    documentTitle: string;
+    assignedTo?: string;
+    action: 'edit' | 'delete' | 'mark-status';
+  } | null>(null);
+  const [deleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
 
   // Use centralized mock data
   const documents: Document[] = mockDocuments;
@@ -126,22 +137,40 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
   const handleDocumentClick = (document: Document) => {
     if (onDocumentClick) {
       onDocumentClick(document);
-    } else {
-      setSelectedDocument(document);
-      setPreviewModalOpen(true);
     }
   };
 
 
   const handleView = (document: Document, e: React.MouseEvent) => {
     e.stopPropagation();
-    setSelectedDocument(document);
-    setPreviewModalOpen(true);
+    if (onDocumentClick) {
+      onDocumentClick(document);
+    }
   };
 
   const handleAcknowledge = (documentId: string) => {
     console.log('Document acknowledged:', documentId);
     alert(`Document "${selectedDocument?.title}" has been acknowledged`);
+  };
+
+  const handleConfirmDelete = () => {
+    if (documentToDelete) {
+      console.log('Deleting document:', documentToDelete.title);
+      // In a real app, you would delete the document here
+      alert(`"${documentToDelete.title}" deleted successfully!`);
+      setDeleteConfirmationModalOpen(false);
+      setDocumentToDelete(null);
+    }
+  };
+
+  const handleClosePermissionDeniedModal = () => {
+    setPermissionDeniedModalOpen(false);
+    setPermissionDeniedInfo(null);
+  };
+
+  const handleCloseDeleteConfirmationModal = () => {
+    setDeleteConfirmationModalOpen(false);
+    setDocumentToDelete(null);
   };
 
   const handleSendFeedback = (document: Document) => {
@@ -233,7 +262,8 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
     }
 
     // Status marking - Only for managers and admins
-    if (user?.role === 'manager' || user?.role === 'admin') {
+    // Mark Status - Only if user can change status
+    if (user && canChangeStatus(document, user)) {
       baseItems.push(
         { id: 'divider1', label: '', divider: true },
         {
@@ -275,8 +305,8 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
     }
 
 
-    // Delete - Only for admin users
-    if (user?.role === 'admin') {
+    // Delete - Only for admin users and if they can delete
+    if (user?.role === 'admin' && canDeleteDocument(document, user)) {
       baseItems.push(
         { id: 'divider1', label: '', divider: true },
         {
@@ -285,13 +315,26 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
           icon: Trash2,
           destructive: true,
           onClick: () => {
-            console.log('Deleting document:', document.title);
-            if (confirm(`Are you sure you want to delete "${document.title}"?`)) {
-              alert(`"${document.title}" deleted`);
-            }
+            setDocumentToDelete(document);
+            setDeleteConfirmationModalOpen(true);
           }
         }
       );
+    }
+
+    // Restore Document - Only for admin users and if document is deleted
+    if (user?.role === 'admin' && canRestoreDocument(document, user)) {
+      baseItems.push({
+        id: 'restore',
+        label: 'Restore Document',
+        icon: RotateCcw,
+        onClick: () => {
+          console.log('Restoring document:', document.title);
+          if (confirm(`Are you sure you want to restore "${document.title}"?`)) {
+            alert(`"${document.title}" restored successfully`);
+          }
+        }
+      });
     }
 
     return baseItems;
@@ -304,6 +347,20 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
 
   const handleEdit = (document: Document, e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Check if user can edit this document
+    if (user && !canEditDocument(document, user)) {
+      // Find the assigned user name
+      const assignedUser = mockUsers.find(u => u.id === document.assignedTo);
+      setPermissionDeniedInfo({
+        documentTitle: document.title,
+        assignedTo: assignedUser?.name || 'Unknown User',
+        action: 'edit'
+      });
+      setPermissionDeniedModalOpen(true);
+      return;
+    }
+    
     setEditingDocument(document);
     setEditModalOpen(true);
   };
@@ -659,6 +716,7 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
           documents={filteredDocuments}
           columns={filterColumnsByRole(docsDBColumns, user?.role)}
           user={user}
+          users={mockUsers}
           selectedDocuments={selectedDocuments}
           hoveredRow={hoveredRow}
           sortBy={sortBy}
@@ -693,24 +751,6 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
         </motion.div>
       )}
 
-      {/* Document Preview Modal */}
-      <DocumentPreviewModal
-        isOpen={previewModalOpen}
-        onClose={() => {
-          setPreviewModalOpen(false);
-          setSelectedDocument(null);
-        }}
-        document={selectedDocument as any}
-        onEdit={(document) => {
-          setPreviewModalOpen(false);
-          setSelectedDocument(null);
-          setEditingDocument(document as any);
-          setEditModalOpen(true);
-        }}
-        user={user}
-        onAcknowledge={handleAcknowledge}
-        onApprove={handleApprove}
-      />
 
       {/* Document Edit Modal */}
       <DocumentEditModal
@@ -729,6 +769,25 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
         onClose={handleFeedbackClose}
         onSubmit={handleFeedbackSubmit}
         document={feedbackDocument as any}
+      />
+
+      {/* Permission Denied Modal */}
+      {permissionDeniedInfo && (
+        <PermissionDeniedModal
+          isOpen={permissionDeniedModalOpen}
+          onClose={handleClosePermissionDeniedModal}
+          documentTitle={permissionDeniedInfo.documentTitle}
+          assignedTo={permissionDeniedInfo.assignedTo}
+          action={permissionDeniedInfo.action}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteConfirmationModalOpen}
+        onClose={handleCloseDeleteConfirmationModal}
+        onConfirm={handleConfirmDelete}
+        documentTitle={documentToDelete?.title || ''}
       />
 
     </div>

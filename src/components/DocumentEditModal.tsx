@@ -26,6 +26,7 @@ interface DocumentEditModalProps {
   onClose: () => void;
   document: Document | null;
   onSave: (updatedDocument: Document) => void;
+  hideApproveActions?: boolean;
 }
 
 const departments = ['Engineering', 'Finance', 'HR', 'Marketing', 'Operations'];
@@ -42,7 +43,7 @@ const availableApprovers = [
   { id: '8', name: 'John Smith', initials: 'JS', title: 'Legal Counsel', email: 'john.smith@edaratgroup.com', avatar: 'https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1' }
 ];
 
-export default function DocumentEditModal({ isOpen, onClose, document, onSave }: DocumentEditModalProps) {
+export default function DocumentEditModal({ isOpen, onClose, document, onSave, hideApproveActions = false }: DocumentEditModalProps) {
   const [isInfoPanelVisible, setIsInfoPanelVisible] = useState(true);
   const [editedDocument, setEditedDocument] = useState<Document | null>(null);
   const [newTag, setNewTag] = useState('');
@@ -485,20 +486,22 @@ export default function DocumentEditModal({ isOpen, onClose, document, onSave }:
                           </div>
 
                           {/* Document Status */}
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                              Status
-                            </label>
-                            <select
-                              value={editedDocument.status}
-                              onChange={(e) => handleInputChange('status', e.target.value)}
-                              className="glass-select w-full"
-                            >
-                              <option value="approved">Approved</option>
-                              <option value="pending">Pending</option>
-                              <option value="revision">Revision</option>
-                            </select>
-                          </div>
+                          {!hideApproveActions && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Status
+                              </label>
+                              <select
+                                value={editedDocument.status}
+                                onChange={(e) => handleInputChange('status', e.target.value)}
+                                className="glass-select w-full"
+                              >
+                                <option value="approved">Approved</option>
+                                <option value="pending">Pending</option>
+                                <option value="revision">Revision</option>
+                              </select>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </motion.div>

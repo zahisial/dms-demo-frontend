@@ -7,14 +7,18 @@ import {
   Bell,
   Trash2
 } from 'lucide-react';
-import DocumentPreviewModal from './DocumentPreviewModal';
 import DocumentEditModal from './DocumentEditModal';
 import UniversalDocumentsTable from './UniversalDocumentsTable';
-import { isoCardDocumentsColumnsWithSubject } from './tableConfigs';
+import PermissionDeniedModal from './PermissionDeniedModal';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
+import { isoCardDocumentsColumnsWithSubject, pendingApprovalsColumns } from './tableConfigs';
 import { Document, User } from '../types';
+import { mockUsers } from '../data/mockData';
+import { canEditDocument, canDeleteDocument } from '../utils/documentPermissions';
 
 interface PendingApprovalsPageProps {
   onBack: () => void;
+  onDocumentClick?: (document: Document) => void;
   user?: User | null;
   iso9000Sections?: any[];
   ceSections?: any[];
@@ -24,20 +28,28 @@ interface PendingApprovalsPageProps {
 
 export default function PendingApprovalsPage({ 
   onBack, 
-  user,
-  iso9000Sections = [],
-  ceSections = [],
+  onDocumentClick,
+  user, 
+  iso9000Sections = [], 
+  ceSections = [], 
   edcSections = [],
   iso2Sections = []
 }: PendingApprovalsPageProps) {
   const [sortBy, setSortBy] = useState('uploadedAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
+  const [permissionDeniedModalOpen, setPermissionDeniedModalOpen] = useState(false);
+  const [permissionDeniedInfo, setPermissionDeniedInfo] = useState<{
+    documentTitle: string;
+    assignedTo?: string;
+    action: 'edit' | 'delete' | 'mark-status';
+  } | null>(null);
+  const [deleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
 
   // Get all pending documents from all sections
   const pendingDocuments = useMemo(() => {
@@ -259,8 +271,9 @@ export default function PendingApprovalsPage({
 
 
   const handleView = (document: Document) => {
-    setSelectedDocument(document);
-    setPreviewModalOpen(true);
+    if (onDocumentClick) {
+      onDocumentClick(document);
+    }
   };
 
   const handleAcknowledge = (documentId: string) => {
@@ -280,8 +293,9 @@ export default function PendingApprovalsPage({
 
   const handleDocumentClick = (document: Document) => {
     console.log('PendingApprovalsPage: Document clicked:', document.title);
-    setSelectedDocument(document);
-    setPreviewModalOpen(true);
+    if (onDocumentClick) {
+      onDocumentClick(document);
+    }
   };
 
   const handleSaveDocument = (updatedDocument: Document) => {
@@ -292,6 +306,20 @@ export default function PendingApprovalsPage({
 
   const handleEdit = (document: Document, e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Check if user can edit this document
+    if (user && !canEditDocument(document, user)) {
+      // Find the assigned user name
+      const assignedUser = mockUsers.find(u => u.id === document.assignedTo);
+      setPermissionDeniedInfo({
+        documentTitle: document.title,
+        assignedTo: assignedUser?.name || 'Unknown User',
+        action: 'edit'
+      });
+      setPermissionDeniedModalOpen(true);
+      return;
+    }
+    
     setEditingDocument(document);
     setEditModalOpen(true);
   };
@@ -309,19 +337,76 @@ export default function PendingApprovalsPage({
     alert('Link copied to clipboard!');
   };
 
-  const handleDelete = (document: Document, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (confirm(`Are you sure you want to delete "${document.title}"?`)) {
-      console.log('Deleting document:', document.title);
-      alert(`"${document.title}" deleted successfully!`);
-    }
-  };
-
+  // Send reminder for a single document (triggered from table actions)
   const handleReminder = (document: Document, e: React.MouseEvent) => {
     e.stopPropagation();
     if (document.approver) {
       handleSendReminder(document.approver);
     }
+  };
+
+  const handleDelete = (document: Document, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    // Check if user can delete this document
+    if (user && !canDeleteDocument(document, user)) {
+      // Find the assigned user name
+      const assignedUser = mockUsers.find(u => u.id === document.assignedTo);
+      setPermissionDeniedInfo({
+        documentTitle: document.title,
+        assignedTo: assignedUser?.name || 'Unknown User',
+        action: 'delete'
+      });
+      setPermissionDeniedModalOpen(true);
+      return;
+    }
+    
+    setDocumentToDelete(document);
+    setDeleteConfirmationModalOpen(true);
+  };
+
+  const handleReassign = (document: Document, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!user) return;
+    
+    if (confirm(`Are you sure you want to re-assign "${document.title}" to yourself?`)) {
+      // Update the document assignment
+      const updatedDocument = {
+        ...document,
+        assignedTo: user.id,
+        assignedDate: new Date()
+      };
+      
+      // Log the activity
+      console.log(`Document "${document.title}" re-assigned to ${user.name} (${user.id})`);
+      
+      // Show success message
+      alert(`"${document.title}" has been re-assigned to you successfully!`);
+      
+      // In a real app, you would update the document in the database here
+      // For now, we'll just log it
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    if (documentToDelete) {
+      console.log('Deleting document:', documentToDelete.title);
+      // In a real app, you would delete the document here
+      alert(`"${documentToDelete.title}" deleted successfully!`);
+      setDeleteConfirmationModalOpen(false);
+      setDocumentToDelete(null);
+    }
+  };
+
+  const handleClosePermissionDeniedModal = () => {
+    setPermissionDeniedModalOpen(false);
+    setPermissionDeniedInfo(null);
+  };
+
+  const handleCloseDeleteConfirmationModal = () => {
+    setDeleteConfirmationModalOpen(false);
+    setDocumentToDelete(null);
   };
 
   const handleSort = (field: string) => {
@@ -486,8 +571,9 @@ export default function PendingApprovalsPage({
       >
         <UniversalDocumentsTable
           documents={sortedDocuments}
-          columns={isoCardDocumentsColumnsWithSubject}
+          columns={pendingApprovalsColumns}
           user={user}
+          users={mockUsers}
           showCheckbox={true}
           showActions={true}
           selectedDocuments={selectedDocuments}
@@ -505,6 +591,7 @@ export default function PendingApprovalsPage({
           onDownload={handleDownload}
           onShare={handleShare}
           onDelete={handleDelete}
+          onReassign={handleReassign}
           onReminder={handleReminder}
         />
       </motion.div>
@@ -528,23 +615,6 @@ export default function PendingApprovalsPage({
       )}
 
       {/* Modals */}
-      <DocumentPreviewModal
-        isOpen={previewModalOpen}
-        onClose={() => {
-          setPreviewModalOpen(false);
-          setSelectedDocument(null);
-        }}
-        document={selectedDocument as any}
-        onEdit={(document) => {
-          setPreviewModalOpen(false);
-          setSelectedDocument(null);
-          setEditingDocument(document as any);
-          setEditModalOpen(true);
-        }}
-        user={user}
-        onAcknowledge={handleAcknowledge}
-        onApprove={handleApprove}
-      />
 
       <DocumentEditModal
         isOpen={editModalOpen}
@@ -558,6 +628,26 @@ export default function PendingApprovalsPage({
           setEditModalOpen(false);
           setEditingDocument(null);
         }}
+        hideApproveActions={true}
+      />
+
+      {/* Permission Denied Modal */}
+      {permissionDeniedInfo && (
+        <PermissionDeniedModal
+          isOpen={permissionDeniedModalOpen}
+          onClose={handleClosePermissionDeniedModal}
+          documentTitle={permissionDeniedInfo.documentTitle}
+          assignedTo={permissionDeniedInfo.assignedTo}
+          action={permissionDeniedInfo.action}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteConfirmationModalOpen}
+        onClose={handleCloseDeleteConfirmationModal}
+        onConfirm={handleConfirmDelete}
+        documentTitle={documentToDelete?.title || ''}
       />
     </div>
   );

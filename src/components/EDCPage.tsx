@@ -4,7 +4,6 @@ import { Plus, MoreHorizontal, Search, Clock, CheckCircle, Upload } from 'lucide
 import { mockEDCSections, type EDCSection, type EDCDocument } from '../data/mockData';
 import EDCCard from './EDCCard';
 import NewCardModal from './NewCardModal';
-import DocumentPreviewModal from './DocumentPreviewModal';
 import DocumentEditModal from './DocumentEditModal';
 import UploadModal from './UploadModal';
 import Toaster, { useToaster } from './Toaster';
@@ -37,15 +36,15 @@ interface Document {
 interface EDCPageProps {
   onNavigateToDocsDB: (subjectTitle?: string) => void;
   onShowAllResults?: (query: string) => void;
+  onDocumentClick?: (document: Document) => void;
   sections?: EDCSection[];
   onUpdateSections?: (sections: EDCSection[]) => void;
 }
 
-export default function EDCPage({ onNavigateToDocsDB, onShowAllResults, sections: propSections, onUpdateSections }: EDCPageProps) {
+export default function EDCPage({ onNavigateToDocsDB, onShowAllResults, onDocumentClick, sections: propSections, onUpdateSections }: EDCPageProps) {
   const [newCardModalOpen, setNewCardModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
@@ -112,9 +111,10 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults, sections
       url: '#'
     };
     
-    console.log('EDCPage: Opening DocumentPreviewModal for:', viewDocument.title);
-    setSelectedDocument(viewDocument);
-    setPreviewModalOpen(true);
+    console.log('EDCPage: Navigating to DocumentDetailPage for:', viewDocument.title);
+    if (onDocumentClick) {
+      onDocumentClick(viewDocument);
+    }
   };
 
   const handleUploadComplete = (files: File[], subject: string) => {
@@ -377,28 +377,6 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults, sections
         onAdd={handleAddNewCard}
       />
 
-      <DocumentPreviewModal
-        isOpen={previewModalOpen}
-        onClose={() => {
-          setPreviewModalOpen(false);
-          setSelectedDocument(null);
-        }}
-        document={selectedDocument}
-        onEdit={(document) => {
-          setPreviewModalOpen(false);
-          setSelectedDocument(null);
-          setEditingDocument(document);
-          setEditModalOpen(true);
-        }}
-        user={{
-          id: '1',
-          name: 'Current User',
-          email: 'user@example.com',
-          role: 'admin'
-        }}
-        onAcknowledge={handleAcknowledge}
-        onApprove={handleApprove}
-      />
 
       <DocumentEditModal
         isOpen={editModalOpen}

@@ -2,6 +2,7 @@ import React from 'react';
 import { Shield, Check } from 'lucide-react';
 import { ColumnConfig } from './UniversalDocumentsTable';
 import { Document } from '../types';
+import { calculateDaysDelayed } from '../utils/documentPermissions';
 
 // DocsDB Page Configuration - Full featured table
 export const docsDBColumns: ColumnConfig[] = [
@@ -162,6 +163,25 @@ export const pendingApprovalsColumns: ColumnConfig[] = [
     ),
   },
   {
+    id: 'daysDelayed',
+    label: 'Days Delayed',
+    sortable: true,
+    render: (document) => {
+      const daysDelayed = calculateDaysDelayed(document.assignedDate);
+      return (
+        <span className={`text-sm font-medium ${
+          daysDelayed > 7 
+            ? 'text-red-600 dark:text-red-400' 
+            : daysDelayed > 3 
+            ? 'text-orange-600 dark:text-orange-400' 
+            : 'text-gray-500 dark:text-gray-400'
+        }`}>
+          {daysDelayed} days
+        </span>
+      );
+    },
+  },
+  {
     id: 'approver',
     label: 'Approver',
     sortable: false,
@@ -200,6 +220,68 @@ export const pendingApprovalsColumns: ColumnConfig[] = [
             </span>
           </div>
         </div>
+      );
+    },
+  },
+  {
+    id: 'assignedTo',
+    label: 'Assigned To',
+    sortable: true,
+    render: (document, helpers) => {
+      if (!document.assignedTo) {
+        return (
+          <span className="text-sm text-gray-400 dark:text-gray-500">
+            Unassigned
+          </span>
+        );
+      }
+      
+      const assignedUser = helpers.users?.find(user => user.id === document.assignedTo);
+      if (!assignedUser) {
+        return (
+          <span className="text-sm text-gray-400 dark:text-gray-500">
+            Unknown User
+          </span>
+        );
+      }
+      
+      return (
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+            <span className="text-xs font-medium text-primary-600 dark:text-primary-400">
+              {assignedUser.name.charAt(0).toUpperCase()}
+            </span>
+          </div>
+          <div>
+            <div className="text-sm font-medium text-gray-900 dark:text-white">
+              {assignedUser.name}
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              {assignedUser.role}
+            </div>
+          </div>
+        </div>
+      );
+    },
+  },
+  {
+    id: 'securityLevel',
+    label: 'Security Level',
+    sortable: true,
+    render: (document) => {
+      if (!document.securityLevel) {
+        return <span className="text-sm text-gray-400 dark:text-gray-500">Public</span>;
+      }
+      
+      return (
+        <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+          document.securityLevel === 'Public' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+          document.securityLevel === 'Restricted' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
+          document.securityLevel === 'Confidential' ? 'bg-[#ffedec] text-[#d22927] dark:bg-[#d22927]/10 dark:text-[#d22927]' :
+          'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+        }`}>
+          {document.securityLevel}
+        </span>
       );
     },
   },

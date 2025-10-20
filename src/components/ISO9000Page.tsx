@@ -54,7 +54,6 @@ import {
 } from 'lucide-react';
 import ISO9000Card from './ISO9000Card';
 import NewCardModal from './NewCardModal';
-import DocumentPreviewModal from './DocumentPreviewModal';
 import DocumentEditModal from './DocumentEditModal';
 import UploadModal from './UploadModal';
 import Toaster, { useToaster } from './Toaster';
@@ -68,15 +67,15 @@ interface ISO9000PageProps {
   onNavigateToDocsDB: (subjectTitle?: string) => void;
   onNavigateToPendingApprovals?: () => void;
   onShowAllResults?: (query: string) => void;
+  onDocumentClick?: (document: Document) => void;
   sections?: ISO9000Section[];
   onUpdateSections?: (sections: ISO9000Section[]) => void;
 }
 
-export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApprovals, onShowAllResults, sections: propSections, onUpdateSections }: ISO9000PageProps) {
+export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApprovals, onShowAllResults, onDocumentClick, sections: propSections, onUpdateSections }: ISO9000PageProps) {
   const [newCardModalOpen, setNewCardModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
@@ -186,9 +185,10 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
     console.log('ISO9000Page: Document clicked:', document.title);
     // Track as recently viewed
     setRecentlyViewedDocs(prev => new Set([...prev, document.id]));
-    // Documents now have full structure, use directly
-    setSelectedDocument(document as Document);
-    setPreviewModalOpen(true);
+    // Navigate to document detail page
+    if (onDocumentClick) {
+      onDocumentClick(document as Document);
+    }
   };
 
   const handleEdit = (document: Document, e: React.MouseEvent) => {
@@ -201,8 +201,10 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
     e.stopPropagation();
     // Track as recently viewed
     setRecentlyViewedDocs(prev => new Set([...prev, document.id]));
-    setSelectedDocument(document);
-    setPreviewModalOpen(true);
+    // Navigate to document detail page
+    if (onDocumentClick) {
+      onDocumentClick(document);
+    }
   };
 
   const handleDownload = (document: Document, e: React.MouseEvent) => {
@@ -805,29 +807,6 @@ export default function ISO9000Page({ onNavigateToDocsDB, onNavigateToPendingApp
         onAdd={handleAddNewCard}
       />
 
-      <DocumentPreviewModal
-        isOpen={previewModalOpen}
-        onClose={() => {
-          setPreviewModalOpen(false);
-          setSelectedDocument(null);
-        }}
-        document={selectedDocument as any}
-        onEdit={(document) => {
-          setPreviewModalOpen(false);
-          setSelectedDocument(null);
-          setEditingDocument(document);
-          setEditModalOpen(true);
-        }}
-        user={{
-          id: '1',
-          name: 'Current User',
-          email: 'user@example.com',
-          role: 'admin',
-          department: 'ISO9000 Management'
-        }}
-        onAcknowledge={handleAcknowledge}
-        onApprove={handleApprove}
-      />
 
       <DocumentEditModal
         isOpen={editModalOpen}
