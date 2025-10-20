@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { User, Document, Department, AuditLog, Notification } from '../types';
 import { DocumentAcceptance } from '../types';
 import { Award, FileText, Shield, Users, Heart, TrendingUp } from 'lucide-react';
@@ -32,6 +33,7 @@ export interface ISO9000Section {
   id: string;
   title: string;
   color: string;
+
   icon: React.ComponentType<any>;
   documents: ISO9000Document[];
 }
@@ -101,6 +103,14 @@ export const mockUsers: User[] = [
 ];
 // Get user
 export const mockUser: User = mockUsers[0];
+// Random assignment helpers
+const getRandomUser = (users: User[]) => users[Math.floor(Math.random() * users.length)];
+const getRandomAssignedDate = () => {
+  const now = Date.now();
+  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+  const ts = now - Math.floor(Math.random() * thirtyDays);
+  return new Date(ts);
+};
 // Documents Data
 export const mockDocuments: Document[] = [
   {
@@ -126,6 +136,8 @@ export const mockDocuments: Document[] = [
     expiryDate: new Date('2025-12-31'),
     requiresAcceptance: true,
     securityLevel: 'Public',
+    assignedTo: getRandomUser(mockUsers).id,
+    assignedDate: getRandomAssignedDate(),
     approver: {
       id: '2',
       name: 'Ahmed Al-Rashid',
@@ -152,6 +164,8 @@ export const mockDocuments: Document[] = [
     expiryDate: new Date('2025-06-30'),
     requiresAcceptance: true,
     securityLevel: 'Confidential',
+    assignedTo: getRandomUser(mockUsers).id,
+    assignedDate: getRandomAssignedDate(),
     approver: {
       id: '1',
       name: 'Sarah Johnson',
@@ -175,7 +189,9 @@ export const mockDocuments: Document[] = [
     tags: ['financial', 'quarterly', 'report'],
     description: 'First quarter financial performance and budget analysis.',
     url: '/documents/financial-report-q1-2024.xlsx',
-    securityLevel: 'Highly Confidential'
+    securityLevel: 'Highly Confidential',
+    assignedTo: getRandomUser(mockUsers).id,
+    assignedDate: getRandomAssignedDate()
   },
   {
     id: '4',
@@ -193,7 +209,9 @@ export const mockDocuments: Document[] = [
     description: 'Step-by-step emergency response and evacuation procedures.',
     url: '/documents/emergency-response.pdf',
     expiryDate: new Date('2025-03-31'),
-    requiresAcceptance: true
+    requiresAcceptance: true,
+    assignedTo: getRandomUser(mockUsers).id,
+    assignedDate: getRandomAssignedDate()
   },
   {
     id: '5',
@@ -209,7 +227,9 @@ export const mockDocuments: Document[] = [
     approvalStatus: 'pending',
     tags: ['marketing', 'strategy', '2024'],
     description: 'Comprehensive marketing strategy and campaign planning for 2024.',
-    url: '/documents/marketing-strategy-2024.docx'
+    url: '/documents/marketing-strategy-2024.docx',
+    assignedTo: getRandomUser(mockUsers).id,
+    assignedDate: getRandomAssignedDate()
   },
   // Additional Human Resources Documents
   {
@@ -1309,7 +1329,9 @@ export const mockISO9000Sections: ISO9000Section[] = [
         tags: ['ISO9000', 'Quality', 'Policy'],
         description: 'Comprehensive quality policy statement for the organization.',
         url: '/documents/iso9000/quality-policy.pdf',
-        securityLevel: 'Public'
+        securityLevel: 'Public',
+        assignedTo: getRandomUser(mockUsers).id,
+        assignedDate: getRandomAssignedDate()
       },
       {
         id: 'iso-2',
@@ -1326,7 +1348,9 @@ export const mockISO9000Sections: ISO9000Section[] = [
         tags: ['ISO9000', 'Quality', 'Objectives'],
         description: 'Measurable quality objectives aligned with company strategy.',
         url: '/documents/iso9000/quality-objectives.pdf',
-        securityLevel: 'Restricted'
+        securityLevel: 'Restricted',
+        assignedTo: getRandomUser(mockUsers).id,
+        assignedDate: getRandomAssignedDate()
       },
       {
         id: 'iso-3',
@@ -1344,8 +1368,8 @@ export const mockISO9000Sections: ISO9000Section[] = [
         description: 'Management review procedure for quality system assessment.',
         url: '/documents/iso9000/management-review.pdf',
         securityLevel: 'Confidential',
-        assignedTo: '4',  // Assigned to ISO Administrator
-        assignedDate: new Date('2024-01-11 14:00:00'),
+        assignedTo: getRandomUser(mockUsers).id,
+        assignedDate: getRandomAssignedDate(),
         approver: {
           id: '4',
           name: 'ISO Administrator',
@@ -1370,7 +1394,9 @@ export const mockISO9000Sections: ISO9000Section[] = [
         tags: ['ISO9000', 'Quality', 'Manual'],
         description: 'Complete quality management system manual.',
         url: '/documents/iso9000/quality-manual.pdf',
-        securityLevel: 'Public'
+        securityLevel: 'Public',
+        assignedTo: getRandomUser(mockUsers).id,
+        assignedDate: getRandomAssignedDate()
       },
       {
         id: 'iso-5',
@@ -1387,7 +1413,9 @@ export const mockISO9000Sections: ISO9000Section[] = [
         tags: ['ISO9000', 'Process', 'Mapping'],
         description: 'Visual representation of key organizational processes.',
         url: '/documents/iso9000/process-mapping.pdf',
-        securityLevel: 'Restricted'
+        securityLevel: 'Restricted',
+        assignedTo: getRandomUser(mockUsers).id,
+        assignedDate: getRandomAssignedDate()
       },
       {
         id: 'iso-6',
@@ -1822,6 +1850,29 @@ export const mockISO9000Sections: ISO9000Section[] = [
     ]
   }
 ];
+
+// Ensure random assignment for all base documents and ISO9000 section documents
+(() => {
+  // Fill top-level mockDocuments
+  if (Array.isArray(mockDocuments)) {
+    mockDocuments.forEach(doc => {
+      if (!doc.assignedTo) doc.assignedTo = getRandomUser(mockUsers).id;
+      if (!doc.assignedDate) doc.assignedDate = getRandomAssignedDate();
+    });
+  }
+
+  // Fill ISO9000 section documents
+  if (Array.isArray(mockISO9000Sections)) {
+    mockISO9000Sections.forEach(section => {
+      if (Array.isArray(section.documents)) {
+        section.documents.forEach(doc => {
+          if (!doc.assignedTo) doc.assignedTo = getRandomUser(mockUsers).id;
+          if (!doc.assignedDate) doc.assignedDate = getRandomAssignedDate();
+        });
+      }
+    });
+  }
+})();
 
 // ISO2 Sections Data (ISO 9001, 14001, 45001, 27001, 50001, 22000)
 export const mockISO2Sections: ISO2Section[] = [

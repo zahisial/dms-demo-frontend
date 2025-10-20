@@ -22,6 +22,8 @@ import NewCardModal from './NewCardModal';
 import DocumentEditModal from './DocumentEditModal';
 import UploadModal from './UploadModal';
 import Toaster, { useToaster } from './Toaster';
+import PermissionDeniedModal from './PermissionDeniedModal';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 import SearchBar from './SearchBar';
 import UniversalDocumentsTable from './UniversalDocumentsTable';
 import { isoCardDocumentsColumns, isoCardDocumentsColumnsWithSubject } from './tableConfigs';
@@ -56,6 +58,14 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
   const { toasts, removeToast, showSuccess } = useToaster();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [permissionDeniedModalOpen, setPermissionDeniedModalOpen] = useState(false);
+  const [permissionDeniedInfo, setPermissionDeniedInfo] = useState<{
+    documentTitle: string;
+    assignedTo?: string;
+    action: 'edit' | 'delete' | 'mark-status';
+  } | null>(null);
+  const [deleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -108,8 +118,9 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
 
   const handleEdit = (document: Document, e: React.MouseEvent) => {
     e.stopPropagation();
-    setEditingDocument(document);
-    setEditModalOpen(true);
+    if (onDocumentClick) {
+      onDocumentClick(document);
+    }
   };
 
   const handleView = (document: Document, e: React.MouseEvent) => {
@@ -125,7 +136,7 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
   const handleDownload = (document: Document, e: React.MouseEvent) => {
     e.stopPropagation();
     console.log('Downloading document:', document.title);
-    alert(`Downloading "${document.title}"`);
+    showSuccess('Download', `Downloading "${document.title}"` , 3000);
   };
 
   const handleShare = (document: Document, e: React.MouseEvent) => {
@@ -137,10 +148,8 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
 
   const handleDelete = (document: Document, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm(`Are you sure you want to delete "${document.title}"?`)) {
-      console.log('Deleting document:', document.title);
-      showSuccess('Document Deleted', `"${document.title}" has been deleted successfully.`, 3000);
-    }
+    setDocumentToDelete(document);
+    setDeleteConfirmationModalOpen(true);
   };
 
   const handleReminder = (document: Document, e: React.MouseEvent) => {
@@ -183,11 +192,15 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
 
   const handleBulkDelete = () => {
     const count = selectedDocuments.size;
-    if (confirm(`Are you sure you want to delete ${count} selected document${count > 1 ? 's' : ''}?`)) {
-      console.log('Bulk deleting documents:', Array.from(selectedDocuments));
-      showSuccess('Documents Deleted', `${count} document${count > 1 ? 's' : ''} deleted successfully!`, 3000);
-      setSelectedDocuments(new Set());
-    }
+    // Remove selected docs from state
+    setCESections(prev => prev.map(section => ({
+      ...section,
+      documents: section.documents.filter((doc: any) => !selectedDocuments.has(doc.id))
+    })) as any);
+
+    console.log('Bulk deleting documents:', Array.from(selectedDocuments));
+    showSuccess('Documents Deleted', `${count} document${count > 1 ? 's' : ''} deleted successfully!`, 3000);
+    setSelectedDocuments(new Set());
   };
 
   const handleBulkReminder = () => {
@@ -345,6 +358,31 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
     console.log('Document updated:', updatedDocument);
     setEditModalOpen(false);
     setEditingDocument(null);
+  };
+
+  const handleConfirmDelete = () => {
+    if (documentToDelete) {
+      console.log('Deleting document:', documentToDelete.title);
+      // Remove from CE sections state
+      setCESections(prev => prev.map(section => ({
+        ...section,
+        documents: section.documents.filter((doc: any) => doc.id !== documentToDelete.id)
+      })) as any);
+
+      showSuccess('Document Deleted', `"${documentToDelete.title}" has been deleted successfully.`, 3000);
+      setDeleteConfirmationModalOpen(false);
+      setDocumentToDelete(null);
+    }
+  };
+
+  const handleClosePermissionDeniedModal = () => {
+    setPermissionDeniedModalOpen(false);
+    setPermissionDeniedInfo(null);
+  };
+
+  const handleCloseDeleteConfirmationModal = () => {
+    setDeleteConfirmationModalOpen(false);
+    setDocumentToDelete(null);
   };
 
   return (
@@ -776,6 +814,25 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
       <Toaster
         toasts={toasts}
         removeToast={removeToast}
+      />
+
+      {/* Permission Denied Modal */}
+      {permissionDeniedInfo && (
+        <PermissionDeniedModal
+          isOpen={permissionDeniedModalOpen}
+          onClose={handleClosePermissionDeniedModal}
+          documentTitle={permissionDeniedInfo.documentTitle}
+          assignedTo={permissionDeniedInfo.assignedTo}
+          action={permissionDeniedInfo.action}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteConfirmationModalOpen}
+        onClose={handleCloseDeleteConfirmationModal}
+        onConfirm={handleConfirmDelete}
+        documentTitle={documentToDelete?.title || ''}
       />
     </div>
   );

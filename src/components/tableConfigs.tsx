@@ -372,6 +372,45 @@ export const isoCardDocumentsColumnsWithSubject: ColumnConfig[] = [
     ),
   },
   {
+    id: 'assignedTo',
+    label: 'Assigned To',
+    sortable: true,
+    render: (document, helpers) => {
+      if (!document.assignedTo) {
+        return (
+          <span className="text-sm text-gray-400 dark:text-gray-500">
+            Unassigned
+          </span>
+        );
+      }
+      const assignedUser = helpers.users?.find(u => u.id === document.assignedTo);
+      if (!assignedUser) {
+        return (
+          <span className="text-sm text-gray-400 dark:text-gray-500">
+            Unknown User
+          </span>
+        );
+      }
+      return (
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+            <span className="text-xs font-medium text-primary-600 dark:text-primary-400">
+              {assignedUser.name.charAt(0).toUpperCase()}
+            </span>
+          </div>
+          <div>
+            <div className="text-sm font-medium text-gray-900 dark:text-white">
+              {assignedUser.name}
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              {assignedUser.role}
+            </div>
+          </div>
+        </div>
+      );
+    },
+  },
+  {
     id: 'department',
     label: 'Subject',
     sortable: true,
@@ -383,7 +422,7 @@ export const isoCardDocumentsColumnsWithSubject: ColumnConfig[] = [
   },
   {
     id: 'uploadedAt',
-    label: 'Date',
+    label: 'Uploaded Date',
     sortable: true,
     render: (document, helpers) => (
       <span className="text-sm text-gray-900 dark:text-white">
@@ -458,8 +497,47 @@ export const isoCardDocumentsColumns: ColumnConfig[] = [
     ),
   },
   {
+    id: 'assignedTo',
+    label: 'Assigned To',
+    sortable: true,
+    render: (document, helpers) => {
+      if (!document.assignedTo) {
+        return (
+          <span className="text-sm text-gray-400 dark:text-gray-500">
+            Unassigned
+          </span>
+        );
+      }
+      const assignedUser = helpers.users?.find(u => u.id === document.assignedTo);
+      if (!assignedUser) {
+        return (
+          <span className="text-sm text-gray-400 dark:text-gray-500">
+            Unknown User
+          </span>
+        );
+      }
+      return (
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+            <span className="text-xs font-medium text-primary-600 dark:text-primary-400">
+              {assignedUser.name.charAt(0).toUpperCase()}
+            </span>
+          </div>
+          <div>
+            <div className="text-sm font-medium text-gray-900 dark:text-white">
+              {assignedUser.name}
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              {assignedUser.role}
+            </div>
+          </div>
+        </div>
+      );
+    },
+  },
+  {
     id: 'uploadedAt',
-    label: 'Date',
+    label: 'Uploaded Date',
     sortable: true,
     render: (document, helpers) => (
       <span className="text-sm text-gray-900 dark:text-white">

@@ -39,7 +39,7 @@ export interface Document {
   expiryDate?: Date;
   requiresAcceptance?: boolean;
   notifyAllAfterApproval?: boolean;
-  securityLevel?: 'Public' | 'Restricted' | 'Confidential' | 'Top Secret';
+  securityLevel?: 'Public' | 'Restricted' | 'Confidential' | 'Top Secret' | 'Highly Confidential';
   documentType?: string;
   approver?: {
     id: string;

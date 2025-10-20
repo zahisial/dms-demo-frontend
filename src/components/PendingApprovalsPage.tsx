@@ -320,8 +320,10 @@ export default function PendingApprovalsPage({
       return;
     }
     
-    setEditingDocument(document);
-    setEditModalOpen(true);
+    // Navigate to DocumentDetailPage instead of opening the edit modal
+    if (onDocumentClick) {
+      onDocumentClick(document);
+    }
   };
 
   const handleDownload = (document: Document, e: React.MouseEvent) => {
