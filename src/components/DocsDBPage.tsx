@@ -21,7 +21,7 @@ import {
   MessageCircle,
   RotateCcw
 } from 'lucide-react';
-import DocumentEditModal from './DocumentEditModal';
+import DocumentEditDetail from './DocumentEditDetail';
 import SearchBar from './SearchBar';
 import FeedbackModal from './FeedbackModal';
 import UniversalDocumentsTable from './UniversalDocumentsTable';
@@ -753,15 +753,17 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
 
 
       {/* Document Edit Modal */}
-      <DocumentEditModal
-        isOpen={editModalOpen}
-        onClose={() => {
-          setEditModalOpen(false);
-          setEditingDocument(null);
-        }}
-        document={editingDocument as any}
-        onSave={handleSaveDocument}
-      />
+      {editModalOpen && editingDocument && (
+        <DocumentEditDetail
+          document={editingDocument as any}
+          onSave={handleSaveDocument}
+          onBack={() => {
+            setEditModalOpen(false);
+            setEditingDocument(null);
+          }}
+          hideApproveActions={false}
+        />
+      )}
 
       {/* Feedback Modal */}
       <FeedbackModal

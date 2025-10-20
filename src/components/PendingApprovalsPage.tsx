@@ -7,7 +7,7 @@ import {
   Bell,
   Trash2
 } from 'lucide-react';
-import DocumentEditModal from './DocumentEditModal';
+import DocumentEditDetail from './DocumentEditDetail';
 import UniversalDocumentsTable from './UniversalDocumentsTable';
 import PermissionDeniedModal from './PermissionDeniedModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
@@ -618,20 +618,21 @@ export default function PendingApprovalsPage({
 
       {/* Modals */}
 
-      <DocumentEditModal
-        isOpen={editModalOpen}
-        onClose={() => {
-          setEditModalOpen(false);
-          setEditingDocument(null);
-        }}
-        document={editingDocument as any}
-        onSave={(updatedDocument) => {
-          console.log('Document updated:', updatedDocument);
-          setEditModalOpen(false);
-          setEditingDocument(null);
-        }}
-        hideApproveActions={true}
-      />
+      {editModalOpen && editingDocument && (
+        <DocumentEditDetail
+          document={editingDocument as any}
+          onSave={(updatedDocument) => {
+            console.log('Document updated:', updatedDocument);
+            setEditModalOpen(false);
+            setEditingDocument(null);
+          }}
+          onBack={() => {
+            setEditModalOpen(false);
+            setEditingDocument(null);
+          }}
+          hideApproveActions={true}
+        />
+      )}
 
       {/* Permission Denied Modal */}
       {permissionDeniedInfo && (

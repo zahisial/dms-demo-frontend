@@ -4,7 +4,7 @@ import { Plus, MoreHorizontal, Search, Clock, CheckCircle, Upload } from 'lucide
 import { mockEDCSections, type EDCSection, type EDCDocument } from '../data/mockData';
 import EDCCard from './EDCCard';
 import NewCardModal from './NewCardModal';
-import DocumentEditModal from './DocumentEditModal';
+import DocumentEditDetail from './DocumentEditDetail';
 import UploadModal from './UploadModal';
 import Toaster, { useToaster } from './Toaster';
 import SearchBar from './SearchBar';
@@ -378,15 +378,17 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults, onDocume
       />
 
 
-      <DocumentEditModal
-        isOpen={editModalOpen}
-        onClose={() => {
-          setEditModalOpen(false);
-          setEditingDocument(null);
-        }}
-        document={editingDocument}
-        onSave={handleSaveDocument}
-      />
+      {editModalOpen && editingDocument && (
+        <DocumentEditDetail
+          document={editingDocument}
+          onSave={handleSaveDocument}
+          onBack={() => {
+            setEditModalOpen(false);
+            setEditingDocument(null);
+          }}
+          hideApproveActions={false}
+        />
+      )}
 
       <UploadModal
         isOpen={uploadModalOpen}

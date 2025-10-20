@@ -4,7 +4,7 @@ import { Plus, MoreHorizontal, Search, Clock, CheckCircle, Upload } from 'lucide
 import { mockISO2Sections, type ISO2Section, type ISO2Document } from '../data/mockData';
 import ISO2Card from './ISO2Card';
 import NewCardModal from './NewCardModal';
-import DocumentEditModal from './DocumentEditModal';
+import DocumentEditDetail from './DocumentEditDetail';
 import UploadModal from './UploadModal';
 import Toaster, { useToaster } from './Toaster';
 import SearchBar from './SearchBar';
@@ -376,15 +376,17 @@ export default function ISO2Page({ onNavigateToDocsDB, onShowAllResults, onDocum
       />
 
 
-      <DocumentEditModal
-        isOpen={editModalOpen}
-        onClose={() => {
-          setEditModalOpen(false);
-          setEditingDocument(null);
-        }}
-        document={editingDocument}
-        onSave={handleSaveDocument}
-      />
+      {editModalOpen && editingDocument && (
+        <DocumentEditDetail
+          document={editingDocument}
+          onSave={handleSaveDocument}
+          onBack={() => {
+            setEditModalOpen(false);
+            setEditingDocument(null);
+          }}
+          hideApproveActions={false}
+        />
+      )}
 
       <UploadModal
         isOpen={uploadModalOpen}
