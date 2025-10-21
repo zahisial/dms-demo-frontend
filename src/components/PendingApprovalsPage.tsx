@@ -627,10 +627,10 @@ export default function PendingApprovalsPage({
           onHoverChange={setHoveredRow}
           onDocumentClick={handleDocumentClick}
           onView={handleView}
-          onEdit={handleEdit}
+          onEdit={user?.role === 'admin' ? handleEdit : undefined}
           onDownload={handleDownload}
           onShare={handleShare}
-          onDelete={handleDelete}
+          onDelete={user?.role === 'admin' ? handleDelete : undefined}
           onReassign={handleReassign}
           onReminder={handleReminder}
         />

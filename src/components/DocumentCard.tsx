@@ -31,13 +31,30 @@ export default function DocumentCard({
 }: DocumentCardProps) {
 
   const getStatusIcon = () => {
+    const getStatusColor = (status: string) => {
+      switch (status) {
+        case 'approved':
+          return 'rgb(77, 183, 72)';
+        case 'pending':
+          return 'rgb(182, 65, 51)';
+        case 'revision':
+          return 'rgb(182, 65, 51)';
+        case 'rejected':
+          return 'rgb(210, 41, 39)';
+        default:
+          return 'rgb(210, 41, 39)';
+      }
+    };
+
     switch (document.approvalStatus) {
       case 'approved':
-        return <CheckCircle className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />;
+        return <CheckCircle className="w-3 h-3" style={{ color: getStatusColor('approved') }} />;
       case 'rejected':
-        return <XCircle className="w-3 h-3 text-red-600 dark:text-red-400" />;
+        return <XCircle className="w-3 h-3" style={{ color: getStatusColor('rejected') }} />;
       case 'pending':
-        return <AlertCircle className="w-3 h-3 text-amber-600 dark:text-amber-400" />;
+        return <AlertCircle className="w-3 h-3" style={{ color: getStatusColor('pending') }} />;
+      case 'revision':
+        return <AlertCircle className="w-3 h-3" style={{ color: getStatusColor('revision') }} />;
       default:
         return null;
     }
@@ -100,17 +117,29 @@ export default function DocumentCard({
       return null;
     }
 
-    const iconColor = document.securityLevel === 'Highly Confidential' 
-      ? 'text-red-600 dark:text-red-400' 
-      : 'text-amber-600 dark:text-amber-400';
-    
-    const bgColor = document.securityLevel === 'Highly Confidential'
-      ? 'bg-red-100 dark:bg-red-900/30 border-red-200 dark:border-red-700'
-      : 'bg-amber-100 dark:bg-amber-900/30 border-amber-200 dark:border-amber-700';
+    const getSecurityColor = (level: string) => {
+      switch (level) {
+        case 'Public':
+          return 'rgb(77, 183, 72)';
+        case 'Restricted':
+          return 'rgb(182, 65, 51)';
+        case 'Confidential':
+          return 'rgb(210, 41, 39)';
+        case 'Top Secret':
+          return 'rgb(210, 41, 39)';
+        case 'Highly Confidential':
+          return 'rgb(210, 41, 39)';
+        default:
+          return 'rgb(77, 183, 72)';
+      }
+    };
 
     return (
       <div className="absolute bottom-2 left-2 z-20">
-        <Shield className={`w-5 h-5 ${iconColor}`} />
+        <Shield 
+          className="w-5 h-5" 
+          style={{ color: getSecurityColor(document.securityLevel) }}
+        />
       </div>
     );
   };
@@ -153,11 +182,14 @@ export default function DocumentCard({
               <div className="flex items-center space-x-1">
                 {document.securityLevel && document.securityLevel !== 'Public' && (
                   <div className="flex items-center">
-                    <Shield className={`w-4 h-4 ${
-                      document.securityLevel === 'Highly Confidential' 
-                        ? 'text-red-500 dark:text-red-400' 
-                        : 'text-amber-500 dark:text-amber-400'
-                    }`} />
+                    <Shield 
+                      className="w-4 h-4"
+                      style={{
+                        color: document.securityLevel === 'Highly Confidential' || document.securityLevel === 'Confidential' || document.securityLevel === 'Top Secret'
+                          ? 'rgb(210, 41, 39)'
+                          : 'rgb(182, 65, 51)'
+                      }}
+                    />
                   </div>
                 )}
                 {showApprovalStatus && getStatusIcon()}

@@ -166,19 +166,19 @@ export const pendingApprovalsColumns: ColumnConfig[] = [
     id: 'approvalStatus',
     label: 'Status',
     sortable: true,
-    render: (document) => {
-      const getStatusColor = (status: string) => {
+    render: (document, helpers) => {
+      const getStatusBackgroundColor = (status: string): React.CSSProperties => {
         switch (status) {
           case 'approved':
-            return 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30';
+            return { backgroundColor: 'rgb(77, 183, 72)', color: 'white' };
           case 'pending':
-            return 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30';
-          case 'rejected':
-            return 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30';
+            return { backgroundColor: 'rgb(182, 65, 51)', color: 'white' };
           case 'revision':
-            return 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30';
+            return { backgroundColor: 'rgb(182, 65, 51)', color: 'white' };
+          case 'rejected':
+            return { backgroundColor: 'rgb(210, 41, 39)', color: 'white' };
           default:
-            return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-900/30';
+            return { backgroundColor: 'rgb(210, 41, 39)', color: 'white' };
         }
       };
 
@@ -198,7 +198,10 @@ export const pendingApprovalsColumns: ColumnConfig[] = [
       };
 
       return (
-        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(document.approvalStatus)}`}>
+        <span 
+          className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white"
+          style={getStatusBackgroundColor(document.approvalStatus)}
+        >
           {getStatusIcon(document.approvalStatus)}
           <span className="ml-1 capitalize">{document.approvalStatus}</span>
         </span>
@@ -221,48 +224,6 @@ export const pendingApprovalsColumns: ColumnConfig[] = [
         }`}>
           {daysDelayed} days
         </span>
-      );
-    },
-  },
-  {
-    id: 'approver',
-    label: 'Approver',
-    sortable: false,
-    render: (document) => {
-      if (!document.approver) {
-        return <span className="text-sm text-gray-500 dark:text-gray-400">No approver assigned</span>;
-      }
-      return (
-        <div className="flex items-center space-x-3">
-          <div className="relative">
-            <img
-              src={document.approver.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(document.approver.name)}&background=6366f1&color=fff&size=32`}
-              alt={document.approver.name}
-              className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                fallback?.classList.remove('hidden');
-              }}
-            />
-            <div className="flex hidden justify-center items-center w-8 h-8 text-xs font-medium rounded-full border-2 border-white bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 dark:border-gray-800">
-              {document.approver.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-            </div>
-            {document.approver.approved && (
-              <div className="flex absolute -top-1 -right-1 justify-center items-center w-4 h-4 bg-green-500 rounded-full">
-                <Check className="w-2.5 h-2.5 text-white" />
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
-              {document.approver.name}
-            </span>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              {document.approver.title}
-            </span>
-          </div>
-        </div>
       );
     },
   },

@@ -43,7 +43,6 @@ import {
   X
 } from 'lucide-react';
 import { Document, User as UserType } from '../types';
-import { canEditDocument, canDeleteDocument } from '../utils/documentPermissions';
 import RejectionModal from './RejectionModal';
 
 interface ExtendedDocument extends Document {
@@ -78,16 +77,19 @@ export default function DocumentDetailPage({
   const [showTooltip, setShowTooltip] = useState<string | null>(null);
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
 
-  const getStatusColor = (status: string) => {
+
+  const getStatusBackgroundColor = (status: string): React.CSSProperties => {
     switch (status) {
       case 'approved':
-        return 'text-green-600 dark:text-green-400';
+        return { backgroundColor: 'rgb(77, 183, 72)', color: 'white' };
       case 'pending':
-        return 'text-white dark:text-white';
+        return { backgroundColor: 'rgb(182, 65, 51)', color: 'white' };
       case 'revision':
-        return 'text-orange-600 dark:text-orange-400';
+        return { backgroundColor: 'rgb(182, 65, 51)', color: 'white' };
+      case 'rejected':
+        return { backgroundColor: 'rgb(210, 41, 39)', color: 'white' };
       default:
-        return 'text-gray-600 dark:text-gray-400';
+        return { backgroundColor: 'rgb(210, 41, 39)', color: 'white' };
     }
   };
 
@@ -214,7 +216,8 @@ export default function DocumentDetailPage({
         <div className="flex justify-between items-center mb-3">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Document Details</h4>
           <span 
-            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(document.approvalStatus)}`}
+            className="inline-flex items-center px-2 py-1 text-xs font-medium text-white rounded-full"
+            style={getStatusBackgroundColor(document.approvalStatus)}
           >
             {getStatusIcon(document.approvalStatus)}
             <span className="ml-1 capitalize">{document.approvalStatus}</span>
@@ -550,8 +553,8 @@ export default function DocumentDetailPage({
                   </motion.button>
                 </Tooltip>
 
-                {/* Edit Button */}
-                {onEdit && canEditDocument(document, user) && (
+                {/* Edit Button - Admin Only */}
+                {onEdit && (
                   <Tooltip text="Edit Document" show={showTooltip === 'edit'}>
                     <motion.button
                       onMouseEnter={() => setShowTooltip('edit')}
@@ -568,8 +571,8 @@ export default function DocumentDetailPage({
               </>
             )}
 
-            {/* Delete Button */}
-            {user && canDeleteDocument(document, user) && (
+            {/* Delete Button - Admin Only */}
+            {user?.role === 'admin' && (
               <Tooltip text="Delete Document" show={showTooltip === 'delete'}>
                 <motion.button
                   onMouseEnter={() => setShowTooltip('delete')}
@@ -587,22 +590,6 @@ export default function DocumentDetailPage({
             {/* Manager User Buttons */}
             {user?.role === 'manager' && (
               <>
-                {/* Edit Button */}
-                {onEdit && canEditDocument(document, user) && (
-                  <Tooltip text="Edit Document" show={showTooltip === 'edit'}>
-                    <motion.button
-                      onMouseEnter={() => setShowTooltip('edit')}
-                      onMouseLeave={() => setShowTooltip(null)}
-                      onClick={() => onEdit(document)}
-                      className="glass-button-icon"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </motion.button>
-                  </Tooltip>
-                )}
-
                 {/* Copy Link Button */}
                 <Tooltip text="Copy Document Link" show={showTooltip === 'share'}>
                   <motion.button

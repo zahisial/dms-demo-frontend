@@ -80,26 +80,30 @@ const getFileIcon = (fileType: string) => {
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'approved':
-      return 'text-green-600 dark:text-green-400';
+      return 'text-white dark:text-white';
     case 'pending':
       return 'text-white dark:text-white';
     case 'revision':
-      return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400';
+      return 'text-white dark:text-white';
+    case 'rejected':
+      return 'text-white dark:text-white';
     default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400';
+      return 'text-white dark:text-white';
   }
 };
 
-const getStatusBackgroundColor = (status: string) => {
+const getStatusBackgroundColor = (status: string): React.CSSProperties => {
   switch (status) {
     case 'approved':
-      return { backgroundColor: 'rgba(16, 185, 129, 0.1)' };
+      return { backgroundColor: 'rgb(77, 183, 72)', color: 'white' };
     case 'pending':
-      return { backgroundColor: '#ffeefb', color: '#b64198' };
+      return { backgroundColor: 'rgb(182, 65, 51)', color: 'white' };
     case 'revision':
-      return {};
+      return { backgroundColor: 'rgb(182, 65, 51)', color: 'white' };
+    case 'rejected':
+      return { backgroundColor: 'rgb(210, 41, 39)', color: 'white' };
     default:
-      return {};
+      return { backgroundColor: 'rgb(210, 41, 39)', color: 'white' };
   }
 };
 
@@ -119,15 +123,17 @@ const getStatusIcon = (status: string) => {
 const getSecurityLevelColor = (level?: string) => {
   switch (level) {
     case 'Public':
-      return 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30';
+      return 'text-white dark:text-white';
     case 'Restricted':
-      return 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30';
+      return 'text-white dark:text-white';
     case 'Confidential':
       return 'text-white dark:text-white';
     case 'Top Secret':
-      return 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30';
+      return 'text-white dark:text-white';
+    case 'Highly Confidential':
+      return 'text-white dark:text-white';
     default:
-      return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-900/30';
+      return 'text-white dark:text-white';
   }
 };
 

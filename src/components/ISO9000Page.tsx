@@ -47,7 +47,7 @@ import {
   Info,
   HelpCircle,
   MessageCircle,
-  User,
+  User as UserIcon,
   Users2,
   ArrowLeft
 } from 'lucide-react';
@@ -62,16 +62,17 @@ import DeleteConfirmationModal from './DeleteConfirmationModal';
 import UniversalDocumentsTable from './UniversalDocumentsTable';
 import { isoCardDocumentsColumns, isoCardDocumentsColumnsWithSubject } from './tableConfigs';
 import { mockUsers } from '../data/mockData';
-import { Document } from '../types';
+import { Document, User } from '../types';
 
 
 interface ISO9000PageProps {
   onDocumentClick?: (document: Document) => void;
   sections?: ISO9000Section[];
   onUpdateSections?: (sections: ISO9000Section[]) => void;
+  user?: User | null;
 }
 
-export default function ISO9000Page({ onDocumentClick, sections: propSections, onUpdateSections }: ISO9000PageProps) {
+export default function ISO9000Page({ onDocumentClick, sections: propSections, onUpdateSections, user }: ISO9000PageProps) {
   const [newCardModalOpen, setNewCardModalOpen] = useState(false);
   const [searchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -171,7 +172,7 @@ export default function ISO9000Page({ onDocumentClick, sections: propSections, o
         'HelpCircle': HelpCircle,
         'MessageCircle': MessageCircle,
         'Bell': Bell,
-        'User': User,
+        'User': UserIcon,
         'Users2': Users2,
       };
       return iconMap[iconName] || Award;
@@ -806,7 +807,7 @@ export default function ISO9000Page({ onDocumentClick, sections: propSections, o
             <UniversalDocumentsTable
               documents={sortedDocuments as Document[]}
               columns={selectedSection ? isoCardDocumentsColumns : isoCardDocumentsColumnsWithSubject}
-              user={{
+              user={user || {
                 id: '4',
                 name: 'ISO Administrator',
                 email: 'admini_iso@edaratgroup.com',
@@ -827,10 +828,10 @@ export default function ISO9000Page({ onDocumentClick, sections: propSections, o
               onHoverChange={setHoveredRow}
               onDocumentClick={(doc) => handleDocumentClick(doc)}
               onView={handleView}
-              onEdit={handleEdit}
+              onEdit={user?.role === 'admin' ? handleEdit : undefined}
               onDownload={handleDownload}
               onShare={handleShare}
-              onDelete={handleDelete}
+              onDelete={user?.role === 'admin' ? handleDelete : undefined}
               onReminder={handleReminder}
             />
           </motion.div>

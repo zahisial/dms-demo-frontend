@@ -1079,14 +1079,16 @@ export default function FolderView({
                                       <td className="px-4 py-3">
                                         <div className="flex flex-col space-y-1">
                                           <div 
-                                            className={`inline-flex px-2 py-1 rounded-full text-xs ${
-                                              document.approvalStatus === 'approved' 
-                                                ? 'text-green-800 dark:text-green-200'
+                                            className="inline-flex px-2 py-1 rounded-full text-xs text-white"
+                                            style={{
+                                              backgroundColor: document.approvalStatus === 'approved' 
+                                                ? 'rgb(77, 183, 72)'
                                                 : document.approvalStatus === 'pending'
-                                                ? 'text-white dark:text-white'
-                                                : 'text-red-800 dark:text-red-200'
-                                            }`}
-                                            style={document.approvalStatus === 'pending' ? { backgroundColor: '#b64198' } : {}}
+                                                ? 'rgb(182, 65, 51)'
+                                                : document.approvalStatus === 'revision'
+                                                ? 'rgb(182, 65, 51)'
+                                                : 'rgb(210, 41, 39)'
+                                            }}
                                           >
                                             {document.approvalStatus}
                                           </div>
@@ -1144,17 +1146,23 @@ export default function FolderView({
                                       {/* Security Shield Icon - Bottom Left */}
                                     {document.securityLevel && document.securityLevel !== 'Public' && (
                                       <div className="absolute bottom-1 -left-0 z-20">
-                                        <Shield className={`w-4 h-4 stroke-3 bg-white dark:bg-gray-800 rounded-full ${
-                                          document.securityLevel === 'Top Secret' 
-                                            ? 'text-red-600 dark:text-red-400' 
-                                            : 'text-amber-600 dark:text-amber-400'
-                                        }`} />
+                                        <Shield 
+                                          className="w-4 h-4 stroke-3 bg-white dark:bg-gray-800 rounded-full text-white"
+                                          style={{
+                                            color: document.securityLevel === 'Top Secret' || document.securityLevel === 'Confidential' || document.securityLevel === 'Highly Confidential'
+                                              ? 'rgb(210, 41, 39)'
+                                              : 'rgb(182, 65, 51)'
+                                          }}
+                                        />
                                       </div>
                                     )}
                                       {getFileIcon(document.fileType, "stroke-1 w-12 h-12")}
                                       {/* Status indicators */}
                                       {document.approvalStatus === 'pending' && (
-                                        <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white dark:border-gray-800 bg-amber-500" />
+                                        <div 
+                                          className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white dark:border-gray-800"
+                                          style={{ backgroundColor: 'rgb(182, 65, 51)' }}
+                                        />
                                       )}
                                       {document.publishStatus === 'published' && (
                                         <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white dark:border-gray-800 bg-blue-500" />
