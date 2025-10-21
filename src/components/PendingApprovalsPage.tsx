@@ -91,13 +91,40 @@ export default function PendingApprovalsPage({
       });
     });
     
+    // If no documents from sections, use mock data for testing
+    if (allDocs.length === 0) {
+      const mockDocs = oldPendingDocuments.map(doc => ({
+        ...doc,
+        approvalStatus: (doc as any).status as 'pending' | 'approved' | 'rejected' | 'revision',
+        fileType: ((doc as any).fileExtension?.toLowerCase() || 'pdf'),
+        uploadedAt: new Date(doc.uploadedAt),
+        lastModified: new Date(doc.uploadedAt),
+        accessType: 'public' as const,
+        tags: doc.tags || [],
+        url: `/documents/${doc.id}`,
+        assignedTo: doc.approver?.id || '1',
+        assignedDate: new Date(doc.submittedForApproval || doc.uploadedAt),
+        securityLevel: 'Public' as const,
+        uploadedBy: doc.uploadedBy,
+        department: doc.department,
+        type: doc.type,
+        fileSize: doc.fileSize,
+        description: doc.description,
+        approver: doc.approver,
+        priority: doc.priority
+      }));
+      allDocs.push(...mockDocs);
+    }
+    
     // Filter to show only documents assigned to the current manager
     if (user && user.role === 'manager') {
       return allDocs.filter(doc => doc.assignedTo === user.id);
     }
     
     // For non-managers or when no user is logged in, return all documents
-    return allDocs;
+    const result = allDocs;
+    console.log('PendingApprovalsPage: Documents found:', result.length, result);
+    return result;
   }, [iso9000Sections, ceSections, edcSections, iso2Sections, user]);
 
   // OLD Mock data - Now replaced with real data from sections
@@ -108,7 +135,7 @@ export default function PendingApprovalsPage({
       type: 'Financial Report',
       department: 'Finance',
       uploadedBy: 'John Smith',
-      uploadedAt: '2025-01-15T10:30:00Z',
+      uploadedAt: new Date('2025-01-15T10:30:00Z'),
       fileSize: '2.4 MB',
       status: 'pending',
       tags: ['financial', 'quarterly', 'report'],
@@ -131,7 +158,7 @@ export default function PendingApprovalsPage({
       type: 'Policy Document',
       department: 'IT Security',
       uploadedBy: 'Mike Chen',
-      uploadedAt: '2025-01-14T14:20:00Z',
+      uploadedAt: new Date('2025-01-14T14:20:00Z'),
       fileSize: '1.8 MB',
       status: 'pending',
       tags: ['security', 'policy', 'update'],
@@ -154,7 +181,7 @@ export default function PendingApprovalsPage({
       type: 'HR Document',
       department: 'Human Resources',
       uploadedBy: 'Emily Davis',
-      uploadedAt: '2025-01-13T09:15:00Z',
+      uploadedAt: new Date('2025-01-13T09:15:00Z'),
       fileSize: '3.2 MB',
       status: 'pending',
       tags: ['hr', 'handbook', 'employee'],

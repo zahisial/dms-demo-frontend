@@ -274,7 +274,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, document, onEdit
             <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
               <span className="text-sm text-gray-600 dark:text-gray-400">Security Level:</span>
               <span 
-                className="text-xs font-medium px-2 py-1 rounded-full text-white"
+                className="px-2 py-1 text-xs font-medium text-white rounded-full"
                 style={getSecurityLevelBackgroundColor(document.securityLevel)}
               >
                 {document.securityLevel} 

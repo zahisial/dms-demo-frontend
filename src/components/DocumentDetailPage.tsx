@@ -664,16 +664,13 @@ export default function DocumentDetailPage({
         <div className="flex flex-1">
           {/* Document Preview */}
           <div className="relative flex-1 p-6">
-            <div className="flex justify-center items-center h-full bg-gray-50 rounded-lg dark:bg-gray-800">
-              <div className="text-center">
-                <FileText className="mx-auto mb-4 w-24 h-24 text-gray-400 stroke-1" />
-                <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
-                  Document Preview
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400">
-                  Preview content would be displayed here
-                </p>
-              </div>
+            <div className="overflow-hidden h-full bg-white rounded-lg dark:bg-gray-800">
+              <iframe
+                src="/Web-Privacy-Policy.html"
+                className="w-full h-full border-0"
+                title="Document Preview"
+                sandbox="allow-same-origin allow-scripts"
+              />
             </div>
           </div>
 

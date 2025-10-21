@@ -12,13 +12,13 @@ export const docsDBColumns: ColumnConfig[] = [
     sortable: true,
     render: (document, helpers) => (
       <div 
-        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg p-2 -m-2 transition-colors"
+        className="p-2 -m-2 rounded-lg transition-colors cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
         role="button"
         tabIndex={0}
         aria-label={`View ${document.title}`}
       >
         <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline transition-colors duration-200 text-left">
+          <span className="text-sm font-medium text-left transition-colors duration-200 text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline">
             {document.title}
           </span>
         </div>
@@ -77,7 +77,7 @@ export const docsDBColumns: ColumnConfig[] = [
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${helpers.getSecurityLevelColor(document.securityLevel)}`}
         style={helpers.getSecurityLevelBackgroundColor(document.securityLevel)}
       >
-        <Shield className="w-3 h-3 mr-1" />
+        <Shield className="mr-1 w-3 h-3" />
         <span className="capitalize">{document.securityLevel || 'Public'}</span>
       </span>
     ),
@@ -104,7 +104,7 @@ export const docsDBColumns: ColumnConfig[] = [
                 fallback?.classList.remove('hidden');
               }}
             />
-            <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-xs font-medium text-primary-600 dark:text-primary-400 border-2 border-white dark:border-gray-800 hidden">
+            <div className="flex hidden justify-center items-center w-8 h-8 text-xs font-medium rounded-full border-2 border-white bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 dark:border-gray-800">
               {document.approver.name.split(' ').map(n => n[0]).join('').toUpperCase()}
             </div>
           </div>
@@ -132,7 +132,7 @@ export const pendingApprovalsColumns: ColumnConfig[] = [
       <div className="flex items-center space-x-3">
         {helpers.getFileIcon(document.fileType)}
         <div>
-          <div className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline transition-colors duration-200 text-left">
+          <div className="text-sm font-medium text-left transition-colors duration-200 text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline">
             {document.title}
           </div>
           <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -245,11 +245,11 @@ export const pendingApprovalsColumns: ColumnConfig[] = [
                 fallback?.classList.remove('hidden');
               }}
             />
-            <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-xs font-medium text-primary-600 dark:text-primary-400 border-2 border-white dark:border-gray-800 hidden">
+            <div className="flex hidden justify-center items-center w-8 h-8 text-xs font-medium rounded-full border-2 border-white bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 dark:border-gray-800">
               {document.approver.name.split(' ').map(n => n[0]).join('').toUpperCase()}
             </div>
             {document.approver.approved && (
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+              <div className="flex absolute -top-1 -right-1 justify-center items-center w-4 h-4 bg-green-500 rounded-full">
                 <Check className="w-2.5 h-2.5 text-white" />
               </div>
             )}
@@ -290,7 +290,7 @@ export const pendingApprovalsColumns: ColumnConfig[] = [
       
       return (
         <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+          <div className="flex justify-center items-center w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30">
             <span className="text-xs font-medium text-primary-600 dark:text-primary-400">
               {assignedUser.name.charAt(0).toUpperCase()}
             </span>
@@ -311,14 +311,14 @@ export const pendingApprovalsColumns: ColumnConfig[] = [
     id: 'securityLevel',
     label: 'Security Level',
     sortable: true,
-    render: (document) => {
+    render: (document, helpers) => {
       if (!document.securityLevel) {
         return <span className="text-sm text-gray-400 dark:text-gray-500">Public</span>;
       }
       
       return (
         <span 
-          className="text-xs font-medium px-2 py-1 rounded-full text-white"
+          className="px-2 py-1 text-xs font-medium text-white rounded-full"
           style={helpers.getSecurityLevelBackgroundColor(document.securityLevel)}
         >
           {document.securityLevel}
@@ -337,7 +337,7 @@ export const folderViewColumns: ColumnConfig[] = [
     render: (document, helpers) => (
       <div className="flex items-center space-x-3">
         {helpers.getFileIcon(document.fileType)}
-        <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+        <span className="text-sm font-medium text-gray-900 truncate dark:text-white">
           {document.title}
         </span>
         {document.securityLevel && document.securityLevel !== 'Public' && (
@@ -396,10 +396,10 @@ export const isoCardDocumentsColumnsWithSubject: ColumnConfig[] = [
       <div className="flex items-center space-x-3">
         {helpers.getFileIcon(document.fileType)}
         <div>
-          <div className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline transition-colors duration-200 text-left">
+          <div className="text-sm font-medium text-left transition-colors duration-200 text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline">
             {document.title}
           </div>
-          <div className="flex items-center space-x-2 mt-1">
+          <div className="flex items-center mt-1 space-x-2">
             <span className="text-xs text-gray-500 dark:text-gray-400">
               {document.fileSize}
             </span>
@@ -434,7 +434,7 @@ export const isoCardDocumentsColumnsWithSubject: ColumnConfig[] = [
       }
       return (
         <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+          <div className="flex justify-center items-center w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30">
             <span className="text-xs font-medium text-primary-600 dark:text-primary-400">
               {assignedUser.name.charAt(0).toUpperCase()}
             </span>
@@ -494,7 +494,7 @@ export const isoCardDocumentsColumnsWithSubject: ColumnConfig[] = [
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${helpers.getSecurityLevelColor(document.securityLevel)}`}
         style={helpers.getSecurityLevelBackgroundColor(document.securityLevel)}
       >
-        <Shield className="w-3 h-3 mr-1" />
+        <Shield className="mr-1 w-3 h-3" />
         <span className="capitalize">{document.securityLevel || 'Public'}</span>
       </span>
     ),
@@ -521,10 +521,10 @@ export const isoCardDocumentsColumns: ColumnConfig[] = [
       <div className="flex items-center space-x-3">
         {helpers.getFileIcon(document.fileType)}
         <div>
-          <div className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline transition-colors duration-200 text-left">
+          <div className="text-sm font-medium text-left transition-colors duration-200 text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline">
             {document.title}
           </div>
-          <div className="flex items-center space-x-2 mt-1">
+          <div className="flex items-center mt-1 space-x-2">
             <span className="text-xs text-gray-500 dark:text-gray-400">
               {document.fileSize}
             </span>
@@ -559,7 +559,7 @@ export const isoCardDocumentsColumns: ColumnConfig[] = [
       }
       return (
         <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+          <div className="flex justify-center items-center w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30">
             <span className="text-xs font-medium text-primary-600 dark:text-primary-400">
               {assignedUser.name.charAt(0).toUpperCase()}
             </span>
@@ -609,7 +609,7 @@ export const isoCardDocumentsColumns: ColumnConfig[] = [
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${helpers.getSecurityLevelColor(document.securityLevel)}`}
         style={helpers.getSecurityLevelBackgroundColor(document.securityLevel)}
       >
-        <Shield className="w-3 h-3 mr-1" />
+        <Shield className="mr-1 w-3 h-3" />
         <span className="capitalize">{document.securityLevel || 'Public'}</span>
       </span>
     ),

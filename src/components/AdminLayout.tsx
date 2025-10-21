@@ -226,9 +226,9 @@ export default function AdminLayout({
             
           </div>
 
-          <div className="flex flex-1 justify-end items-right">
+          <div className="flex flex-1 justify-center items-center">
             {/* middle section */}
-            <div className="w-96">
+            <div className="w-[90%]">
               <SearchBar
                 onSearch={(query, filters) => {
                   setSearchQuery(query);
