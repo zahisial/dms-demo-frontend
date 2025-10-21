@@ -25,7 +25,7 @@ export interface Document {
   uploadedAt: Date;
   lastModified: Date;
   accessType: 'public' | 'department' | 'restricted';
-  approvalStatus: 'pending' | 'approved' | 'rejected' | 'revision';
+  approvalStatus: 'pending' | 'approved' | 'rejected' | 'revision' | 'acknowledged';
   approvedBy?: string;
   approvedAt?: Date;
   publishStatus?: 'draft' | 'published';
@@ -58,6 +58,9 @@ export interface Document {
   deletedBy?: string;
   username?: string;    // Username for document access
   password?: string;    // Password for document access
+  rejectionReason?: string;  // Reason for rejection
+  rejectedBy?: string;  // User who rejected the document
+  rejectedAt?: Date;    // When document was rejected
 }
 
 export interface DocumentAcceptance {

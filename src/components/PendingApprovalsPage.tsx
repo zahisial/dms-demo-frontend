@@ -51,14 +51,14 @@ export default function PendingApprovalsPage({
   const [deleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
 
-  // Get all pending documents from all sections, filtered by manager assignment
+  // Get all pending and rejected documents from all sections, filtered by manager assignment
   const pendingDocuments = useMemo(() => {
     const allDocs: Document[] = [];
     
     // Get from ISO9000 sections
     iso9000Sections.forEach(section => {
       section.documents.forEach((doc: any) => {
-        if (doc.approvalStatus === 'pending') {
+        if (doc.approvalStatus === 'pending' || doc.approvalStatus === 'rejected') {
           allDocs.push(doc as Document);
         }
       });
@@ -67,7 +67,7 @@ export default function PendingApprovalsPage({
     // Get from CE sections
     ceSections.forEach(section => {
       section.documents.forEach((doc: any) => {
-        if (doc.approvalStatus === 'pending') {
+        if (doc.approvalStatus === 'pending' || doc.approvalStatus === 'rejected') {
           allDocs.push(doc as Document);
         }
       });
@@ -76,7 +76,7 @@ export default function PendingApprovalsPage({
     // Get from EDC sections
     edcSections.forEach(section => {
       section.documents.forEach((doc: any) => {
-        if (doc.approvalStatus === 'pending') {
+        if (doc.approvalStatus === 'pending' || doc.approvalStatus === 'rejected') {
           allDocs.push(doc as Document);
         }
       });
@@ -85,7 +85,7 @@ export default function PendingApprovalsPage({
     // Get from ISO2 sections
     iso2Sections.forEach(section => {
       section.documents.forEach((doc: any) => {
-        if (doc.approvalStatus === 'pending') {
+        if (doc.approvalStatus === 'pending' || doc.approvalStatus === 'rejected') {
           allDocs.push(doc as Document);
         }
       });

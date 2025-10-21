@@ -21,10 +21,12 @@ import {
   ChevronLeft,
   Globe,
   UserCheck,
-  Copy
+  Copy,
+  X
 } from 'lucide-react';
 import { Document, User as UserType } from '../types';
 import { canEditDocument, canDeleteDocument } from '../utils/documentPermissions';
+import RejectionModal from './RejectionModal';
 
 interface ExtendedDocument extends Document {
   isLocked?: boolean;
@@ -39,6 +41,7 @@ interface DocumentDetailPageProps {
   onDelete?: (document: Document) => void;
   onDownload?: (document: Document) => void;
   onShare?: (document: Document) => void;
+  onDocumentStatusUpdate?: (documentId: string, status: 'approved' | 'rejected', reason?: string) => void;
 }
 
 export default function DocumentDetailPage({ 
@@ -48,12 +51,14 @@ export default function DocumentDetailPage({
   onEdit, 
   onDelete, 
   onDownload, 
-  onShare
+  onShare,
+  onDocumentStatusUpdate
 }: DocumentDetailPageProps) {
   const [activeTab, setActiveTab] = useState<'info' | 'activity' | 'version'>('info');
   const [isInfoPanelVisible, setIsInfoPanelVisible] = useState(true);
   const [acknowledged, setAcknowledged] = useState(false);
   const [showTooltip, setShowTooltip] = useState<string | null>(null);
+  const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -115,6 +120,23 @@ export default function DocumentDetailPage({
     }
   };
 
+  const handleApprove = () => {
+    if (onDocumentStatusUpdate) {
+      onDocumentStatusUpdate(document.id, 'approved');
+    }
+  };
+
+  const handleReject = () => {
+    setRejectionModalOpen(true);
+  };
+
+  const handleRejectionSubmit = (reason: string) => {
+    if (onDocumentStatusUpdate) {
+      onDocumentStatusUpdate(document.id, 'rejected', reason);
+    }
+    setRejectionModalOpen(false);
+  };
+
   // Simple Tooltip Component
   const Tooltip = ({ children, text, show }: { children: React.ReactNode; text: string; show: boolean }) => {
     if (!show) return <>{children}</>;
@@ -141,7 +163,7 @@ export default function DocumentDetailPage({
 
   // Info Tab
   const renderInfoTab = () => (
-    <div className="space-y-6">
+    <div className="space-y-1">
       {/* Description */}
       <div>
         <h4 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Description</h4>
@@ -299,7 +321,41 @@ export default function DocumentDetailPage({
           </div>
         </div>
       )}
-    </div>
+
+      {/* Approval Actions - Only for managers */}
+      {user?.role === 'manager' && document.approvalStatus === 'pending' && (
+        <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="space-y-4">
+            <div>
+              <h4 className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Document Approval</h4>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Review and approve or reject this document
+              </p>
+            </div>
+            <div className="flex space-x-3">
+              <motion.button
+                onClick={handleApprove}
+                className="flex flex-1 justify-center items-center px-4 py-2 space-x-2 text-sm font-medium text-white bg-green-600 rounded-lg transition-colors hover:bg-green-700"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <CheckCircle className="w-4 h-4" />
+                <span>Approve</span>
+              </motion.button>
+              <motion.button
+                onClick={handleReject}
+                className="flex flex-1 justify-center items-center px-4 py-2 space-x-2 text-sm font-medium text-white bg-red-600 rounded-lg transition-colors hover:bg-red-700"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <X className="w-4 h-4" />
+                <span>Reject</span>
+              </motion.button>
+            </div>
+          </div>
+        </div>
+      )}
+</div>
   );
 
   // Activity Tab
@@ -675,6 +731,14 @@ export default function DocumentDetailPage({
           </AnimatePresence>
         </div>
       </motion.div>
+
+      {/* Rejection Modal */}
+      <RejectionModal
+        isOpen={rejectionModalOpen}
+        onClose={() => setRejectionModalOpen(false)}
+        onSubmit={handleRejectionSubmit}
+        documentTitle={document.title}
+      />
     </div>
   );
 }

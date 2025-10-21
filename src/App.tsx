@@ -382,6 +382,43 @@ function App() {
     setBulkMode(false);
   };
 
+  // Handle document status update
+  const handleDocumentStatusUpdate = (documentId: string, status: 'approved' | 'rejected', reason?: string) => {
+    if (!user) return;
+    
+    setDocuments(prev => 
+      prev.map(doc => {
+        if (doc.id === documentId) {
+          const updatedDoc = { ...doc, approvalStatus: status };
+          
+          if (status === 'approved') {
+            updatedDoc.approvedBy = user.name;
+            updatedDoc.approvedAt = new Date();
+          } else if (status === 'rejected') {
+            updatedDoc.rejectionReason = reason;
+            updatedDoc.rejectedBy = user.name;
+            updatedDoc.rejectedAt = new Date();
+          }
+          
+          return updatedDoc;
+        }
+        return doc;
+      })
+    );
+    
+    // Update selected document if it's the one being updated
+    if (selectedDocument && selectedDocument.id === documentId) {
+      const updatedDoc = documents.find(doc => doc.id === documentId);
+      if (updatedDoc) {
+        setSelectedDocument(updatedDoc);
+      }
+    }
+    
+    // Show success message
+    const action = status === 'approved' ? 'approved' : 'rejected';
+    alert(`Document has been ${action} successfully!`);
+  };
+
   // Enhanced bulk actions
   const handleBulkAction = (action: 'delete' | 'approve' | 'publish' | 'notify', documentIds: string[]) => {
     if (!user) return;
@@ -389,7 +426,7 @@ function App() {
     const selectedDocs = documents.filter(doc => documentIds.includes(doc.id));
     
     switch (action) {
-      case 'approve':
+      case 'approve': {
         const docsToNotify = selectedDocs.filter(doc => doc.notifyAllAfterApproval);
         
         setDocuments(prev => 
@@ -407,8 +444,9 @@ function App() {
           alert(`${selectedDocs.length} documents approved successfully!`);
         }
         break;
+      }
         
-      case 'publish':
+      case 'publish': {
         // Only publish approved documents
         const approvedDocs = selectedDocs.filter(doc => doc.approvalStatus === 'approved');
         
@@ -427,6 +465,7 @@ function App() {
         
         alert(`${approvedDocs.length} documents published successfully!`);
         break;
+      }
         
       case 'notify':
         console.log(`Sending notifications about ${selectedDocs.length} documents to users`);
@@ -602,6 +641,7 @@ function App() {
             onDocumentClick={handleDocumentClick}
             sections={iso2Sections}
             onUpdateSections={setIso2Sections}
+            user={user}
           />
         </LayoutComponent>
         <ThemeToggle />
@@ -627,6 +667,7 @@ function App() {
             onDocumentClick={handleDocumentClick}
             sections={edcSections}
             onUpdateSections={setEdcSections}
+            user={user}
           />
         </LayoutComponent>
         <ThemeToggle />
@@ -659,6 +700,7 @@ function App() {
             onDocumentClick={handleDocumentClick}
             sections={ceSections}
             onUpdateSections={setCESections}
+            user={user}
           />
         </LayoutComponent>
         <ThemeToggle />
@@ -688,6 +730,7 @@ function App() {
             onDocumentClick={handleDocumentClick}
             sections={iso9000Sections}
             onUpdateSections={setIso9000Sections}
+            user={user}
           />
         </LayoutComponent>
         <ThemeToggle />
@@ -784,6 +827,7 @@ function App() {
               console.log('Share document:', document.title);
               // Handle share logic
             }}
+            onDocumentStatusUpdate={handleDocumentStatusUpdate}
           />
         </LayoutComponent>
         <ThemeToggle />

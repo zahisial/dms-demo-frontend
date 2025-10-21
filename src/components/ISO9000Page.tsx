@@ -360,21 +360,25 @@ export default function ISO9000Page({ onDocumentClick, sections: propSections, o
     setShowDropdown(false);
   };
 
-  // Get all documents from all sections
+  // Get all documents from all sections (only approved documents)
   const getAllDocuments = () => {
     return iso9000Sections.flatMap(section => 
-      section.documents.map(doc => ({
-        ...doc,
-        sectionTitle: section.title
-      }))
+      section.documents
+        .filter(doc => doc.approvalStatus === 'approved')
+        .map(doc => ({
+          ...doc,
+          sectionTitle: section.title
+        }))
     );
   };
 
-  // Get recently viewed documents (last day)
+  // Get recently viewed documents (last day) - only approved documents
   const getRecentlyViewedDocuments = useCallback(() => {
     // If viewing from a specific section, only show that section's recent docs
     if (selectedSection && tableViewType === 'section') {
-      return selectedSection.documents.filter(doc => recentlyViewedDocs.has(doc.id));
+      return selectedSection.documents.filter(doc => 
+        doc.approvalStatus === 'approved' && recentlyViewedDocs.has(doc.id)
+      );
     }
     // Otherwise show all recent docs
     const allDocs = getAllDocuments();
@@ -414,7 +418,8 @@ export default function ISO9000Page({ onDocumentClick, sections: propSections, o
     } else if (tableViewType === 'pending') {
       docsToSort = getPendingDocuments();
     } else if (selectedSection?.documents) {
-      docsToSort = [...selectedSection.documents];
+      // Only show approved documents in section view
+      docsToSort = selectedSection.documents.filter(doc => doc.approvalStatus === 'approved');
     }
     
     return docsToSort.sort((a, b) => {

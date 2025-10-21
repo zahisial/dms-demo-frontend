@@ -163,6 +163,49 @@ export const pendingApprovalsColumns: ColumnConfig[] = [
     ),
   },
   {
+    id: 'approvalStatus',
+    label: 'Status',
+    sortable: true,
+    render: (document) => {
+      const getStatusColor = (status: string) => {
+        switch (status) {
+          case 'approved':
+            return 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30';
+          case 'pending':
+            return 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30';
+          case 'rejected':
+            return 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30';
+          case 'revision':
+            return 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30';
+          default:
+            return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-900/30';
+        }
+      };
+
+      const getStatusIcon = (status: string) => {
+        switch (status) {
+          case 'approved':
+            return <Check className="w-3 h-3" />;
+          case 'pending':
+            return <Shield className="w-3 h-3" />;
+          case 'rejected':
+            return <Shield className="w-3 h-3" />;
+          case 'revision':
+            return <Shield className="w-3 h-3" />;
+          default:
+            return <Shield className="w-3 h-3" />;
+        }
+      };
+
+      return (
+        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(document.approvalStatus)}`}>
+          {getStatusIcon(document.approvalStatus)}
+          <span className="ml-1 capitalize">{document.approvalStatus}</span>
+        </span>
+      );
+    },
+  },
+  {
     id: 'daysDelayed',
     label: 'Days Delayed',
     sortable: true,
