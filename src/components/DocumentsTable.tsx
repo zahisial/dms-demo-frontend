@@ -1,5 +1,23 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+
+// Helper function for security level background colors
+const getSecurityLevelBackgroundColor = (level?: string): React.CSSProperties => {
+  switch (level) {
+    case 'Public':
+      return { backgroundColor: 'rgb(77, 183, 72)', color: 'white' };
+    case 'Restricted':
+      return { backgroundColor: 'rgb(182, 65, 51)', color: 'white' };
+    case 'Confidential':
+      return { backgroundColor: 'rgb(210, 41, 39)', color: 'white' };
+    case 'Top Secret':
+      return { backgroundColor: 'rgb(210, 41, 39)', color: 'white' };
+    case 'Highly Confidential':
+      return { backgroundColor: 'rgb(210, 41, 39)', color: 'white' };
+    default:
+      return { backgroundColor: 'rgb(77, 183, 72)', color: 'white' };
+  }
+};
 import {
   Eye,
   Edit,
@@ -314,7 +332,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span 
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSecurityLevelColor(document.securityLevel)}`}
-                      style={document.securityLevel === 'Confidential' ? { backgroundColor: '#ffedec', color: '#d22927' } : {}}
+                      style={getSecurityLevelBackgroundColor(document.securityLevel)}
                     >
                       <Shield className="w-3 h-3 mr-1" />
                       <span className="capitalize">{document.securityLevel || 'Public'}</span>

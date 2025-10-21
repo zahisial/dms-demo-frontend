@@ -75,7 +75,7 @@ export const docsDBColumns: ColumnConfig[] = [
     render: (document, helpers) => (
       <span 
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${helpers.getSecurityLevelColor(document.securityLevel)}`}
-        style={document.securityLevel === 'Confidential' ? { backgroundColor: '#ffedec', color: '#d22927' } : {}}
+        style={helpers.getSecurityLevelBackgroundColor(document.securityLevel)}
       >
         <Shield className="w-3 h-3 mr-1" />
         <span className="capitalize">{document.securityLevel || 'Public'}</span>
@@ -317,12 +317,10 @@ export const pendingApprovalsColumns: ColumnConfig[] = [
       }
       
       return (
-        <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-          document.securityLevel === 'Public' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-          document.securityLevel === 'Restricted' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-          document.securityLevel === 'Confidential' ? 'bg-[#ffedec] text-[#d22927] dark:bg-[#d22927]/10 dark:text-[#d22927]' :
-          'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-        }`}>
+        <span 
+          className="text-xs font-medium px-2 py-1 rounded-full text-white"
+          style={helpers.getSecurityLevelBackgroundColor(document.securityLevel)}
+        >
           {document.securityLevel}
         </span>
       );
@@ -494,7 +492,7 @@ export const isoCardDocumentsColumnsWithSubject: ColumnConfig[] = [
     render: (document, helpers) => (
       <span 
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${helpers.getSecurityLevelColor(document.securityLevel)}`}
-        style={document.securityLevel === 'Confidential' ? { backgroundColor: '#ffedec', color: '#d22927' } : {}}
+        style={helpers.getSecurityLevelBackgroundColor(document.securityLevel)}
       >
         <Shield className="w-3 h-3 mr-1" />
         <span className="capitalize">{document.securityLevel || 'Public'}</span>
@@ -609,7 +607,7 @@ export const isoCardDocumentsColumns: ColumnConfig[] = [
     render: (document, helpers) => (
       <span 
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${helpers.getSecurityLevelColor(document.securityLevel)}`}
-        style={document.securityLevel === 'Confidential' ? { backgroundColor: '#ffedec', color: '#d22927' } : {}}
+        style={helpers.getSecurityLevelBackgroundColor(document.securityLevel)}
       >
         <Shield className="w-3 h-3 mr-1" />
         <span className="capitalize">{document.securityLevel || 'Public'}</span>

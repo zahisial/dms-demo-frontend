@@ -1,5 +1,23 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// Helper function for security level background colors
+const getSecurityLevelBackgroundColor = (level?: string): React.CSSProperties => {
+  switch (level) {
+    case 'Public':
+      return { backgroundColor: 'rgb(77, 183, 72)', color: 'white' };
+    case 'Restricted':
+      return { backgroundColor: 'rgb(182, 65, 51)', color: 'white' };
+    case 'Confidential':
+      return { backgroundColor: 'rgb(210, 41, 39)', color: 'white' };
+    case 'Top Secret':
+      return { backgroundColor: 'rgb(210, 41, 39)', color: 'white' };
+    case 'Highly Confidential':
+      return { backgroundColor: 'rgb(210, 41, 39)', color: 'white' };
+    default:
+      return { backgroundColor: 'rgb(77, 183, 72)', color: 'white' };
+  }
+};
 import { 
   ArrowLeft, 
   Download, 
@@ -220,12 +238,10 @@ export default function DocumentDetailPage({
           {document.securityLevel && (
             <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
               <span className="text-sm text-gray-600 dark:text-gray-400">Security Level:</span>
-              <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                document.securityLevel === 'Public' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                document.securityLevel === 'Restricted' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                document.securityLevel === 'Confidential' ? 'bg-[#ffedec] text-[#d22927] dark:bg-[#d22927]/10 dark:text-[#d22927]' :
-                'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-              }`}>
+              <span 
+                className="text-xs font-medium px-2 py-1 rounded-full text-white"
+                style={getSecurityLevelBackgroundColor(document.securityLevel)}
+              >
                 {document.securityLevel} 
               </span>
             </div>
