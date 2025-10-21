@@ -3,6 +3,16 @@ import { Shield, Check } from 'lucide-react';
 import { ColumnConfig } from './UniversalDocumentsTable';
 import { Document } from '../types';
 import { calculateDaysDelayed } from '../utils/documentPermissions';
+import { 
+  getFileIcon, 
+  getStatusIcon, 
+  getStatusColor, 
+  getStatusBackgroundColor, 
+  getSecurityLevelColor, 
+  getSecurityLevelBackgroundColor, 
+  formatDateTime 
+} from '../utils/tableHelpers';
+import { mockUsers } from '../data/mockData';
 
 // DocsDB Page Configuration - Full featured table
 export const docsDBColumns: ColumnConfig[] = [
@@ -10,7 +20,7 @@ export const docsDBColumns: ColumnConfig[] = [
     id: 'title',
     label: 'Title',
     sortable: true,
-    render: (document, helpers) => (
+    render: (document) => (
       <div 
         className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg p-2 -m-2 transition-colors"
         role="button"
@@ -34,9 +44,9 @@ export const docsDBColumns: ColumnConfig[] = [
     id: 'type',
     label: 'Type',
     sortable: true,
-    render: (document, helpers) => (
+    render: (document) => (
       <div className="flex items-center space-x-2">
-        {helpers.getFileIcon(document.fileType)}
+        {getFileIcon(document.fileType)}
         <span className="text-sm text-gray-900 dark:text-white">
           {document.fileType.toUpperCase()}
         </span>
@@ -47,9 +57,9 @@ export const docsDBColumns: ColumnConfig[] = [
     id: 'uploadedAt',
     label: 'Date',
     sortable: true,
-    render: (document, helpers) => (
+    render: (document) => (
       <span className="text-sm text-gray-900 dark:text-white">
-        {helpers.formatDateTime(document.uploadedAt.toISOString())}
+        {formatDateTime(document.uploadedAt.toISOString())}
       </span>
     ),
   },
@@ -57,12 +67,12 @@ export const docsDBColumns: ColumnConfig[] = [
     id: 'status',
     label: 'Status',
     sortable: true,
-    render: (document, helpers) => (
+    render: (document) => (
       <span 
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${helpers.getStatusColor(document.approvalStatus)}`}
-        style={helpers.getStatusBackgroundColor(document.approvalStatus)}
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(document.approvalStatus)}`}
+        style={getStatusBackgroundColor(document.approvalStatus)}
       >
-        {helpers.getStatusIcon(document.approvalStatus)}
+        {getStatusIcon(document.approvalStatus)}
         <span className="ml-1">{document.approvalStatus}</span>
       </span>
     ),
@@ -72,10 +82,10 @@ export const docsDBColumns: ColumnConfig[] = [
     label: 'Security',
     sortable: true,
     visible: true, // Will be controlled dynamically based on user role
-    render: (document, helpers) => (
+    render: (document) => (
       <span 
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${helpers.getSecurityLevelColor(document.securityLevel)}`}
-        style={helpers.getSecurityLevelBackgroundColor(document.securityLevel)}
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSecurityLevelColor(document.securityLevel)}`}
+        style={getSecurityLevelBackgroundColor(document.securityLevel)}
       >
         <Shield className="w-3 h-3 mr-1" />
         <span className="capitalize">{document.securityLevel || 'Public'}</span>
@@ -128,9 +138,9 @@ export const pendingApprovalsColumns: ColumnConfig[] = [
     id: 'title',
     label: 'Document',
     sortable: true,
-    render: (document, helpers) => (
+    render: (document) => (
       <div className="flex items-center space-x-3">
-        {helpers.getFileIcon(document.fileType)}
+        {getFileIcon(document.fileType)}
         <div>
           <div className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline transition-colors duration-200 text-left">
             {document.title}
@@ -270,7 +280,7 @@ export const pendingApprovalsColumns: ColumnConfig[] = [
     id: 'assignedTo',
     label: 'Assigned To',
     sortable: true,
-    render: (document, helpers) => {
+    render: (document) => {
       if (!document.assignedTo) {
         return (
           <span className="text-sm text-gray-400 dark:text-gray-500">
@@ -279,7 +289,7 @@ export const pendingApprovalsColumns: ColumnConfig[] = [
         );
       }
       
-      const assignedUser = helpers.users?.find(user => user.id === document.assignedTo);
+      const assignedUser = mockUsers.find(user => user.id === document.assignedTo);
       if (!assignedUser) {
         return (
           <span className="text-sm text-gray-400 dark:text-gray-500">
@@ -319,7 +329,7 @@ export const pendingApprovalsColumns: ColumnConfig[] = [
       return (
         <span 
           className="text-xs font-medium px-2 py-1 rounded-full text-white"
-          style={helpers.getSecurityLevelBackgroundColor(document.securityLevel)}
+          style={getSecurityLevelBackgroundColor(document.securityLevel)}
         >
           {document.securityLevel}
         </span>
@@ -334,9 +344,9 @@ export const folderViewColumns: ColumnConfig[] = [
     id: 'title',
     label: 'Name',
     sortable: true,
-    render: (document, helpers) => (
+    render: (document) => (
       <div className="flex items-center space-x-3">
-        {helpers.getFileIcon(document.fileType)}
+        {getFileIcon(document.fileType)}
         <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
           {document.title}
         </span>
@@ -364,9 +374,9 @@ export const folderViewColumns: ColumnConfig[] = [
     id: 'uploadedAt',
     label: 'Date',
     sortable: true,
-    render: (document, helpers) => (
+    render: (document) => (
       <span className="text-sm text-gray-500 dark:text-gray-400">
-        {helpers.formatDateTime(document.uploadedAt.toISOString())}
+        {formatDateTime(document.uploadedAt.toISOString())}
       </span>
     ),
   },
@@ -374,12 +384,12 @@ export const folderViewColumns: ColumnConfig[] = [
     id: 'status',
     label: 'Status',
     sortable: true,
-    render: (document, helpers) => (
+    render: (document) => (
       <span 
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${helpers.getStatusColor(document.approvalStatus)}`}
-        style={helpers.getStatusBackgroundColor(document.approvalStatus)}
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(document.approvalStatus)}`}
+        style={getStatusBackgroundColor(document.approvalStatus)}
       >
-        {helpers.getStatusIcon(document.approvalStatus)}
+        {getStatusIcon(document.approvalStatus)}
         <span className="ml-1 capitalize">{document.approvalStatus}</span>
       </span>
     ),
@@ -392,9 +402,9 @@ export const isoCardDocumentsColumnsWithSubject: ColumnConfig[] = [
     id: 'title',
     label: 'Document',
     sortable: true,
-    render: (document, helpers) => (
+    render: (document) => (
       <div className="flex items-center space-x-3">
-        {helpers.getFileIcon(document.fileType)}
+        {getFileIcon(document.fileType)}
         <div>
           <div className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline transition-colors duration-200 text-left">
             {document.title}
@@ -416,7 +426,7 @@ export const isoCardDocumentsColumnsWithSubject: ColumnConfig[] = [
     id: 'assignedTo',
     label: 'Assigned To',
     sortable: true,
-    render: (document, helpers) => {
+    render: (document) => {
       if (!document.assignedTo) {
         return (
           <span className="text-sm text-gray-400 dark:text-gray-500">
@@ -424,7 +434,7 @@ export const isoCardDocumentsColumnsWithSubject: ColumnConfig[] = [
           </span>
         );
       }
-      const assignedUser = helpers.users?.find(u => u.id === document.assignedTo);
+      const assignedUser = mockUsers.find(u => u.id === document.assignedTo);
       if (!assignedUser) {
         return (
           <span className="text-sm text-gray-400 dark:text-gray-500">
@@ -465,9 +475,9 @@ export const isoCardDocumentsColumnsWithSubject: ColumnConfig[] = [
     id: 'uploadedAt',
     label: 'Uploaded Date',
     sortable: true,
-    render: (document, helpers) => (
+    render: (document) => (
       <span className="text-sm text-gray-900 dark:text-white">
-        {helpers.formatDateTime(document.uploadedAt.toISOString())}
+        {formatDateTime(document.uploadedAt.toISOString())}
       </span>
     ),
   },
@@ -475,12 +485,12 @@ export const isoCardDocumentsColumnsWithSubject: ColumnConfig[] = [
     id: 'status',
     label: 'Status',
     sortable: true,
-    render: (document, helpers) => (
+    render: (document) => (
       <span 
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${helpers.getStatusColor(document.approvalStatus)}`}
-        style={helpers.getStatusBackgroundColor(document.approvalStatus)}
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(document.approvalStatus)}`}
+        style={getStatusBackgroundColor(document.approvalStatus)}
       >
-        {helpers.getStatusIcon(document.approvalStatus)}
+        {getStatusIcon(document.approvalStatus)}
         <span className="ml-1 capitalize">{document.approvalStatus}</span>
       </span>
     ),
@@ -489,10 +499,10 @@ export const isoCardDocumentsColumnsWithSubject: ColumnConfig[] = [
     id: 'securityLevel',
     label: 'Security',
     sortable: true,
-    render: (document, helpers) => (
+    render: (document) => (
       <span 
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${helpers.getSecurityLevelColor(document.securityLevel)}`}
-        style={helpers.getSecurityLevelBackgroundColor(document.securityLevel)}
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSecurityLevelColor(document.securityLevel)}`}
+        style={getSecurityLevelBackgroundColor(document.securityLevel)}
       >
         <Shield className="w-3 h-3 mr-1" />
         <span className="capitalize">{document.securityLevel || 'Public'}</span>
@@ -517,9 +527,9 @@ export const isoCardDocumentsColumns: ColumnConfig[] = [
     id: 'title',
     label: 'Document',
     sortable: true,
-    render: (document, helpers) => (
+    render: (document) => (
       <div className="flex items-center space-x-3">
-        {helpers.getFileIcon(document.fileType)}
+        {getFileIcon(document.fileType)}
         <div>
           <div className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline transition-colors duration-200 text-left">
             {document.title}
@@ -541,7 +551,7 @@ export const isoCardDocumentsColumns: ColumnConfig[] = [
     id: 'assignedTo',
     label: 'Assigned To',
     sortable: true,
-    render: (document, helpers) => {
+    render: (document) => {
       if (!document.assignedTo) {
         return (
           <span className="text-sm text-gray-400 dark:text-gray-500">
@@ -549,7 +559,7 @@ export const isoCardDocumentsColumns: ColumnConfig[] = [
           </span>
         );
       }
-      const assignedUser = helpers.users?.find(u => u.id === document.assignedTo);
+      const assignedUser = mockUsers.find(u => u.id === document.assignedTo);
       if (!assignedUser) {
         return (
           <span className="text-sm text-gray-400 dark:text-gray-500">
@@ -580,9 +590,9 @@ export const isoCardDocumentsColumns: ColumnConfig[] = [
     id: 'uploadedAt',
     label: 'Uploaded Date',
     sortable: true,
-    render: (document, helpers) => (
+    render: (document) => (
       <span className="text-sm text-gray-900 dark:text-white">
-        {helpers.formatDateTime(document.uploadedAt.toISOString())}
+        {formatDateTime(document.uploadedAt.toISOString())}
       </span>
     ),
   },
@@ -590,12 +600,12 @@ export const isoCardDocumentsColumns: ColumnConfig[] = [
     id: 'status',
     label: 'Status',
     sortable: true,
-    render: (document, helpers) => (
+    render: (document) => (
       <span 
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${helpers.getStatusColor(document.approvalStatus)}`}
-        style={helpers.getStatusBackgroundColor(document.approvalStatus)}
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(document.approvalStatus)}`}
+        style={getStatusBackgroundColor(document.approvalStatus)}
       >
-        {helpers.getStatusIcon(document.approvalStatus)}
+        {getStatusIcon(document.approvalStatus)}
         <span className="ml-1 capitalize">{document.approvalStatus}</span>
       </span>
     ),
@@ -604,10 +614,10 @@ export const isoCardDocumentsColumns: ColumnConfig[] = [
     id: 'securityLevel',
     label: 'Security',
     sortable: true,
-    render: (document, helpers) => (
+    render: (document) => (
       <span 
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${helpers.getSecurityLevelColor(document.securityLevel)}`}
-        style={helpers.getSecurityLevelBackgroundColor(document.securityLevel)}
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSecurityLevelColor(document.securityLevel)}`}
+        style={getSecurityLevelBackgroundColor(document.securityLevel)}
       >
         <Shield className="w-3 h-3 mr-1" />
         <span className="capitalize">{document.securityLevel || 'Public'}</span>
