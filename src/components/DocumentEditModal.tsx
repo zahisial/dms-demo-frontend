@@ -12,6 +12,7 @@ import {
   Search
 } from 'lucide-react';
 import { Document } from '../types';
+import { getAllDepartmentPaths, type ISO9000Section, type ISO2Section, type EDCSection, mockUsers } from '../data/mockData';
 
 interface User {
   id: string;
@@ -27,28 +28,53 @@ interface DocumentEditModalProps {
   document: Document | null;
   onSave: (updatedDocument: Document) => void;
   hideApproveActions?: boolean;
+  // Page-specific sections for dropdown
+  iso9000Sections?: ISO9000Section[];
+  iso2Sections?: ISO2Section[];
+  edcSections?: EDCSection[];
+  ceSections?: any[];  // CE sections
 }
 
 const departments = ['Engineering', 'Finance', 'HR', 'Marketing', 'Operations'];
 const securityLevels = ['Confidential', 'Public', 'Restricted', 'Top Secret'];
 const documentTypes = ['Agreement', 'Analysis', 'Assessment', 'Calendar', 'Checklist', 'Configuration', 'Dashboard', 'Database', 'Documentation', 'Evaluation', 'Guideline', 'Manual', 'Material', 'Matrix', 'Metrics', 'Notes', 'Other', 'Plan', 'Policy', 'Process', 'Procedure', 'Program', 'Project', 'Record', 'Report', 'SLA', 'Schedule', 'Script', 'Setup', 'SOP', 'Study', 'Template'];
-const availableApprovers = [
-  { id: '1', name: 'Sarah Johnson', initials: 'SJ', title: 'IT Director', email: 'fms-admin@edaratgroup.com', avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1' },
-  { id: '2', name: 'Ahmed Al-Rashid', initials: 'AA', title: 'HR Manager', email: 'fms-hr@edaratgroup.com', avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1' },
-  { id: '3', name: 'Mike Chen', initials: 'MC', title: 'Operations Director', email: 'mike.chen@edaratgroup.com', avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1' },
-  { id: '4', name: 'Emma Wilson', initials: 'EW', title: 'Quality Manager', email: 'emma.wilson@edaratgroup.com', avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1' },
-  { id: '5', name: 'Lisa Davis', initials: 'LD', title: 'Compliance Officer', email: 'lisa.davis@edaratgroup.com', avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1' },
-  { id: '6', name: 'David Wilson', initials: 'DW', title: 'Finance Director', email: 'david.wilson@edaratgroup.com', avatar: 'https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1' },
-  { id: '7', name: 'Alex Rodriguez', initials: 'AR', title: 'Engineering Lead', email: 'alex.rodriguez@edaratgroup.com', avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1' },
-  { id: '8', name: 'John Smith', initials: 'JS', title: 'Legal Counsel', email: 'john.smith@edaratgroup.com', avatar: 'https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=1' }
-];
 
-export default function DocumentEditModal({ isOpen, onClose, document, onSave, hideApproveActions = false }: DocumentEditModalProps) {
+export default function DocumentEditModal({ 
+  isOpen, 
+  onClose, 
+  document, 
+  onSave, 
+  hideApproveActions = false,
+  iso9000Sections = [],
+  iso2Sections = [],
+  edcSections = [],
+  ceSections = []
+}: DocumentEditModalProps) {
   const [isInfoPanelVisible, setIsInfoPanelVisible] = useState(true);
   const [editedDocument, setEditedDocument] = useState<Document | null>(null);
   const [newTag, setNewTag] = useState('');
   const [approverSearch, setApproverSearch] = useState('');
   const [showApproverDropdown, setShowApproverDropdown] = useState(false);
+
+  // Get available subjects based on which page is calling the modal
+  const availableSubjects = React.useMemo(() => {
+    // Priority: Use page-specific sections if provided
+    if (iso9000Sections.length > 0) {
+      return iso9000Sections.map(section => section.title);
+    }
+    if (iso2Sections.length > 0) {
+      return iso2Sections.map(section => section.title);
+    }
+    if (edcSections.length > 0) {
+      return edcSections.map(section => section.title);
+    }
+    if (ceSections.length > 0) {
+      return ceSections.map(section => section.title);
+    }
+    
+    // Fallback: Use department paths if no page-specific sections
+    return getAllDepartmentPaths();
+  }, [iso9000Sections, iso2Sections, edcSections, ceSections]);
 
   // Initialize edited document when modal opens
   React.useEffect(() => {
@@ -93,10 +119,11 @@ export default function DocumentEditModal({ isOpen, onClose, document, onSave, h
   // Filter available approvers based on search query
   const getFilteredApprovers = () => {
     const searchTerm = approverSearch.toLowerCase();
-    return availableApprovers.filter(user => 
+    return mockUsers.filter(user => 
       user.name.toLowerCase().includes(searchTerm) ||
-      user.title.toLowerCase().includes(searchTerm) ||
-      user.email.toLowerCase().includes(searchTerm)
+      user.email.toLowerCase().includes(searchTerm) ||
+      user.department.toLowerCase().includes(searchTerm) ||
+      user.role.toLowerCase().includes(searchTerm)
     );
   };
 

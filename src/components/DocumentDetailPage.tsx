@@ -44,6 +44,8 @@ import {
 } from 'lucide-react';
 import { Document, User as UserType } from '../types';
 import RejectionModal from './RejectionModal';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
+import DocumentEditModal from './DocumentEditModal';
 
 interface ExtendedDocument extends Document {
   isLocked?: boolean;
@@ -76,6 +78,9 @@ export default function DocumentDetailPage({
   const [acknowledged, setAcknowledged] = useState(false);
   const [showTooltip, setShowTooltip] = useState<string | null>(null);
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
 
   const getStatusBackgroundColor = (status: string): React.CSSProperties => {
@@ -133,11 +138,43 @@ export default function DocumentDetailPage({
   };
 
   const handleDelete = () => {
-    if (window.confirm(`Are you sure you want to delete "${document.title}"? This action cannot be undone.`)) {
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    setIsDeleting(true);
+    try {
       if (onDelete) {
-        onDelete(document);
+        await onDelete(document);
       }
+      setDeleteModalOpen(false);
+    } catch (error) {
+      console.error('Error deleting document:', error);
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+  };
+
+  const handleEdit = () => {
+    setEditModalOpen(true);
+  };
+
+  const handleEditSave = (updatedDocument: Document) => {
+    // Here you would typically update the document in your state management or API
+    console.log('Document updated:', updatedDocument);
+    setEditModalOpen(false);
+    // You might want to call a callback to update the parent component's state
+    // if (onEdit) {
+    //   onEdit(updatedDocument);
+    // }
+  };
+
+  const handleEditCancel = () => {
+    setEditModalOpen(false);
   };
 
   const handleApprove = () => {
@@ -568,7 +605,7 @@ export default function DocumentDetailPage({
                     <motion.button
                       onMouseEnter={() => setShowTooltip('edit')}
                       onMouseLeave={() => setShowTooltip(null)}
-                      onClick={() => onEdit(document)}
+                      onClick={handleEdit}
                       className="glass-button-icon"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -747,6 +784,23 @@ export default function DocumentDetailPage({
         onClose={() => setRejectionModalOpen(false)}
         onSubmit={handleRejectionSubmit}
         documentTitle={document.title}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        documentTitle={document.title}
+        isDeleting={isDeleting}
+      />
+
+      {/* Document Edit Modal */}
+      <DocumentEditModal
+        isOpen={editModalOpen}
+        onClose={handleEditCancel}
+        document={document}
+        onSave={handleEditSave}
       />
     </div>
   );
