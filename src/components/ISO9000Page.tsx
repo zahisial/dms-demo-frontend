@@ -229,7 +229,7 @@ export default function ISO9000Page({ onDocumentClick, sections: propSections, o
   const handleDownload = (document: Document, e: React.MouseEvent) => {
     e.stopPropagation();
     console.log('Downloading document:', document.title);
-    alert(`Downloading "${document.title}"`);
+    showInfo('Download Started', `Downloading "${document.title}"`);
     // Add download logic here
   };
 

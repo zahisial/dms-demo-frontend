@@ -11,6 +11,7 @@ import SearchResultsPage from './components/SearchResultsPage';
 import DocumentDetailPage from './components/DocumentDetailPage';
 import DocumentEditModal from './components/DocumentEditModal';
 import UploadModal from './components/UploadModal';
+import Toaster, { useToaster } from './components/Toaster';
 import FeedbackModal from './components/FeedbackModal';
 import AddDepartmentModal from './components/AddDepartmentModal';
 import DepartmentDetailPanel from './components/DepartmentDetailPanel';
@@ -40,6 +41,7 @@ function App() {
   const [currentView, setCurrentView] = useState<'main' | 'document' | 'search'>('main');
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
+  const { toasts, removeToast, showSuccess, showError, showInfo, showWarning } = useToaster();
   const [searchResultsQuery, setSearchResultsQuery] = useState('');
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [documents, setDocuments] = useState<Document[]>(mockDocuments);
@@ -320,7 +322,7 @@ function App() {
       );
       setCurrentView('main');
       // Show success message
-      alert(`Feedback sent successfully for "${selectedDocument.title}"`);
+      showSuccess('Feedback Sent', `Feedback sent successfully for "${selectedDocument.title}"`);
     }
   };
 
@@ -419,7 +421,7 @@ function App() {
     
     // Show success message
     const action = status === 'approved' ? 'approved' : 'rejected';
-    alert(`Document has been ${action} successfully!`);
+    showSuccess('Action Completed', `Document has been ${action} successfully!`);
   };
 
   // Enhanced bulk actions
@@ -442,9 +444,9 @@ function App() {
         
         if (docsToNotify.length > 0) {
           console.log(`Sending notifications to all employees about ${docsToNotify.length} approved documents`);
-          alert(`${selectedDocs.length} documents approved! Notifications sent to all employees about ${docsToNotify.length} documents.`);
+          showSuccess('Documents Approved', `${selectedDocs.length} documents approved! Notifications sent to all employees about ${docsToNotify.length} documents.`);
         } else {
-          alert(`${selectedDocs.length} documents approved successfully!`);
+          showSuccess('Documents Approved', `${selectedDocs.length} documents approved successfully!`);
         }
         break;
       }
@@ -454,7 +456,7 @@ function App() {
         const approvedDocs = selectedDocs.filter(doc => doc.approvalStatus === 'approved');
         
         if (approvedDocs.length === 0) {
-          alert('Only approved documents can be published. Please approve documents first.');
+          showWarning('Cannot Publish', 'Only approved documents can be published. Please approve documents first.');
           return;
         }
         
@@ -466,19 +468,19 @@ function App() {
           )
         );
         
-        alert(`${approvedDocs.length} documents published successfully!`);
+        showSuccess('Documents Published', `${approvedDocs.length} documents published successfully!`);
         break;
       }
         
       case 'notify':
         console.log(`Sending notifications about ${selectedDocs.length} documents to users`);
-        alert(`Notifications sent to users about ${selectedDocs.length} documents.`);
+        showSuccess('Notifications Sent', `Notifications sent to users about ${selectedDocs.length} documents.`);
         break;
         
       case 'delete':
         if (confirm(`Are you sure you want to delete ${selectedDocs.length} documents? This action cannot be undone.`)) {
           setDocuments(prev => prev.filter(doc => !documentIds.includes(doc.id)));
-          alert(`${selectedDocs.length} documents deleted successfully.`);
+          showSuccess('Documents Deleted', `${selectedDocs.length} documents deleted successfully.`);
         } else {
           return; // Don't clear selection if user cancelled
         }
@@ -500,7 +502,7 @@ function App() {
     if (confirmed) {
       setDocuments(prev => prev.filter(doc => doc.id !== documentId));
       console.log(`Document deleted: ${documentId} by ${user?.name || 'Unknown'}`);
-      alert(`Document "${document.title}" has been deleted successfully.`);
+      showSuccess('Document Deleted', `Document "${document.title}" has been deleted successfully.`);
       
       // If we're currently viewing this document, go back to main view
       if (selectedDocument && selectedDocument.id === documentId) {
@@ -551,7 +553,7 @@ function App() {
     
     setDepartments(prev => [...prev, department]);
     console.log(`New department added: ${newDept.name} by ${user?.name || 'Unknown'}`);
-    alert(`Subject "${newDept.name}" added successfully!`);
+    showSuccess('Subject Added', `Subject "${newDept.name}" added successfully!`);
   };
 
 
@@ -830,7 +832,7 @@ function App() {
             onEdit={(document) => {
               // Check if admin can edit this document (only if assigned to them)
               if (currentUser?.role === 'admin' && document.assignedTo && document.assignedTo !== currentUser.id) {
-                alert(`You don't have permission to edit this document. It's assigned to another user.`);
+                showWarning('Permission Denied', `You don't have permission to edit this document. It's assigned to another user.`);
                 return;
               }
               // Open the edit modal
@@ -968,6 +970,11 @@ function App() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <Toaster
+        toasts={toasts}
+        onRemove={removeToast}
+      />
         <ThemeToggle />
       </ThemeProvider>
     );

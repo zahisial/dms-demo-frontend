@@ -25,6 +25,7 @@ import DocumentEditModal from './DocumentEditModal';
 import SearchBar from './SearchBar';
 import FeedbackModal from './FeedbackModal';
 import UniversalDocumentsTable from './UniversalDocumentsTable';
+import Toaster, { useToaster } from './Toaster';
 import PermissionDeniedModal from './PermissionDeniedModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { docsDBColumns, filterColumnsByRole } from './tableConfigs';
@@ -67,6 +68,7 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
   } | null>(null);
   const [deleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
+  const { toasts, removeToast, showSuccess, showError, showInfo, showWarning } = useToaster();
 
   // Use centralized mock data
   const documents: Document[] = mockDocuments;
@@ -150,14 +152,14 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
 
   const handleAcknowledge = (documentId: string) => {
     console.log('Document acknowledged:', documentId);
-    alert(`Document "${selectedDocument?.title}" has been acknowledged`);
+    showSuccess('Document Acknowledged', `Document "${selectedDocument?.title}" has been acknowledged`);
   };
 
   const handleConfirmDelete = () => {
     if (documentToDelete) {
       console.log('Deleting document:', documentToDelete.title);
       // In a real app, you would delete the document here
-      alert(`"${documentToDelete.title}" deleted successfully!`);
+      showSuccess('Document Deleted', `"${documentToDelete.title}" deleted successfully!`);
       setDeleteConfirmationModalOpen(false);
       setDocumentToDelete(null);
     }
@@ -180,7 +182,7 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
 
   const handleFeedbackSubmit = (feedback: string) => {
     console.log('Feedback submitted for document:', feedbackDocument?.title, 'Feedback:', feedback);
-    alert(`Feedback sent for "${feedbackDocument?.title}": ${feedback}`);
+    showSuccess('Feedback Sent', `Feedback sent for "${feedbackDocument?.title}": ${feedback}`);
     setFeedbackModalOpen(false);
     setFeedbackDocument(null);
   };
@@ -231,7 +233,7 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
         icon: Download,
         onClick: () => {
           console.log('Downloading document:', document.title);
-          alert(`Downloading "${document.title}"`);
+          showInfo('Download Started', `Downloading "${document.title}"`);
         }
       });
     }
@@ -244,7 +246,7 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
       onClick: () => {
         console.log('Copying link for document:', document.title);
         navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
+        showSuccess('Link Copied', 'Link copied to clipboard!');
       }
     });
 
@@ -256,7 +258,7 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
         icon: Share,
         onClick: () => {
           console.log('Sharing document:', document.title);
-          alert(`Sharing "${document.title}"`);
+          showInfo('Sharing Document', `Sharing "${document.title}"`);
         }
       });
     }
@@ -277,7 +279,7 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
               icon: CheckCircle,
               onClick: () => {
                 console.log('Marking document as approved:', document.title);
-                alert(`"${document.title}" marked as approved`);
+                showSuccess('Status Updated', `"${document.title}" marked as approved`);
               }
             },
             {
@@ -286,7 +288,7 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
               icon: Clock,
               onClick: () => {
                 console.log('Marking document as pending:', document.title);
-                alert(`"${document.title}" marked as pending`);
+                showInfo('Status Updated', `"${document.title}" marked as pending`);
               }
             }
           ]
@@ -331,7 +333,7 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
         onClick: () => {
           console.log('Restoring document:', document.title);
           if (confirm(`Are you sure you want to restore "${document.title}"?`)) {
-            alert(`"${document.title}" restored successfully`);
+            showSuccess('Document Restored', `"${document.title}" restored successfully`);
           }
         }
       });
@@ -342,7 +344,7 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
 
   const handleApprove = (documentId: string) => {
     console.log('Document approved:', documentId);
-    alert(`Document "${selectedDocument?.title}" has been approved`);
+    showSuccess('Document Approved', `Document "${selectedDocument?.title}" has been approved`);
   };
 
   const handleEdit = (document: Document, e: React.MouseEvent) => {
@@ -411,7 +413,7 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
       security: 'Update security level of selected documents'
     };
     
-    alert(`${actionMessages[actionType]} (${selectedDocuments.size} documents)`);
+    showSuccess('Bulk Action Completed', `${actionMessages[actionType]} (${selectedDocuments.size} documents)`);
     
     // Reset after action
     setTimeout(() => {
@@ -788,6 +790,11 @@ export default function DocsDBPage({ onBack, user, onShowAllResults, onDocumentC
         onClose={handleCloseDeleteConfirmationModal}
         onConfirm={handleConfirmDelete}
         documentTitle={documentToDelete?.title || ''}
+      />
+
+      <Toaster
+        toasts={toasts}
+        onRemove={removeToast}
       />
 
     </div>

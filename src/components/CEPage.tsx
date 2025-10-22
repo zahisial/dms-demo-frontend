@@ -129,7 +129,7 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
     
     if (currentUser.role === 'admin' && document.assignedTo !== currentUser.id) {
       // Show permission denied for documents not assigned to this admin
-      alert(`You don't have permission to edit this document. It's assigned to another user.`);
+      showWarning('Permission Denied', `You don't have permission to edit this document. It's assigned to another user.`);
       return;
     }
     
@@ -361,12 +361,12 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
 
   const handleAcknowledge = (documentId: string) => {
     console.log('Document acknowledged:', documentId);
-    alert(`Document "${selectedDocument?.title}" has been acknowledged`);
+    showSuccess('Document Acknowledged', `Document "${selectedDocument?.title}" has been acknowledged`);
   };
 
   const handleApprove = (documentId: string) => {
     console.log('Document approved:', documentId);
-    alert(`Document "${selectedDocument?.title}" has been approved`);
+    showSuccess('Document Approved', `Document "${selectedDocument?.title}" has been approved`);
   };
 
   const handleSaveDocument = (updatedDocument: Document) => {

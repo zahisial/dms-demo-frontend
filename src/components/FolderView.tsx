@@ -7,6 +7,7 @@ import TreeExplorer from './TreeExplorer';
 import DropdownMenu from './DropdownMenu';
 import NewFolderModal from './NewFolderModal';
 import NotificationModal from './NotificationModal';
+import Toaster, { useToaster } from './Toaster';
 
 interface FolderViewProps {
   departments: Department[];
@@ -100,7 +101,7 @@ function FolderItem({
                       const newName = prompt('Enter new folder name:', department.name);
                       if (newName) {
                         console.log('Renaming folder to:', newName);
-                        alert(`Folder renamed to "${newName}"`);
+                        showSuccess('Folder Renamed', `Folder renamed to "${newName}"`);
                       }
                     }
                   },
@@ -110,7 +111,7 @@ function FolderItem({
                     icon: Share2,
                     onClick: () => {
                       console.log('Sharing folder:', department.name);
-                      alert(`Sharing folder "${department.name}"`);
+                      showInfo('Sharing Folder', `Sharing folder "${department.name}"`);
                     }
                   },
                   {
@@ -119,7 +120,7 @@ function FolderItem({
                     icon: Copy,
                     onClick: () => {
                       console.log('Copying link for:', department.name);
-                      alert(`Link copied for "${department.name}"`);
+                      showSuccess('Link Copied', `Link copied for "${department.name}"`);
                     }
                   },
                   {
@@ -131,7 +132,7 @@ function FolderItem({
                     onClick: () => {
                       if (confirm(`Are you sure you want to delete "${department.name}" folder?`)) {
                         console.log('Deleting folder:', department.name);
-                        alert(`Folder "${department.name}" deleted`);
+                        showSuccess('Folder Deleted', `Folder "${department.name}" deleted`);
                       }
                     }
                   }
@@ -342,6 +343,7 @@ export default function FolderView({
   onBulkAction
 }: FolderViewProps) {
   const [selectedFolder, setSelectedFolder] = useState<Department | null>(null);
+  const { toasts, removeToast, showSuccess, showError, showInfo, showWarning } = useToaster();
   
   // Helper function to find department by path
   const findDepartmentByPath = (targetPath: string, allDepartments: Department[]): Department | null => {
@@ -541,7 +543,7 @@ export default function FolderView({
     // Here you would typically handle the actual file upload
     // For now, we'll show a confirmation and trigger the upload modal
     const fileNames = files.map(f => f.name).join(', ');
-    alert(`Ready to upload ${files.length} file(s) to "${folderName}" folder:\n${fileNames}\n\nThis would typically trigger the upload process.`);
+    showInfo('Upload Ready', `Ready to upload ${files.length} file(s) to "${folderName}" folder:\n${fileNames}\n\nThis would typically trigger the upload process.`);
     
     // Optionally trigger the upload modal with pre-selected folder
     if (onUploadClick) {
@@ -577,7 +579,7 @@ export default function FolderView({
 
   const handleUpdateDocumentSecurity = (document: Document, securityLevel: 'Public' | 'Restricted' | 'Confidential' | 'Top Secret') => {
     console.log(`Updating security level for "${document.title}" to: ${securityLevel}`);
-    alert(`Security level for "${document.title}" updated to: ${securityLevel}`);
+    showSuccess('Security Updated', `Security level for "${document.title}" updated to: ${securityLevel}`);
     // In a real app, this would update the document in the backend
   };
 
@@ -587,7 +589,7 @@ export default function FolderView({
     console.log('Notes:', notes);
     
     // Here you would integrate with your notification system
-    alert(`Notification sent to ${recipients.length} recipient(s) for "${selectedDocumentForNotification?.title}"`);
+    showSuccess('Notification Sent', `Notification sent to ${recipients.length} recipient(s) for "${selectedDocumentForNotification?.title}"`);
     
     setShowNotificationModal(false);
     setSelectedDocumentForNotification(null);
@@ -663,7 +665,7 @@ export default function FolderView({
 
   const handleCreateFolder = (data: { name: string; color: string; restrictions: string[] }) => {
     console.log('Creating folder:', data);
-    alert(`Folder "${data.name}" created with color ${data.color} and restrictions: ${data.restrictions.join(', ') || 'None'}`);
+    showSuccess('Folder Created', `Folder "${data.name}" created with color ${data.color} and restrictions: ${data.restrictions.join(', ') || 'None'}`);
   };
 
   return (
@@ -1199,7 +1201,7 @@ export default function FolderView({
                                               icon: Edit3,
                                               onClick: () => {
                                                 console.log('Editing document:', document.title);
-                                                alert(`Editing "${document.title}"`);
+                                                showInfo('Editing Document', `Editing "${document.title}"`);
                                               }
                                             },
                                             {
@@ -1408,6 +1410,11 @@ export default function FolderView({
         }}
         onSend={handleSendNotification}
         document={selectedDocumentForNotification}
+      />
+
+      <Toaster
+        toasts={toasts}
+        onRemove={removeToast}
       />
     </>
   );

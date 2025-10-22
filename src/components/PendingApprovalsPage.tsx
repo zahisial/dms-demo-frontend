@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import DocumentEditModal from './DocumentEditModal';
 import UniversalDocumentsTable from './UniversalDocumentsTable';
+import Toaster, { useToaster } from './Toaster';
 import PermissionDeniedModal from './PermissionDeniedModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { isoCardDocumentsColumnsWithSubject, pendingApprovalsColumns } from './tableConfigs';
@@ -50,6 +51,7 @@ export default function PendingApprovalsPage({
   } | null>(null);
   const [deleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
+  const { toasts, removeToast, showSuccess, showError, showInfo, showWarning } = useToaster();
 
   // Get all pending and rejected documents from all sections, filtered by manager assignment
   const pendingDocuments = useMemo(() => {
@@ -311,12 +313,12 @@ export default function PendingApprovalsPage({
 
   const handleAcknowledge = (documentId: string) => {
     console.log('Document acknowledged:', documentId);
-    alert(`Document "${selectedDocument?.title}" has been acknowledged`);
+    showSuccess('Document Acknowledged', `Document "${selectedDocument?.title}" has been acknowledged`);
   };
 
   const handleApprove = (documentId: string) => {
     console.log('Document approved:', documentId);
-    alert(`Document "${selectedDocument?.title}" has been approved`);
+    showSuccess('Document Approved', `Document "${selectedDocument?.title}" has been approved`);
   };
 
   const handleSendReminder = (approver: { id: string; name: string; email: string }) => {
