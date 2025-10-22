@@ -52,7 +52,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import ISO9000Card from './ISO9000Card';
-import NewCardModal from './NewCardModal';
+import NewCardModal from './NewSubjectModal';
 import DocumentEditModal from './DocumentEditModal';
 import UploadModal from './UploadModal';
 import Toaster, { useToaster } from './Toaster';
@@ -200,10 +200,20 @@ export default function ISO9000Page({ onDocumentClick, sections: propSections, o
 
   const handleEdit = (document: Document, e: React.MouseEvent) => {
     e.stopPropagation();
-    // Navigate to the document detail page instead of opening the edit modal
-    if (onDocumentClick) {
-      onDocumentClick(document);
+    // Check if admin can edit this document (only if assigned to them)
+    if (user?.role === 'admin' && document.assignedTo !== user.id) {
+      // Show permission denied for documents not assigned to this admin
+      setPermissionDeniedInfo({
+        documentTitle: document.title,
+        assignedTo: mockUsers.find(u => u.id === document.assignedTo)?.name || 'Unknown User',
+        action: 'edit'
+      });
+      setPermissionDeniedModalOpen(true);
+      return;
     }
+    // Open the edit modal instead of navigating to detail page
+    setEditingDocument(document);
+    setEditModalOpen(true);
   };
 
   const handleView = (document: Document, e: React.MouseEvent) => {
@@ -233,6 +243,17 @@ export default function ISO9000Page({ onDocumentClick, sections: propSections, o
 
   const handleDelete = (document: Document, e: React.MouseEvent) => {
     e.stopPropagation();
+    // Check if admin can delete this document (only if assigned to them)
+    if (user?.role === 'admin' && document.assignedTo !== user.id) {
+      // Show permission denied for documents not assigned to this admin
+      setPermissionDeniedInfo({
+        documentTitle: document.title,
+        assignedTo: mockUsers.find(u => u.id === document.assignedTo)?.name || 'Unknown User',
+        action: 'delete'
+      });
+      setPermissionDeniedModalOpen(true);
+      return;
+    }
     setDocumentToDelete(document);
     setDeleteConfirmationModalOpen(true);
   };
@@ -633,28 +654,33 @@ export default function ISO9000Page({ onDocumentClick, sections: propSections, o
               </AnimatePresence>
             </div>
             
-            <motion.button
-              onClick={() => {
-                setUploadSubject('');
-                setUploadModalOpen(true);
-              }}
-              className="glass-button-secondary"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Upload className="w-4 h-4" />
-              <span>Upload New</span>
-            </motion.button>
-            
-            <motion.button
-              onClick={() => setNewCardModalOpen(true)}
-              className="glass-button-primary"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Plus className="w-4 h-4" />
-              <span>New Subject</span>
-            </motion.button>
+            {/* Admin Only Buttons */}
+            {user?.role === 'admin' && (
+              <>
+                <motion.button
+                  onClick={() => {
+                    setUploadSubject('');
+                    setUploadModalOpen(true);
+                  }}
+                  className="glass-button-secondary"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>Upload New</span>
+                </motion.button>
+                
+                <motion.button
+                  onClick={() => setNewCardModalOpen(true)}
+                  className="glass-button-primary"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>New Subject</span>
+                </motion.button>
+              </>
+            )}
             
             {/* Search Bar */}
             

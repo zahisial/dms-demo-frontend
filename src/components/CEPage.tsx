@@ -18,7 +18,7 @@ import {
   ArrowLeft,
   ArrowRight
 } from 'lucide-react';
-import NewCardModal from './NewCardModal';
+import NewCardModal from './NewSubjectModal';
 import DocumentEditModal from './DocumentEditModal';
 import UploadModal from './UploadModal';
 import Toaster, { useToaster } from './Toaster';
@@ -118,9 +118,24 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
 
   const handleEdit = (document: Document, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onDocumentClick) {
-      onDocumentClick(document);
+    // Check if admin can edit this document (only if assigned to them)
+    const currentUser = {
+      id: '1',
+      name: 'Sarah Johnson',
+      email: 'fms-admin@edaratgroup.com',
+      role: 'admin' as const,
+      department: 'Information Technology'
+    };
+    
+    if (currentUser.role === 'admin' && document.assignedTo !== currentUser.id) {
+      // Show permission denied for documents not assigned to this admin
+      alert(`You don't have permission to edit this document. It's assigned to another user.`);
+      return;
     }
+    
+    // Open the edit modal instead of navigating to detail page
+    setEditingDocument(document);
+    setEditModalOpen(true);
   };
 
   const handleView = (document: Document, e: React.MouseEvent) => {
@@ -403,17 +418,10 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
           
           {/* Only show header buttons when sections exist */}
           {ceSections.length > 0 && (
-            <div className="flex items-center space-x-3">
+            <div className="flex space-x-3 items-right">
               {/* 3 Dots Menu */}
               <div className="relative" ref={dropdownRef}>
-                <motion.button
-                  onClick={() => setShowDropdown(!showDropdown)}
-                  className="glass-button-icon"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <MoreHorizontal className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                </motion.button>
+               
                 
                 {/* Dropdown Menu */}
                 <AnimatePresence>
@@ -484,15 +492,7 @@ export default function CEPage({ onNavigateToDocsDB, onShowAllResults, onDocumen
               
               {/* Search Bar */}
               <div className="w-96">
-                <SearchBar
-                  onSearch={(query) => {
-                    setSearchQuery(query);
-                  }}
-                  onShowAllResults={onShowAllResults || (() => {})}
-                  onDocumentClick={(doc) => handleDocumentClick(doc as any)}
-                  documents={mockDocuments}
-                  placeholder="Search"
-                />
+             
               </div>
             </div>
           )}

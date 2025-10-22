@@ -9,6 +9,7 @@ import ThemeToggle from './components/ThemeToggle';
 import { SearchFilters } from './components/SearchBar';
 import SearchResultsPage from './components/SearchResultsPage';
 import DocumentDetailPage from './components/DocumentDetailPage';
+import DocumentEditModal from './components/DocumentEditModal';
 import UploadModal from './components/UploadModal';
 import FeedbackModal from './components/FeedbackModal';
 import AddDepartmentModal from './components/AddDepartmentModal';
@@ -37,6 +38,8 @@ function App() {
   const [sortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [currentView, setCurrentView] = useState<'main' | 'document' | 'search'>('main');
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [searchResultsQuery, setSearchResultsQuery] = useState('');
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [documents, setDocuments] = useState<Document[]>(mockDocuments);
@@ -590,6 +593,21 @@ function App() {
     });
   };
 
+  const handleSaveDocument = (updatedDocument: Document) => {
+    console.log('Document updated:', updatedDocument);
+    // Update the document in the documents array
+    setDocuments(prev => prev.map(doc => 
+      doc.id === updatedDocument.id ? updatedDocument : doc
+    ));
+    // Update selectedDocument if it's the same document
+    if (selectedDocument && selectedDocument.id === updatedDocument.id) {
+      setSelectedDocument(updatedDocument);
+    }
+    // Close the edit modal
+    setEditModalOpen(false);
+    setEditingDocument(null);
+  };
+
 
 
   // Show UserLogin page if no user is logged in
@@ -810,9 +828,14 @@ function App() {
             user={user}
             onBack={handleBackFromDocument}
             onEdit={(document) => {
-              // Handle edit logic here
-              console.log('Edit document:', document.title);
-              // Could open DocumentEditModal or navigate to edit page
+              // Check if admin can edit this document (only if assigned to them)
+              if (currentUser?.role === 'admin' && document.assignedTo && document.assignedTo !== currentUser.id) {
+                alert(`You don't have permission to edit this document. It's assigned to another user.`);
+                return;
+              }
+              // Open the edit modal
+              setEditingDocument(document);
+              setEditModalOpen(true);
             }}
             onDelete={(document) => {
               // Handle delete logic here
@@ -892,6 +915,16 @@ function App() {
         isOpen={addDepartmentModalOpen}
         onClose={() => setAddDepartmentModalOpen(false)}
         onAdd={handleAddDepartment}
+      />
+
+      <DocumentEditModal
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setEditingDocument(null);
+        }}
+        document={editingDocument}
+        onSave={handleSaveDocument}
       />
 
       <DepartmentDetailPanel

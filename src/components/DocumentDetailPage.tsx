@@ -554,7 +554,16 @@ export default function DocumentDetailPage({
                 </Tooltip>
 
                 {/* Edit Button - Admin Only */}
-                {onEdit && (
+                {(() => {
+                  console.log('Edit button debug:', {
+                    hasOnEdit: !!onEdit,
+                    userRole: user?.role,
+                    userId: user?.id,
+                    documentAssignedTo: document.assignedTo,
+                    canEdit: onEdit && user?.role === 'admin'
+                  });
+                  return onEdit && user?.role === 'admin';
+                })() && (
                   <Tooltip text="Edit Document" show={showTooltip === 'edit'}>
                     <motion.button
                       onMouseEnter={() => setShowTooltip('edit')}

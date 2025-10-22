@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, MoreHorizontal, Search, Clock, CheckCircle, Upload } from 'lucide-react';
 import { mockEDCSections, type EDCSection, type EDCDocument } from '../data/mockData';
 import EDCCard from './EDCCard';
-import NewCardModal from './NewCardModal';
+import NewCardModal from './NewSubjectModal';
 import DocumentEditModal from './DocumentEditModal';
 import UploadModal from './UploadModal';
 import Toaster, { useToaster } from './Toaster';
@@ -208,6 +208,52 @@ export default function EDCPage({ onNavigateToDocsDB, onShowAllResults, onDocume
   const handleCardUpload = (sectionTitle: string) => {
     setUploadSubject(sectionTitle);
     setUploadModalOpen(true);
+  };
+
+  const handleEdit = (document: Document, e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Check if admin can edit this document (only if assigned to them)
+    const currentUser = {
+      id: '2',
+      name: 'EDC Administrator',
+      email: 'edc-admin@edaratgroup.com',
+      role: 'admin' as const,
+      department: 'EDC Management'
+    };
+    
+    if (currentUser.role === 'admin' && document.assignedTo !== currentUser.id) {
+      // Show permission denied for documents not assigned to this admin
+      alert(`You don't have permission to edit this document. It's assigned to another user.`);
+      return;
+    }
+    
+    // Open the edit modal instead of navigating to detail page
+    setEditingDocument(document);
+    setEditModalOpen(true);
+  };
+
+  const handleDelete = (document: Document, e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Check if admin can delete this document (only if assigned to them)
+    const currentUser = {
+      id: '2',
+      name: 'EDC Administrator',
+      email: 'edc-admin@edaratgroup.com',
+      role: 'admin' as const,
+      department: 'EDC Management'
+    };
+    
+    if (currentUser.role === 'admin' && document.assignedTo !== currentUser.id) {
+      // Show permission denied for documents not assigned to this admin
+      alert(`You don't have permission to delete this document. It's assigned to another user.`);
+      return;
+    }
+    
+    if (window.confirm(`Are you sure you want to delete "${document.title}"? This action cannot be undone.`)) {
+      console.log('Deleting document:', document.title);
+      // Add delete logic here
+      alert(`"${document.title}" deleted successfully!`);
+    }
   };
 
   // Calculate dynamic counts

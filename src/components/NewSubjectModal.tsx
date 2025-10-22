@@ -148,14 +148,14 @@ export default function NewCardModal({ isOpen, onClose, onAdd }: NewCardModalPro
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="overflow-y-auto fixed inset-0 z-50">
+          <div className="flex justify-center items-center p-4 min-h-screen">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+              className="fixed inset-0 backdrop-blur-sm bg-black/50"
               onClick={handleClose}
             />
 
@@ -164,12 +164,12 @@ export default function NewCardModal({ isOpen, onClose, onAdd }: NewCardModalPro
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-2xl glass-panel rounded-2xl p-6"
+              className="relative p-6 w-full max-w-2xl rounded-2xl glass-panel"
             >
               {/* Header */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                  <div className="flex justify-center items-center w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/30">
                     <Plus className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                   </div>
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -178,7 +178,7 @@ export default function NewCardModal({ isOpen, onClose, onAdd }: NewCardModalPro
                 </div>
                 <button
                   onClick={handleClose}
-                  className="p-2 glass-button-icon hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  className="p-2 rounded-lg transition-colors glass-button-icon hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <X className="w-4 h-4 text-red-500 dark:text-red-400" />
                 </button>
@@ -188,7 +188,7 @@ export default function NewCardModal({ isOpen, onClose, onAdd }: NewCardModalPro
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Subject Title */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                   Subject Title
                   </label>
                   <input
@@ -196,15 +196,15 @@ export default function NewCardModal({ isOpen, onClose, onAdd }: NewCardModalPro
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Enter subject title..."
-                    className="glass-input w-full"
+                    className="w-full glass-input"
                     required
                     autoFocus
                   />
                 </div>
 
                 {/* Color Selection */}
-                <div className='hidden'>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                <div className=''>
+                  <label className="block mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
                     <div className="flex items-center space-x-2">
                       <Palette className="w-4 h-4" />
                       <span>Label Color</span>
@@ -233,13 +233,13 @@ export default function NewCardModal({ isOpen, onClose, onAdd }: NewCardModalPro
 
                 {/* Icon Selection */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  <label className="block mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
                     <div className="flex items-center space-x-2">
                       <FileText className="w-4 h-4" />
                       <span>Subject Icon</span>
                     </div>
                   </label>
-                  <div className="grid grid-cols-8 gap-2 max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-3 bg-gray-50 dark:bg-gray-800">
+                  <div className="grid overflow-y-auto grid-cols-8 gap-2 p-3 max-h-48 bg-gray-50 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-800">
                     {iconOptions.map((iconOption) => {
                       const IconComponent = iconOption.component;
                       return (
@@ -255,7 +255,7 @@ export default function NewCardModal({ isOpen, onClose, onAdd }: NewCardModalPro
                           title={iconOption.label}
                         >
                           <IconComponent className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-                          <span className="text-xs text-gray-600 dark:text-gray-400 truncate max-w-full">
+                          <span className="max-w-full text-xs text-gray-600 truncate dark:text-gray-400">
                             {iconOption.label}
                           </span>
                         </button>
@@ -269,24 +269,24 @@ export default function NewCardModal({ isOpen, onClose, onAdd }: NewCardModalPro
 
                 {/* Preview */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     Preview
                   </label>
-                  <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center p-3 space-x-3 bg-gray-50 rounded-lg dark:bg-gray-800">
                     <div 
-                      className="w-3 h-3 rounded-full shadow-sm -mt-2"
+                      className="-mt-2 w-3 h-3 rounded-full shadow-sm"
                       style={{ backgroundColor: selectedColor }}
                     />
-                    <div className="flex items-center space-x-3 flex-1">
+                    <div className="flex flex-1 items-center space-x-3">
                       {(() => {
                         const IconComponent = iconOptions.find(icon => icon.name === selectedIcon)?.component || FileText;
                         return <IconComponent className="w-6 h-6 text-gray-600 dark:text-gray-400" />;
                       })()}
                       <div>
-                        <h4 className="font-bold text-gray-800 dark:text-white text-lg">
+                        <h4 className="text-lg font-bold text-gray-800 dark:text-white">
                           {title || 'Subject Title'}
                         </h4>
-                        <p className="text-xs text-gray-600 dark:text-white/60 mt-1">
+                        <p className="mt-1 text-xs text-gray-600 dark:text-white/60">
                           0 documents
                         </p>
                       </div>
@@ -295,7 +295,7 @@ export default function NewCardModal({ isOpen, onClose, onAdd }: NewCardModalPro
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-end space-x-3 pt-4">
+                <div className="flex justify-end items-center pt-4 space-x-3">
                   <button
                     type="button"
                     onClick={handleClose}

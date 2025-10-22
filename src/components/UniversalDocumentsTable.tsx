@@ -337,8 +337,8 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
                           </motion.button>
                         )}
                         
-                        {/* Edit - for managers/admins */}
-                        {onEdit && (user?.role === 'manager' || user?.role === 'admin') && (
+                        {/* Edit - for managers/admins, but only if assigned to current admin */}
+                        {onEdit && (user?.role === 'manager' || (user?.role === 'admin' && document.assignedTo === user.id)) && (
                           <motion.button
                             onClick={(e) => onEdit(document, e)}
                             className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
@@ -393,8 +393,8 @@ const UniversalDocumentsTable: React.FC<UniversalDocumentsTableProps> = ({
                           </motion.button>
                         )}
                         
-                        {/* Delete - for admins only */}
-                        {onDelete && user?.role === 'admin' && (
+                        {/* Delete - for admins only, but only if assigned to current admin */}
+                        {onDelete && user?.role === 'admin' && document.assignedTo === user.id && (
                           <motion.button
                             onClick={(e) => onDelete(document, e)}
                             className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"

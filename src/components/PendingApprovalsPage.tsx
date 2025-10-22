@@ -340,9 +340,9 @@ export default function PendingApprovalsPage({
   const handleEdit = (document: Document, e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // Check if user can edit this document
-    if (user && !canEditDocument(document, user)) {
-      // Find the assigned user name
+    // Check if admin can edit this document (only if assigned to them)
+    if (user?.role === 'admin' && document.assignedTo !== user.id) {
+      // Show permission denied for documents not assigned to this admin
       const assignedUser = mockUsers.find(u => u.id === document.assignedTo);
       setPermissionDeniedInfo({
         documentTitle: document.title,
@@ -353,10 +353,9 @@ export default function PendingApprovalsPage({
       return;
     }
     
-    // Navigate to DocumentDetailPage instead of opening the edit modal
-    if (onDocumentClick) {
-      onDocumentClick(document);
-    }
+    // Open the edit modal instead of navigating to detail page
+    setEditingDocument(document);
+    setEditModalOpen(true);
   };
 
   const handleDownload = (document: Document, e: React.MouseEvent) => {
@@ -383,9 +382,9 @@ export default function PendingApprovalsPage({
   const handleDelete = (document: Document, e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // Check if user can delete this document
-    if (user && !canDeleteDocument(document, user)) {
-      // Find the assigned user name
+    // Check if admin can delete this document (only if assigned to them)
+    if (user?.role === 'admin' && document.assignedTo !== user.id) {
+      // Show permission denied for documents not assigned to this admin
       const assignedUser = mockUsers.find(u => u.id === document.assignedTo);
       setPermissionDeniedInfo({
         documentTitle: document.title,
@@ -631,7 +630,6 @@ export default function PendingApprovalsPage({
           onDownload={handleDownload}
           onShare={handleShare}
           onDelete={user?.role === 'admin' ? handleDelete : undefined}
-          onReassign={handleReassign}
           onReminder={handleReminder}
         />
       </motion.div>
