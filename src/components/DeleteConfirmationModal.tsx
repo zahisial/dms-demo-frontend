@@ -10,6 +10,7 @@ interface DeleteConfirmationModalProps {
   isDeleting?: boolean;
 }
 
+
 export default function DeleteConfirmationModal({ 
   isOpen, 
   onClose, 
@@ -20,13 +21,13 @@ export default function DeleteConfirmationModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="flex fixed inset-0 z-50 justify-center items-center">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 backdrop-blur-sm bg-black/50"
             onClick={onClose}
           />
 
@@ -35,12 +36,12 @@ export default function DeleteConfirmationModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full mx-4"
+            className="relative mx-4 w-full max-w-md bg-white rounded-2xl shadow-2xl dark:bg-gray-800"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center space-x-3">
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30">
+                <div className="flex justify-center items-center w-12 h-12 bg-red-100 rounded-full dark:bg-red-900/30">
                   <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
                 </div>
                 <div>
@@ -55,7 +56,7 @@ export default function DeleteConfirmationModal({
               <motion.button
                 onClick={onClose}
                 disabled={isDeleting}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                className="p-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -66,20 +67,20 @@ export default function DeleteConfirmationModal({
             {/* Content */}
             <div className="p-6">
               <div className="flex items-start space-x-4">
-                <AlertTriangle className="w-8 h-8 text-red-500 flex-shrink-0 mt-1" />
+                <AlertTriangle className="flex-shrink-0 mt-1 w-8 h-8 text-red-500" />
                 <div className="flex-1">
-                  <p className="text-gray-700 dark:text-gray-300 mb-4">
+                  <p className="mb-4 text-gray-700 dark:text-gray-300">
                     Are you sure you want to delete <strong>"{documentTitle}"</strong>?
                   </p>
                   
-                  <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 mb-4">
+                  <div className="p-4 mb-4 bg-red-50 rounded-lg dark:bg-red-900/20">
                     <p className="text-sm text-red-800 dark:text-red-200">
                       <strong>Warning:</strong> This action will permanently delete the document and cannot be undone. 
                       All associated data, comments, and version history will be lost.
                     </p>
                   </div>
 
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                  <div className="p-4 bg-gray-50 rounded-lg dark:bg-gray-700">
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       <strong>Alternative:</strong> Consider archiving the document instead of deleting it, 
                       or contact your administrator if you're unsure.
@@ -90,11 +91,11 @@ export default function DeleteConfirmationModal({
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end space-x-3 p-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-end p-6 space-x-3 border-t border-gray-200 dark:border-gray-700">
               <motion.button
                 onClick={onClose}
                 disabled={isDeleting}
-                className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50"
+                className="px-6 py-2 font-medium text-white bg-gray-600 rounded-lg transition-colors hover:bg-gray-700 disabled:opacity-50"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -103,13 +104,13 @@ export default function DeleteConfirmationModal({
               <motion.button
                 onClick={onConfirm}
                 disabled={isDeleting}
-                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50 flex items-center space-x-2"
+                className="flex items-center px-6 py-2 space-x-2 font-medium text-white bg-red-600 rounded-lg transition-colors hover:bg-red-700 disabled:opacity-50"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 {isDeleting ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-4 h-4 rounded-full border-2 border-white animate-spin border-t-transparent" />
                     <span>Deleting...</span>
                   </>
                 ) : (
